@@ -301,7 +301,7 @@ app.post('/api/getProfile', (req, res) => {
             }).catch(e => console.error(e.stack));
         } else if (req.session.user_type == "bus_staff") {
             dbclient.query(
-                `select id, name, phone, role, from bus_staff where id=$1`,
+                `select id, name, phone, role from bus_staff where id=$1`,
                 [req.session.userid]
             ).then(qres => {
                 //console.log(qres);
@@ -586,25 +586,25 @@ app.post('/api/getTicketCount', (req,res) => {
 });
 
 app.post('/api/getTicketQRData', (req,res) => {
-    // console.log(req.body);
-    // if (req.session.userid) {
-    //     dbclient.query(
-    //         `select count(*) from ticket where student_id=$1`, 
-    //         [req.session.userid]
-    //     ).then(qres => {
-    //         console.log(qres);
-    //         if (qres.rowCount === 1) 
+    console.log(req.body);
+    if (req.session.userid && req.userid.user_type=="student") {
+        dbclient.query(
+            `select id from ticket where student_id=$1 and is_used=false limit 1`, 
+            [req.session.userid]
+        ).then(qres => {
+            console.log(qres);
+            if (qres.rowCount === 1) 
             res.send({ 
-                ticket_id: 2130124940,
-                hash: "1d5790f3e05445b94461158d6ecb9ed5c6dab6bf8b350c23b37c5cb07a8698e1"
+                success: true,
+                ticket_id: qres.rows[0].id,
             });
-    //         else if (qres.rowCount === 0) {
-    //             res.send({
-    //                 success: false,
-    //             });
-    //         };
-    //     }).catch(e => console.error(e.stack));
-    // };
+            else if (qres.rowCount === 0) {
+                res.send({
+                    success: false,
+                });
+            };
+        }).catch(e => console.error(e.stack));
+    };
 });
 
 app.post('/api/getUserFeedback', (req, res) => {
