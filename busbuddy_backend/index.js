@@ -587,7 +587,7 @@ app.post('/api/getTicketCount', (req,res) => {
 
 app.post('/api/getTicketQRData', (req,res) => {
     console.log(req.body);
-    if (req.session.userid && req.userid.user_type=="student") {
+    if (req.session.userid && req.session.user_type=="student") {
         dbclient.query(
             `select id from ticket where student_id=$1 and is_used=false limit 1`, 
             [req.session.userid]
