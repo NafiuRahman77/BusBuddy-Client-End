@@ -11,7 +11,7 @@ import 'pages/login_page.dart';
 import 'pages/routeTimeCalendar.dart';
 import 'pages/route_map.dart';
 import 'pages/Requisition.dart';
-import 'package:shurjopay/utilities/functions.dart';
+// import 'package:shurjopay/utilities/functions.dart';
 import 'pages/ShowFeedback.dart';
 import 'pages/ShowRequisition.dart';
 import 'package:requests/requests.dart';
@@ -20,7 +20,7 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'globel.dart' as globel;
 
 void main() {
-  initializeShurjopay(environment: "sandbox");
+  // initializeShurjopay(environment: "sandbox");
   runApp(BusBuddyApp());
 }
 

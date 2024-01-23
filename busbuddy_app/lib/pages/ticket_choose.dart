@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shurjopay/shurjopay.dart';
-import 'package:shurjopay/models/config.dart';
-import 'package:shurjopay/models/payment_verification_model.dart';
-import 'package:shurjopay/models/shurjopay_request_model.dart';
-import 'package:shurjopay/models/shurjopay_response_model.dart';
+// import 'package:shurjopay/shurjopay.dart';
+// import 'package:shurjopay/models/config.dart';
+// import 'package:shurjopay/models/payment_verification_model.dart';
+// import 'package:shurjopay/models/shurjopay_request_model.dart';
+// import 'package:shurjopay/models/shurjopay_response_model.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:requests/requests.dart';
 import 'dart:math';
@@ -63,18 +63,18 @@ class _TicketChooseState extends State<TicketChoose> {
   }
 
   final ticketController = TextEditingController();
-  ShurjoPay shurjoPay = ShurjoPay();
+  // ShurjoPay shurjoPay = ShurjoPay();
 
-  ShurjopayConfigs shurjopayConfigs = ShurjopayConfigs(
-    prefix: "sp",
-    userName: "sp_sandbox",
-    password: "pyyk97hu&6u6",
-    clientIP: "127.0.0.1",
-  );
+  // ShurjopayConfigs shurjopayConfigs = ShurjopayConfigs(
+  //   prefix: "sp",
+  //   userName: "sp_sandbox",
+  //   password: "pyyk97hu&6u6",
+  //   clientIP: "127.0.0.1",
+  // );
 
-  ShurjopayResponseModel shurjopayResponseModel = ShurjopayResponseModel();
-  ShurjopayVerificationModel shurjopayVerificationModel =
-      ShurjopayVerificationModel();
+  // ShurjopayResponseModel shurjopayResponseModel = ShurjopayResponseModel();
+  // ShurjopayVerificationModel shurjopayVerificationModel =
+  //     ShurjopayVerificationModel();
 
   void incrementTicket() {
     setState(() {
@@ -275,78 +275,78 @@ class _TicketChooseState extends State<TicketChoose> {
                   //   context,
                   //   MaterialPageRoute(builder: (context) => ConfirmPayment()),
                   // );
-                  ShurjopayRequestModel shurjopayRequestModel =
-                      ShurjopayRequestModel(
-                    configs: shurjopayConfigs,
-                    currency: "BDT",
-                    amount: 1.0 * (amount),
-                    orderID: getRandomString(15),
-                    discountAmount: 0,
-                    discountPercentage: 0,
-                    customerName: globel.userName,
-                    customerPhoneNumber: globel.userPhone,
-                    customerEmail: globel.userEmail,
-                    customerAddress:
-                        "Bangladesh University of Engineering and Technology",
-                    customerCity: "Dhaka",
-                    customerPostcode: "1000",
-                    // Live: https://www.engine.shurjopayment.com/return_url
-                    returnURL:
-                        "https://www.sandbox.shurjopayment.com/return_url",
-                    // Live: https://www.engine.shurjopayment.com/cancel_url
-                    cancelURL:
-                        "https://www.sandbox.shurjopayment.com/cancel_url",
-                  );
-                  shurjopayResponseModel = await shurjoPay.makePayment(
-                    context: context,
-                    shurjopayRequestModel: shurjopayRequestModel,
-                  );
-                  if (shurjopayResponseModel.status == true) {
-                    try {
-                      shurjopayVerificationModel =
-                          await shurjoPay.verifyPayment(
-                        orderID: shurjopayResponseModel.shurjopayOrderID!,
-                      );
-                      print(shurjopayVerificationModel.spCode);
-                      print(shurjopayVerificationModel.spMessage);
-                      if (shurjopayVerificationModel.spCode == "1000") {
-                        print(shurjopayVerificationModel.bankTrxId);
-                        context.loaderOverlay.show();
-                        var r = await Requests.post(
-                            globel.serverIp + 'purchaseTickets',
-                            body: {
-                              'method': 'shurjopay',
-                              'trxid': shurjopayVerificationModel.bankTrxId,
-                              'count': selectedTicket,
-                            },
-                            bodyEncoding: RequestBodyEncoding.FormURLEncoded);
-                        r.raiseForStatus();
-                        dynamic json = r.json();
-                        context.loaderOverlay.hide();
-                        getTicketInfo();
-                        Fluttertoast.showToast(
-                            msg: 'Payment Successful.',
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIosWeb: 1,
-                            backgroundColor: Color.fromARGB(134, 48, 196, 3),
-                            textColor: Colors.white,
-                            fontSize: 16.0);
-                      } else if (shurjopayVerificationModel.spCode == "1005") {
-                        print(shurjopayVerificationModel.bankStatus);
-                        Fluttertoast.showToast(
-                            msg: shurjopayVerificationModel.bankTrxId!,
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIosWeb: 1,
-                            backgroundColor: Color.fromARGB(132, 244, 67, 54),
-                            textColor: Colors.white,
-                            fontSize: 16.0);
-                      }
-                    } catch (error) {
-                      print(error.toString());
-                    }
-                  }
+                  //   ShurjopayRequestModel shurjopayRequestModel =
+                  //       ShurjopayRequestModel(
+                  //     configs: shurjopayConfigs,
+                  //     currency: "BDT",
+                  //     amount: 1.0 * (amount),
+                  //     orderID: getRandomString(15),
+                  //     discountAmount: 0,
+                  //     discountPercentage: 0,
+                  //     customerName: globel.userName,
+                  //     customerPhoneNumber: globel.userPhone,
+                  //     customerEmail: globel.userEmail,
+                  //     customerAddress:
+                  //         "Bangladesh University of Engineering and Technology",
+                  //     customerCity: "Dhaka",
+                  //     customerPostcode: "1000",
+                  //     // Live: https://www.engine.shurjopayment.com/return_url
+                  //     returnURL:
+                  //         "https://www.sandbox.shurjopayment.com/return_url",
+                  //     // Live: https://www.engine.shurjopayment.com/cancel_url
+                  //     cancelURL:
+                  //         "https://www.sandbox.shurjopayment.com/cancel_url",
+                  //   );
+                  //   shurjopayResponseModel = await shurjoPay.makePayment(
+                  //     context: context,
+                  //     shurjopayRequestModel: shurjopayRequestModel,
+                  //   );
+                  //   if (shurjopayResponseModel.status == true) {
+                  //     try {
+                  //       shurjopayVerificationModel =
+                  //           await shurjoPay.verifyPayment(
+                  //         orderID: shurjopayResponseModel.shurjopayOrderID!,
+                  //       );
+                  //       print(shurjopayVerificationModel.spCode);
+                  //       print(shurjopayVerificationModel.spMessage);
+                  //       if (shurjopayVerificationModel.spCode == "1000") {
+                  //         print(shurjopayVerificationModel.bankTrxId);
+                  //         context.loaderOverlay.show();
+                  //         var r = await Requests.post(
+                  //             globel.serverIp + 'purchaseTickets',
+                  //             body: {
+                  //               'method': 'shurjopay',
+                  //               'trxid': shurjopayVerificationModel.bankTrxId,
+                  //               'count': selectedTicket,
+                  //             },
+                  //             bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+                  //         r.raiseForStatus();
+                  //         dynamic json = r.json();
+                  //         context.loaderOverlay.hide();
+                  //         getTicketInfo();
+                  //         Fluttertoast.showToast(
+                  //             msg: 'Payment Successful.',
+                  //             toastLength: Toast.LENGTH_SHORT,
+                  //             gravity: ToastGravity.BOTTOM,
+                  //             timeInSecForIosWeb: 1,
+                  //             backgroundColor: Color.fromARGB(134, 48, 196, 3),
+                  //             textColor: Colors.white,
+                  //             fontSize: 16.0);
+                  //       } else if (shurjopayVerificationModel.spCode == "1005") {
+                  //         print(shurjopayVerificationModel.bankStatus);
+                  //         Fluttertoast.showToast(
+                  //             msg: shurjopayVerificationModel.bankTrxId!,
+                  //             toastLength: Toast.LENGTH_SHORT,
+                  //             gravity: ToastGravity.BOTTOM,
+                  //             timeInSecForIosWeb: 1,
+                  //             backgroundColor: Color.fromARGB(132, 244, 67, 54),
+                  //             textColor: Colors.white,
+                  //             fontSize: 16.0);
+                  //       }
+                  //     } catch (error) {
+                  //       print(error.toString());
+                  //     }
+                  //   }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF781B1B),

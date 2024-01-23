@@ -13,6 +13,7 @@ class CustomCard extends StatefulWidget {
   final List<dynamic> extendedInfo; // List of additional information
   final List<String> stationIds;
   final List<String> stationNames;
+  final List<dynamic> stationCoords;
   CustomCard({
     required this.title,
     required this.location1,
@@ -24,6 +25,7 @@ class CustomCard extends StatefulWidget {
     required this.extendedInfo,
     required this.stationIds,
     required this.stationNames,
+    required this.stationCoords,
   });
 
   @override
