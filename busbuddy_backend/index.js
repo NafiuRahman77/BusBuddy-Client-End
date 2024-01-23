@@ -144,15 +144,51 @@ app.post('/api/login', (req, res) => {
     ).then(qres => {
         console.log(qres);
         if (qres.rows.length === 0) {
-            res.send({ 
-                success: false,
-                name: null
-            });
+            dbclient.query(
+                `SELECT name FROM buet_staff WHERE id=$1 AND password=$2`,
+                [req.body.id, req.body.password]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rows.length === 0) {
+                    dbclient.query(
+                        `SELECT name FROM bus_staff WHERE id=$1 AND password=$2`,
+                        [req.body.id, req.body.password]
+                    ).then(qres => {
+                        console.log(qres);
+                        if (qres.rows.length === 0) {
+                            res.send({ 
+                                success: false,
+                                name: null
+                            });
+                        } else {
+                            req.session.userid = req.body.id;
+                            req.session.usertype = "bus_staff";
+                            res.send({
+                                success: true,
+                                name: qres.rows[0].name,
+                                user_type: "bus_staff"
+                            });
+                            console.log(req.session);
+                        };
+                    }).catch(e => console.error(e.stack));
+                } else {
+                    req.session.userid = req.body.id;
+                    req.session.usertype = "buet_staff";
+                    res.send({
+                        success: true,
+                        name: qres.rows[0].name,
+                        user_type: "buet_staff"
+                    });
+                    console.log(req.session);
+                };
+            }).catch(e => console.error(e.stack));
         } else {
             req.session.userid = req.body.id;
+            req.session.usertype = "student";
             res.send({
                 success: true,
                 name: qres.rows[0].name,
+                user_type: "student"
             });
             console.log(req.session);
         };
