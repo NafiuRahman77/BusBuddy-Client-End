@@ -282,33 +282,111 @@ app.post('/api/getProfile', (req, res) => {
                 });
             };
         }).catch(e => console.error(e.stack));
+    } else if (req.session.user_type == "buet_staff") {
+        dbclient.query(
+            `select id, name, department, designation, residence from buet_staff where id=$1`,
+            [req.session.userid]
+        ).then(qres => {
+            //console.log(qres);
+            if (qres.rows.length === 0) res.send({ 
+                success: false,
+            });
+            else {
+                res.send({
+                    ...qres.rows[0],
+                    success: true,
+                });
+            };
+        }).catch(e => console.error(e.stack));
+    } else if (req.session.user_type == "bus_staff") {
+        dbclient.query(
+            `select id, name, role, from bus_staff where id=$1`,
+            [req.session.userid]
+        ).then(qres => {
+            //console.log(qres);
+            if (qres.rows.length === 0) res.send({ 
+                success: false,
+            });
+            else {
+                res.send({
+                    ...qres.rows[0],
+                    success: true,
+                });
+            };
+        }).catch(e => console.error(e.stack));
     };
 });
 
 app.post('/api/getProfileStatic', (req, res) => {
     // console.log(req);
     if (req.session.userid) {
-        dbclient.query(
-            `select id, name from student where id=$1`, 
-            [req.session.userid]
-        ).then(qres => {
-            console.log(qres);
-            if (qres.rows.length === 0) res.send({ 
-                success: false,
-            });
-            else {
-                let response;
-                if (fs.existsSync("../../busbuddy_storage/"+req.session.userid))
-                    response = new Buffer(fs.readFileSync("../../busbuddy_storage/"+req.session.userid)).toString('base64');
-                else response = "";
-                res.send({
-                    ...qres.rows[0],
-                    success: true,
-                    imageStr: response,
-
+        if (req.session.user_type == "student") {
+            dbclient.query(
+                `select id, name from student where id=$1`, 
+                [req.session.userid]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rows.length === 0) res.send({ 
+                    success: false,
                 });
-            };
-        }).catch(e => console.error(e.stack));
+                else {
+                    let response;
+                    if (fs.existsSync("../../busbuddy_storage/"+req.session.userid))
+                        response = new Buffer(fs.readFileSync("../../busbuddy_storage/"+req.session.userid)).toString('base64');
+                    else response = "";
+                    res.send({
+                        ...qres.rows[0],
+                        success: true,
+                        imageStr: response,
+
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        } else if (req.session.user_type == "buet_staff") {
+            dbclient.query(
+                `select id, name from buet_staff where id=$1`, 
+                [req.session.userid]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rows.length === 0) res.send({ 
+                    success: false,
+                });
+                else {
+                    let response;
+                    if (fs.existsSync("../../busbuddy_storage/"+req.session.userid))
+                        response = new Buffer(fs.readFileSync("../../busbuddy_storage/"+req.session.userid)).toString('base64');
+                    else response = "";
+                    res.send({
+                        ...qres.rows[0],
+                        success: true,
+                        imageStr: response,
+
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        } else if (req.session.user_type == "bus_staff") { 
+            dbclient.query(
+                `select id, name from bus_staff where id=$1`, 
+                [req.session.userid]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rows.length === 0) res.send({ 
+                    success: false,
+                });
+                else {
+                    let response;
+                    if (fs.existsSync("../../busbuddy_storage/"+req.session.userid))
+                        response = new Buffer(fs.readFileSync("../../busbuddy_storage/"+req.session.userid)).toString('base64');
+                    else response = "";
+                    res.send({
+                        ...qres.rows[0],
+                        success: true,
+                        imageStr: response,
+
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        };
     } else console.log("Session not recognised.")
 });
 
