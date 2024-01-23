@@ -1,0 +1,26 @@
+{
+  "name": "busbuddy-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Wasif Jalal",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "body-parser": "^1.20.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "express-session": "^1.17.3",
+    "image-to-base64": "^2.2.0",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^2.6.7",
+    "otp-generator": "^4.0.0",
+    "pg": "^8.7.3",
+    "uuid": "^8.3.2"
+  }
+}
