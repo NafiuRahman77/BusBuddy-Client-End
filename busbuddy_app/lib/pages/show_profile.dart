@@ -6,6 +6,95 @@ import 'package:requests/requests.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import '../../globel.dart' as globel;
 
+Widget buildInfoRow(String label, String value) {
+  return Row(
+    children: <Widget>[
+      Flexible(
+        flex: 1,
+        fit: FlexFit.tight,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      Flexible(
+        flex: 2,
+        child: Text(
+          value,
+          style: TextStyle(
+            fontSize: 14.0,
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+
+
+Widget buildUserInfoCard() {
+  return Card(
+    color: Color.fromARGB(223, 255, 255, 255),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          buildInfoRow('Route:', globel.userDefaultRouteName),
+          SizedBox(height: 12.0),
+          buildInfoRow('Station:', globel.userDefaultStationName),
+          SizedBox(height: 12.0),
+          buildInfoRow('Mobile No:', globel.userPhone),
+          SizedBox(height: 12.0),
+          buildInfoRow('Email:', globel.userEmail),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget buildTeacherInfoCard() {
+  return Card(
+    color: Color.fromARGB(223, 255, 255, 255),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          buildInfoRow('Department:', globel.teacherDepartment),
+          SizedBox(height: 12.0),
+          buildInfoRow('Designation:', globel.teacherDesignation),
+          SizedBox(height: 12.0),
+          buildInfoRow('Residence:', globel.teacherResidence),
+          SizedBox(height: 12.0),
+          buildInfoRow('Phone:', globel.userPhone),
+      
+        ],
+      ),
+    ),
+  );
+}
+
+
+Widget buildBusStaffInfoCard() {
+  return Card(
+    color: Color.fromARGB(223, 255, 255, 255),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          buildInfoRow('Role:', globel.staffRole),
+          SizedBox(height: 12.0),
+          buildInfoRow('Mobile No:', globel.userPhone),
+        ],
+      ),
+    ),
+  );
+}
 class ShowProfile extends StatefulWidget {
   @override
   _ShowProfileState createState() => _ShowProfileState();
@@ -37,6 +126,16 @@ class _ShowProfileState extends State<ShowProfile> {
   }
 
   Widget buildContent() {
+      Widget userCard = buildUserInfoCard();
+
+    if (globel.userType == "student") {
+      userCard = buildUserInfoCard();
+    } else if (globel.userType == "buet_staff") {
+      userCard = buildTeacherInfoCard();
+    } else if(globel.userType == "bus_staff"){
+      userCard = buildBusStaffInfoCard() ; 
+    }
+    
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -55,118 +154,13 @@ class _ShowProfileState extends State<ShowProfile> {
             'User ID: ${globel.userId}',
             style: TextStyle(fontSize: 16.0),
           ),
-          SizedBox(height: 40.0),
-          Card(
-            color: Color.fromARGB(223, 255, 255, 255),
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      const Flexible(
-                        flex: 1,
-                        fit: FlexFit.tight,
-                        child: Text(
-                          'Route: ',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        flex: 2,
-                        child: Text(
-                          globel.userDefaultRouteName,
-                          style: TextStyle(
-                            fontSize: 16.0,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12.0),
-                  Row(
-                    children: <Widget>[
-                      const Flexible(
-                        flex: 1,
-                        fit: FlexFit.tight,
-                        child: Text(
-                          'Station: ',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        flex: 2,
-                        child: Text(
-                          globel.userDefaultStationName,
-                          style: TextStyle(
-                            fontSize: 16.0,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12.0),
-                  Row(
-                    children: <Widget>[
-                      const Flexible(
-                        flex: 1,
-                        fit: FlexFit.tight,
-                        child: Text(
-                          'Mobile No: ',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        flex: 2,
-                        child: Text(
-                          globel.userPhone,
-                          style: TextStyle(
-                            fontSize: 16.0,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12.0), // Added spacing
-                  Row(
-                    children: <Widget>[
-                      const Flexible(
-                        flex: 1,
-                        fit: FlexFit.tight,
-                        child: Text(
-                          'Email: ',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        flex: 2,
-                        child: Text(
-                          globel.userEmail,
-                          style: TextStyle(
-                            fontSize: 16.0,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+          SizedBox(height: 12.0),
+          Text(
+            '${globel.userType}' , 
+            style: TextStyle(fontSize: 16.0),
           ),
+          SizedBox(height: 40.0),
+          userCard,
         ],
       ),
     );

@@ -51,6 +51,8 @@ class _LoginPageState extends State<LoginPage> {
     // print(r2.content());
 
     if (json['success'] == true) {
+      globel.userType = json['user_type'] ; 
+      print(globel.userType) ; 
       Fluttertoast.showToast(
           msg: 'Welcome, ${json['name']}',
           toastLength: Toast.LENGTH_SHORT,
@@ -84,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
     r.raiseForStatus();
     dynamic json = r.json();
 
-    //print(r.content());
+    print(r.content());
     if (json['success'] == true) {
       globel.userName = json['name'];
       if (json['imageStr'].toString().isNotEmpty) {
@@ -117,13 +119,28 @@ class _LoginPageState extends State<LoginPage> {
     //print('bb: ${jsonDecode(response.body)['email']}');
     if (json['success'] == true) {
       setState(() {
-        globel.userEmail = json['email'];
+
         globel.userName = json['name'];
         globel.userPhone = json['phone'];
+        if(globel.userType=="student")
+        {        
+        globel.userEmail = json['email'];
         globel.userDefaultRouteId = json['default_route'];
         globel.userDefaultRouteName = json['default_route_name'];
         globel.userDefaultStationId = json['default_station'];
         globel.userDefaultStationName = json['default_station_name'];
+        }
+        else if(globel.userType=="buet_staff")
+        {
+          globel.teacherDepartment = json['department'] ; 
+          globel.teacherDesignation = json['designation'] ; 
+          globel.teacherResidence = json['residence'] ; 
+
+        }
+        else if(globel.userType=="bus_staff"){
+           globel.staffRole = json['role'] ; 
+        }
+
         globel.userId = json['id'];
       });
     } else {
