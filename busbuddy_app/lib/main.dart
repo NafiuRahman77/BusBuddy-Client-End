@@ -248,6 +248,7 @@ class HomeViewState extends State<HomeView> {
                             // Then close the drawer
                           },
                         ),
+                        if (globel.userType == "student")
                         ExpansionTile(
                           initiallyExpanded:
                               (_selectedIndex == 1 || _selectedIndex == 2),
@@ -297,6 +298,7 @@ class HomeViewState extends State<HomeView> {
                             ),
                           ],
                         ),
+                        if (globel.userType!="bus_staff")
                         ListTile(
                           leading: const Icon(Icons.calendar_month),
                           title: const Text('Calendar'),
@@ -313,6 +315,7 @@ class HomeViewState extends State<HomeView> {
                             // Then close the drawer
                           },
                         ),
+                        if (globel.userType!="bus_staff")
                         ListTile(
                           leading: const Icon(Icons.place),
                           title: const Text('Tracking'),
@@ -327,6 +330,7 @@ class HomeViewState extends State<HomeView> {
                             });
                           },
                         ),
+                        if (globel.userType!="bus_staff")
                         ExpansionTile(
                             initiallyExpanded:
                                 (_selectedIndex == 5 || _selectedIndex == 6),
@@ -387,6 +391,7 @@ class HomeViewState extends State<HomeView> {
                                 },
                               ),
                             ]),
+                        if (globel.userType=="buet_staff")
                         ExpansionTile(
                             initiallyExpanded:
                                 (_selectedIndex == 7 || _selectedIndex == 8),
@@ -467,6 +472,7 @@ class HomeViewState extends State<HomeView> {
                             });
                           },
                         ),
+                        if (globel.userType!="buet_staff")
                         ListTile(
                           leading: const Icon(Icons.qr_code),
                           title: const Text('QR Code'),
@@ -478,6 +484,36 @@ class HomeViewState extends State<HomeView> {
                             // Then close the drawer
                             setState(() {
                               _selectedIndex = 10;
+                            });
+                          },
+                        ),
+                        if(globel.userType=="buet_staff")
+                        ListTile(
+                          leading: const Icon(Icons.payment),
+                          title: const Text('Bill Payment'),
+                          selected: _selectedIndex == 11,
+                          onTap: () {
+                            if (_selectedIndex == 11) return;
+                            // Update the state of the app
+                            // _onItemTapped(2);
+                            // Then close the drawer
+                            setState(() {
+                              _selectedIndex = 11; 
+                            });
+                          },
+                        ),
+                        if(globel.userType=="bus_staff")
+                        ListTile(
+                          leading: const Icon(Icons.dashboard),
+                          title: const Text('Dashboard'),
+                          selected: _selectedIndex == 12,
+                          onTap: () {
+                            if (_selectedIndex == 12) return;
+                            // Update the state of the app
+                            // _onItemTapped(2);
+                            // Then close the drawer
+                            setState(() {
+                              _selectedIndex = 12; 
                             });
                           },
                         ),
