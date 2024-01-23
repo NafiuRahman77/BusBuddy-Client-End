@@ -162,7 +162,7 @@ app.post('/api/login', (req, res) => {
                             });
                         } else {
                             req.session.userid = req.body.id;
-                            req.session.usertype = "bus_staff";
+                            req.session.user_type = "bus_staff";
                             res.send({
                                 success: true,
                                 name: qres.rows[0].name,
@@ -173,7 +173,7 @@ app.post('/api/login', (req, res) => {
                     }).catch(e => console.error(e.stack));
                 } else {
                     req.session.userid = req.body.id;
-                    req.session.usertype = "buet_staff";
+                    req.session.user_type = "buet_staff";
                     res.send({
                         success: true,
                         name: qres.rows[0].name,
@@ -184,7 +184,7 @@ app.post('/api/login', (req, res) => {
             }).catch(e => console.error(e.stack));
         } else {
             req.session.userid = req.body.id;
-            req.session.usertype = "student";
+            req.session.user_type = "student";
             res.send({
                 success: true,
                 name: qres.rows[0].name,
@@ -266,54 +266,56 @@ app.post('/api/logout',(req,res) => {
 app.post('/api/getProfile', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
-        dbclient.query(
-            `select s.id as id, s.name as name, phone, email, default_route, r.terminal_point as default_route_name, default_station, st.name as default_station_name
-            from student as s, route as r, station as st where s.id=$1 and s.default_route=r.id and s.default_station=st.id`, 
-            [req.session.userid]
-        ).then(qres => {
-            //console.log(qres);
-            if (qres.rows.length === 0) res.send({ 
-                success: false,
-            });
-            else {
-                res.send({
-                    ...qres.rows[0],
-                    success: true,
+        if (req.session.user_type == "student") {
+            dbclient.query(
+                `select s.id as id, s.name as name, phone, email, default_route, r.terminal_point as default_route_name, default_station, st.name as default_station_name
+                from student as s, route as r, station as st where s.id=$1 and s.default_route=r.id and s.default_station=st.id`, 
+                [req.session.userid]
+            ).then(qres => {
+                //console.log(qres);
+                if (qres.rows.length === 0) res.send({ 
+                    success: false,
                 });
-            };
-        }).catch(e => console.error(e.stack));
-    } else if (req.session.user_type == "buet_staff") {
-        dbclient.query(
-            `select id, name, department, designation, residence from buet_staff where id=$1`,
-            [req.session.userid]
-        ).then(qres => {
-            //console.log(qres);
-            if (qres.rows.length === 0) res.send({ 
-                success: false,
-            });
-            else {
-                res.send({
-                    ...qres.rows[0],
-                    success: true,
+                else {
+                    res.send({
+                        ...qres.rows[0],
+                        success: true,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        } else if (req.session.user_type == "buet_staff") {
+            dbclient.query(
+                `select id, name, phone, department, designation, residence from buet_staff where id=$1`,
+                [req.session.userid]
+            ).then(qres => {
+                //console.log(qres);
+                if (qres.rows.length === 0) res.send({ 
+                    success: false,
                 });
-            };
-        }).catch(e => console.error(e.stack));
-    } else if (req.session.user_type == "bus_staff") {
-        dbclient.query(
-            `select id, name, role, from bus_staff where id=$1`,
-            [req.session.userid]
-        ).then(qres => {
-            //console.log(qres);
-            if (qres.rows.length === 0) res.send({ 
-                success: false,
-            });
-            else {
-                res.send({
-                    ...qres.rows[0],
-                    success: true,
+                else {
+                    res.send({
+                        ...qres.rows[0],
+                        success: true,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        } else if (req.session.user_type == "bus_staff") {
+            dbclient.query(
+                `select id, name, phone, role, from bus_staff where id=$1`,
+                [req.session.userid]
+            ).then(qres => {
+                //console.log(qres);
+                if (qres.rows.length === 0) res.send({ 
+                    success: false,
                 });
-            };
-        }).catch(e => console.error(e.stack));
+                else {
+                    res.send({
+                        ...qres.rows[0],
+                        success: true,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        };
     };
 });
 
