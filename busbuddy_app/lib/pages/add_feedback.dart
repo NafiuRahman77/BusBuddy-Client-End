@@ -96,7 +96,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now().subtract(const Duration(days: 30)),
-      lastDate: DateTime.now(),
+      lastDate: DateTime(2030),
     );
 
     if (pickedDate != null && pickedDate != selectedDate) {
