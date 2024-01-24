@@ -39,7 +39,7 @@ dependencies:
   http: ^0.13.4
   fluttertoast: ^8.2.2
   requests: ^4.7.0
-  # shurjopay: ^2.0.3
+  shurjopay: ^2.0.3
   intl: ^0.18.0
   loader_overlay: ^3.0.4
   qr_flutter: ^4.1.0
