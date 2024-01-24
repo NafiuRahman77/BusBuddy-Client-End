@@ -165,7 +165,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
       return false;
     }
 
-    var r = await Requests.post(globel.serverIp + 'addStudentFeedback',
+    var r = await Requests.post(globel.serverIp + 'addFeedback',
         body: {
           'route': selectedRouteId,
           'submission_timestamp': DateTime.now().toIso8601String(),
