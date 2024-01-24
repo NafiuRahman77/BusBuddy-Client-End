@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:busbuddy_app/pages/scan_ticket_qr.dart';
+import 'package:busbuddy_app/pages/ticket_qr.dart';
+
 import 'pages/ticket_choose.dart';
 import 'pages/ticket_history.dart';
 import 'package:flutter/material.dart';
@@ -64,6 +67,12 @@ class BusBuddyApp extends StatelessWidget {
         path: "/show_requisition",
         builder: ((context, state) =>
             const HomeView(page: "Show Requisition"))),
+    GoRoute(
+        path: "/qr_code",
+        builder: ((context, state) => const HomeView(page: "QR Code"))),
+    GoRoute(
+        path: "/scan_qr_code",
+        builder: ((context, state) => const HomeView(page: "Scan QR Code"))),
   ]);
   // This widget is the root of your application.
   @override
@@ -103,7 +112,11 @@ class PageBody extends StatelessWidget {
       return Requisition();
     else if (this.page == "Feedback Response")
       return ShowFeedback();
-    else if (this.page == "Show Requisition") return ShowRequisition();
+    else if (this.page == "Show Requisition")
+      return ShowRequisition();
+    else if (this.page == "QR Code")
+      return TicketQR();
+    else if (this.page == "Scan QR Code") return ScanTicketQR();
     return (Container());
   }
 }
@@ -177,6 +190,11 @@ class HomeViewState extends State<HomeView> {
     } else if (currentRouteName == '/qr_code') {
       // You are currently on the '/your_route_name' route
       _selectedIndex = 10;
+    } else if (currentRouteName == '/scan_qr_code') {
+      // You are currently on the '/your_route_name' route
+      _selectedIndex = 11;
+    } else {
+      _selectedIndex = 0;
     }
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
@@ -476,8 +494,30 @@ class HomeViewState extends State<HomeView> {
                             // Update the state of the app
                             // _onItemTapped(2);
                             // Then close the drawer
+
+                            GoRouter.of(context).pop();
+                            GoRouter.of(context).push("/qr_code");
+
                             setState(() {
                               _selectedIndex = 10;
+                            });
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.qr_code),
+                          title: const Text('QR Code Scan'),
+                          selected: _selectedIndex == 10,
+                          onTap: () {
+                            if (_selectedIndex == 11) return;
+                            // Update the state of the app
+                            // _onItemTapped(2);
+                            // Then close the drawer
+
+                            GoRouter.of(context).pop();
+                            GoRouter.of(context).push("/scan_qr_code");
+
+                            setState(() {
+                              _selectedIndex = 11;
                             });
                           },
                         ),

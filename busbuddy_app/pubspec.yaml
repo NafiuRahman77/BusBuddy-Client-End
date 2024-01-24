@@ -42,6 +42,8 @@ dependencies:
   shurjopay: ^2.0.3
   intl: ^0.19.0
   loader_overlay: ^3.0.4
+  qr_flutter: ^4.1.0
+  qr_code_scanner: ^1.0.1
 
 dev_dependencies:
   flutter_test:
