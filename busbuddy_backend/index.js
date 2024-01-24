@@ -701,7 +701,7 @@ app.post('/api/getRouteTimeData', (req, res) => {
     if (req.session.userid) {
         dbclient.query(
             `select lpad(id::varchar, 8, '0') as id, start_timestamp, route, array_to_json(time_list), bus
-             from upcoming_trip where route=$1`, [req.body.route]
+             from allocation where route=$1`, [req.body.route]
         ).then(qres => {
 	    let list = [...qres.rows];
 	    //list.forEach(trip => {
