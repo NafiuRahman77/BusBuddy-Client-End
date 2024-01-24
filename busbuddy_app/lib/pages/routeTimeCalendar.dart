@@ -21,7 +21,7 @@ class RouteTimeCalendar extends StatefulWidget {
 
 class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
   String selectedValue2 = 'DH-0974';
-  DateTime? selectedDate; // Store the selected date here
+  DateTime? selectedDate = new DateTime.now(); // Store the selected date here
   List<String> route_ids = [], route_names = [];
   List<String> station_ids = [], station_names = [];
   List<dynamic> station_coords = [];
@@ -113,6 +113,24 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
     //print('bb: ${jsonDecode(response.body)['email']}');
   }
 
+  void setDateInit() {
+    rejectedData.forEach((element) {
+      routeTimeData.add(element);
+    });
+    List<dynamic> acceptedList = [];
+    routeTimeData.forEach((bus) {
+      print(bus['array_to_json'][0]['time']);
+      print(selectedDate!);
+      if (isSameDate(
+          DateTime.parse(bus['array_to_json'][0]['time']), selectedDate!)) {
+        print('match');
+        acceptedList.add(bus);
+      } else
+        rejectedData.add(bus);
+      routeTimeData = acceptedList;
+    });
+  }
+
   Future<void> onRouteSelect(String route) async {
     context.loaderOverlay.show();
     var r = await Requests.post(globel.serverIp + 'getRouteTimeData',
@@ -126,7 +144,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       routeTimeData = r.json();
       loadedRouteTimeData = true;
 
-      routeCoords.clear();
+      // routeCoords.clear();
       routeTimeData.forEach((j) {
         j["array_to_json"].forEach((stop) {
           // routeCoords.add(station_coords[int.parse(stop['station']) - 1]);
@@ -134,9 +152,10 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
         });
       });
 
-      routeCoords.forEach((element) {
-        print(element);
-      });
+      setDateInit();
+      // routeCoords.forEach((element) {
+      //   print(element);
+      // });
 
       // globel.mapMarkerSet.clear();
       // routeCoords.forEach((coord) {
@@ -152,7 +171,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       // });
     });
 
-    print(r.content());
+    // print(r.content());
     // if (json['success'] == true) {
     //   setState(() {
     //     defaultRoute = json['default_route'];
@@ -183,20 +202,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       // Handle the selected date here, e.g., update a variable.
       setState(() {
         selectedDate = pickedDate;
-      });
-      rejectedData.forEach((element) {
-        routeTimeData.add(element);
-      });
-      List<dynamic> acceptedList = [];
-      routeTimeData.forEach((bus) {
-        //print(bus['array_to_json'][0]['time']);
-        if (isSameDate(
-            DateTime.parse(bus['array_to_json'][0]['time']), selectedDate!)) {
-          // print('match');
-          acceptedList.add(bus);
-        } else
-          rejectedData.add(bus);
-        routeTimeData = acceptedList;
+        setDateInit();
       });
     }
   }
