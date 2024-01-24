@@ -1,70 +1,51 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../components/CustomCard.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class RouteTimeMap extends StatelessWidget {
+class RouteTimeMap extends StatefulWidget {
+  @override
+  _RouteTimeMap createState() => _RouteTimeMap();
+}
+
+class _RouteTimeMap extends State<RouteTimeMap> {
+  // @override
+  // void initState() {
+  //   super.initState();
+  // }
+
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
+
+  static const CameraPosition _kGooglePlex = CameraPosition(
+    target: LatLng(37.42796133580664, -122.085749655962),
+    zoom: 14.4746,
+  );
+
+  static const CameraPosition _kLake = CameraPosition(
+      bearing: 192.8334901395799,
+      target: LatLng(37.43296265331129, -122.08832357078792),
+      tilt: 59.440717697143555,
+      zoom: 19.151926040649414);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        children: [
-          Container(
-            color: Colors.white, // Background color for the card
-            child: Center(
-              child: Container(
-                width: 300.0,
-                child: Card(
-                  elevation: 20,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        CircleAvatar(
-                          backgroundColor: Colors.white,
-                          radius: 50.0,
-                          backgroundImage:
-                              AssetImage('lib/sjb/images/logobusbuddy-1.png'),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Mohammadpur-1',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black, // Text color
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        CircleWidget(
-                            text1: 'Mohammadpur', text2: '6:30 AM', x: 1),
-                        SizedBox(height: 10),
-                        CircleWidget(
-                            text1: 'Dhanmondi', text2: '6:40 AM', x: 1),
-                        SizedBox(height: 10),
-                        CircleWidget(text1: 'BUET', text2: '6:50 AM', x: 1),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 30,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: 16.0), // Adjust the padding as needed
-            child: Image(
-              fit: BoxFit.cover, // Image fills the entire width
-              image: AssetImage('lib/images/map.PNG'),
-            ),
-          ),
-        ],
+      body: Padding(
+        padding: EdgeInsets.all(15),
+        child: GoogleMap(
+          mapType: MapType.hybrid,
+          initialCameraPosition: _kGooglePlex,
+          onMapCreated: (GoogleMapController controller) {
+            _controller.complete(controller);
+          },
+        ),
       ),
     );
+  }
+
+  Future<void> _goToTheLake() async {
+    final GoogleMapController controller = await _controller.future;
+    await controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
   }
 }

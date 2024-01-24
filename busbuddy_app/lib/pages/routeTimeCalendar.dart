@@ -23,6 +23,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
   DateTime? selectedDate; // Store the selected date here
   List<String> route_ids = [], route_names = [];
   List<String> station_ids = [], station_names = [];
+  List<dynamic> station_coords = [];
   List<int> route_st_cnt = [];
   String defaultRoute = "";
   String defaultRouteName = "";
@@ -91,10 +92,14 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
         // List<dynamic> arr2j = json2[i]['array_to_json'];
         station_ids.add(json2[i]['id']);
         station_names.add(json2[i]['name']);
+        station_coords.add(json2[i]['coords']);
         // route_st_cnt.add(arr2j.length);
       }
     });
     station_names.forEach((element) {
+      print(element);
+    });
+    station_coords.forEach((element) {
       print(element);
     });
     context.loaderOverlay.hide();
@@ -337,6 +342,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
                     extendedInfo: routeTimeData[i]["array_to_json"],
                     stationIds: station_ids,
                     stationNames: station_names,
+                    stationCoords: station_coords,
                   ),
             ],
           ),
