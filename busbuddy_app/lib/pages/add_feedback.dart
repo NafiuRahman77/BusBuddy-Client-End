@@ -47,7 +47,10 @@ class _FeedbackFormState extends State<FeedbackForm> {
         defaultRouteName = json['default_route_name'];
       });
     } else {
-      Fluttertoast.showToast(
+      if(globel.userType!="student") {defaultRoute = "4" ;}
+      else 
+      {
+          Fluttertoast.showToast(
           msg: 'Failed to load default route.',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
@@ -55,6 +58,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
           backgroundColor: Color.fromARGB(73, 77, 65, 64),
           textColor: Colors.white,
           fontSize: 16.0);
+      }
+
     }
     print(r.content());
     var r1 = await Requests.post(globel.serverIp + 'getRoutes');
@@ -160,7 +165,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
       return false;
     }
 
-    var r = await Requests.post(globel.serverIp + 'addStudentFeedback',
+    var r = await Requests.post(globel.serverIp + 'addFeedback',
         body: {
           'route': selectedRouteId,
           'submission_timestamp': DateTime.now().toIso8601String(),
