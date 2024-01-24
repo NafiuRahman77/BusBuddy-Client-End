@@ -17,6 +17,7 @@ import 'pages/route_map.dart';
 import 'pages/Requisition.dart';
 import 'package:shurjopay/utilities/functions.dart';
 import 'pages/ShowFeedback.dart';
+import 'pages/manage_trips.dart';
 import 'pages/ShowRequisition.dart';
 import 'package:requests/requests.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -75,6 +76,9 @@ class BusBuddyApp extends StatelessWidget {
     GoRoute(
         path: "/scan_qr_code",
         builder: ((context, state) => const HomeView(page: "Scan QR Code"))),
+    GoRoute(
+        path: "/manage_trips",
+        builder: ((context, state) => const HomeView(page: "Manage Trips"))),
   ]);
   // This widget is the root of your application.
   @override
@@ -122,6 +126,7 @@ class PageBody extends StatelessWidget {
     else if (this.page == "QR Code")
       return TicketQR();
     else if (this.page == "Scan QR Code") return ScanTicketQR();
+    else if (this.page == "Manage Trips") return ManageTrips();
     return (Container());
   }
 }
@@ -200,7 +205,10 @@ class HomeViewState extends State<HomeView> {
     } else if (currentRouteName == '/scan_qr_code') {
       // You are currently on the '/your_route_name' route
       _selectedIndex = 13;
-    } else {
+    } else if(currentRouteName == '/manage_trips') {
+      _selectedIndex = 14 ; 
+    }
+     else {
       _selectedIndex = 0;
     }
     // This method is rerun every time setState is called, for instance as done
@@ -513,6 +521,25 @@ class HomeViewState extends State<HomeView> {
 
                               setState(() {
                                 _selectedIndex = 10;
+                              });
+                            },
+                          ),
+                        if (globel.userType == "bus_staff")
+                          ListTile(
+                            leading: const Icon(Icons.manage_accounts),
+                            title: const Text('Manage Trips'),
+                            selected: _selectedIndex == 14,
+                            onTap: () {
+                              if (_selectedIndex == 14) return;
+                              // Update the state of the app
+                              // _onItemTapped(2);
+                              // Then close the drawer
+
+                              GoRouter.of(context).pop();
+                              GoRouter.of(context).push("/manage_trips");
+
+                              setState(() {
+                                _selectedIndex = 14;
                               });
                             },
                           ),
