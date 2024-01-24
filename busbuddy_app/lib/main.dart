@@ -192,7 +192,7 @@ class HomeViewState extends State<HomeView> {
       _selectedIndex = 10;
     } else if (currentRouteName == '/scan_qr_code') {
       // You are currently on the '/your_route_name' route
-      _selectedIndex = 11;
+      _selectedIndex = 13;
     } else {
       _selectedIndex = 0;
     }
@@ -267,97 +267,15 @@ class HomeViewState extends State<HomeView> {
                           },
                         ),
                         if (globel.userType == "student")
-                        ExpansionTile(
-                          initiallyExpanded:
-                              (_selectedIndex == 1 || _selectedIndex == 2),
-                          leading: Icon(
-                            Icons.confirmation_num,
-                            color: Colors.black,
-                          ), // Change color based on the selected index,),
-                          title: Text(
-                            'Tickets',
-                            style: TextStyle(
-                              color: Colors
-                                  .black, // Change color based on the selected index
-                            ),
-                          ),
-                          onExpansionChanged: (bool expanded) {
-                            if (expanded) {
-                              // The tile is expanded, update the selected index or perform other actions.
-                              setState(() {
-                                _selectedIndex = 1;
-                                exp1 = 1;
-                              });
-                            } else {
-                              setState(() {
-                                _selectedIndex = 1;
-                                exp1 = 0;
-                              });
-                            }
-                          },
-                          children: <Widget>[
-                            ListTile(
-                              leading: Icon(Icons.money),
-                              title: Text('Buy Ticket'),
-                              selected: _selectedIndex == 1,
-                              onTap: () {
-                                GoRouter.of(context).pop();
-                                GoRouter.of(context).push("/ticket_choose");
-                              },
-                            ),
-                            ListTile(
-                              leading: Icon(Icons.history),
-                              title: Text('Ticket History'),
-                              selected: _selectedIndex == 2,
-                              onTap: () {
-                                GoRouter.of(context).pop();
-                                GoRouter.of(context).push("/ticket_history");
-                              },
-                            ),
-                          ],
-                        ),
-                        if (globel.userType!="bus_staff")
-                        ListTile(
-                          leading: const Icon(Icons.calendar_month),
-                          title: const Text('Calendar'),
-                          selected: _selectedIndex == 3,
-                          onTap: () {
-                            // Update the state of the app
-                            // _onItemTapped(2);
-                            if (_selectedIndex == 3) return;
-                            GoRouter.of(context).pop();
-                            GoRouter.of(context).push("/route_calendar");
-                            setState(() {
-                              _selectedIndex = 3;
-                            });
-                            // Then close the drawer
-                          },
-                        ),
-                        if (globel.userType!="bus_staff")
-                        ListTile(
-                          leading: const Icon(Icons.place),
-                          title: const Text('Tracking'),
-                          selected: _selectedIndex == 4,
-                          onTap: () {
-                            if (_selectedIndex == 4) return;
-                            // Update the state of the app
-                            // _onItemTapped(2);
-                            // Then close the drawer
-                            setState(() {
-                              _selectedIndex = 4;
-                            });
-                          },
-                        ),
-                        if (globel.userType!="bus_staff")
-                        ExpansionTile(
+                          ExpansionTile(
                             initiallyExpanded:
-                                (_selectedIndex == 5 || _selectedIndex == 6),
+                                (_selectedIndex == 1 || _selectedIndex == 2),
                             leading: Icon(
-                              Icons.feedback,
+                              Icons.confirmation_num,
                               color: Colors.black,
                             ), // Change color based on the selected index,),
                             title: Text(
-                              'Feedback',
+                              'Tickets',
                               style: TextStyle(
                                 color: Colors
                                     .black, // Change color based on the selected index
@@ -367,115 +285,197 @@ class HomeViewState extends State<HomeView> {
                               if (expanded) {
                                 // The tile is expanded, update the selected index or perform other actions.
                                 setState(() {
-                                  _selectedIndex = 5;
-                                  exp2 = 1;
+                                  _selectedIndex = 1;
+                                  exp1 = 1;
                                 });
                               } else {
                                 setState(() {
-                                  _selectedIndex = 5;
-                                  exp2 = 0;
+                                  _selectedIndex = 1;
+                                  exp1 = 0;
                                 });
                               }
                             },
                             children: <Widget>[
                               ListTile(
-                                leading: const Icon(Icons.post_add),
-                                title: const Text('Submit Feedback'),
-                                selected: _selectedIndex == 5,
+                                leading: Icon(Icons.money),
+                                title: Text('Buy Ticket'),
+                                selected: _selectedIndex == 1,
                                 onTap: () {
-                                  if (_selectedIndex == 5) return;
-                                  // Update the state of the app
                                   GoRouter.of(context).pop();
-                                  GoRouter.of(context).push("/user_feedback");
+                                  GoRouter.of(context).push("/ticket_choose");
+                                },
+                              ),
+                              ListTile(
+                                leading: Icon(Icons.history),
+                                title: Text('Ticket History'),
+                                selected: _selectedIndex == 2,
+                                onTap: () {
+                                  GoRouter.of(context).pop();
+                                  GoRouter.of(context).push("/ticket_history");
+                                },
+                              ),
+                            ],
+                          ),
+                        if (globel.userType != "bus_staff")
+                          ListTile(
+                            leading: const Icon(Icons.calendar_month),
+                            title: const Text('Calendar'),
+                            selected: _selectedIndex == 3,
+                            onTap: () {
+                              // Update the state of the app
+                              // _onItemTapped(2);
+                              if (_selectedIndex == 3) return;
+                              GoRouter.of(context).pop();
+                              GoRouter.of(context).push("/route_calendar");
+                              setState(() {
+                                _selectedIndex = 3;
+                              });
+                              // Then close the drawer
+                            },
+                          ),
+                        if (globel.userType != "bus_staff")
+                          ListTile(
+                            leading: const Icon(Icons.place),
+                            title: const Text('Tracking'),
+                            selected: _selectedIndex == 4,
+                            onTap: () {
+                              if (_selectedIndex == 4) return;
+                              // Update the state of the app
+                              // _onItemTapped(2);
+                              // Then close the drawer
+                              setState(() {
+                                _selectedIndex = 4;
+                              });
+                            },
+                          ),
+                        if (globel.userType != "bus_staff")
+                          ExpansionTile(
+                              initiallyExpanded:
+                                  (_selectedIndex == 5 || _selectedIndex == 6),
+                              leading: Icon(
+                                Icons.feedback,
+                                color: Colors.black,
+                              ), // Change color based on the selected index,),
+                              title: Text(
+                                'Feedback',
+                                style: TextStyle(
+                                  color: Colors
+                                      .black, // Change color based on the selected index
+                                ),
+                              ),
+                              onExpansionChanged: (bool expanded) {
+                                if (expanded) {
+                                  // The tile is expanded, update the selected index or perform other actions.
                                   setState(() {
                                     _selectedIndex = 5;
+                                    exp2 = 1;
                                   });
-                                  // Then close the drawer
-                                },
-                              ),
-                              ListTile(
-                                leading: const Icon(Icons.history),
-                                title: const Text('Feedback History'),
-                                selected: _selectedIndex == 6,
-                                onTap: () {
-                                  if (_selectedIndex == 6) return;
-                                  // Update the state of the app
-                                  GoRouter.of(context).pop();
-                                  GoRouter.of(context).push("/prev_feedback");
+                                } else {
                                   setState(() {
-                                    _selectedIndex = 6;
+                                    _selectedIndex = 5;
+                                    exp2 = 0;
                                   });
-                                  // Then close the drawer
-                                },
+                                }
+                              },
+                              children: <Widget>[
+                                ListTile(
+                                  leading: const Icon(Icons.post_add),
+                                  title: const Text('Submit Feedback'),
+                                  selected: _selectedIndex == 5,
+                                  onTap: () {
+                                    if (_selectedIndex == 5) return;
+                                    // Update the state of the app
+                                    GoRouter.of(context).pop();
+                                    GoRouter.of(context).push("/user_feedback");
+                                    setState(() {
+                                      _selectedIndex = 5;
+                                    });
+                                    // Then close the drawer
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.history),
+                                  title: const Text('Feedback History'),
+                                  selected: _selectedIndex == 6,
+                                  onTap: () {
+                                    if (_selectedIndex == 6) return;
+                                    // Update the state of the app
+                                    GoRouter.of(context).pop();
+                                    GoRouter.of(context).push("/prev_feedback");
+                                    setState(() {
+                                      _selectedIndex = 6;
+                                    });
+                                    // Then close the drawer
+                                  },
+                                ),
+                              ]),
+                        if (globel.userType == "buet_staff")
+                          ExpansionTile(
+                              initiallyExpanded:
+                                  (_selectedIndex == 7 || _selectedIndex == 8),
+                              leading: Icon(
+                                Icons.bus_alert,
+                                color: Colors.black,
+                              ), // Change color based on the selected index,),
+                              title: Text(
+                                'Requisition',
+                                style: TextStyle(
+                                  color: Colors
+                                      .black, // Change color based on the selected index
+                                ),
                               ),
-                            ]),
-                        if (globel.userType=="buet_staff")
-                        ExpansionTile(
-                            initiallyExpanded:
-                                (_selectedIndex == 7 || _selectedIndex == 8),
-                            leading: Icon(
-                              Icons.bus_alert,
-                              color: Colors.black,
-                            ), // Change color based on the selected index,),
-                            title: Text(
-                              'Requisition',
-                              style: TextStyle(
-                                color: Colors
-                                    .black, // Change color based on the selected index
-                              ),
-                            ),
-                            onExpansionChanged: (bool expanded) {
-                              if (expanded) {
-                                // The tile is expanded, update the selected ind ex or perform other actions.
-                                setState(() {
-                                  _selectedIndex = 7;
-                                  exp3 = 1;
-                                });
-                              } else {
-                                setState(() {
-                                  _selectedIndex = 7;
-                                  exp3 = 0;
-                                });
-                              }
-                            },
-                            children: <Widget>[
-                              ListTile(
-                                //show_requisition
-                                leading: const Icon(Icons.mail),
-                                title: const Text('Submit Requisition'),
-                                selected: _selectedIndex == 7,
-                                onTap: () {
-                                  if (_selectedIndex == 7) return;
-                                  // Update the state of the app
-                                  // _onItemTapped(2);
-                                  GoRouter.of(context).pop();
-                                  GoRouter.of(context)
-                                      .push("/user_requisition");
+                              onExpansionChanged: (bool expanded) {
+                                if (expanded) {
+                                  // The tile is expanded, update the selected ind ex or perform other actions.
                                   setState(() {
                                     _selectedIndex = 7;
+                                    exp3 = 1;
                                   });
-                                  // Then close the drawer
-                                },
-                              ),
-                              ListTile(
-                                //show_requisition
-                                leading: const Icon(Icons.history),
-                                title: const Text('Show Requisition'),
-                                selected: _selectedIndex == 8,
-                                onTap: () {
-                                  if (_selectedIndex == 8) return;
-                                  // Update the state of the app
-                                  // _onItemTapped(2);
-                                  GoRouter.of(context).pop();
-                                  GoRouter.of(context)
-                                      .push("/show_requisition");
-                                  // Then close the drawer
+                                } else {
                                   setState(() {
-                                    _selectedIndex = 8;
+                                    _selectedIndex = 7;
+                                    exp3 = 0;
                                   });
-                                },
-                              ),
-                            ]),
+                                }
+                              },
+                              children: <Widget>[
+                                ListTile(
+                                  //show_requisition
+                                  leading: const Icon(Icons.mail),
+                                  title: const Text('Submit Requisition'),
+                                  selected: _selectedIndex == 7,
+                                  onTap: () {
+                                    if (_selectedIndex == 7) return;
+                                    // Update the state of the app
+                                    // _onItemTapped(2);
+                                    GoRouter.of(context).pop();
+                                    GoRouter.of(context)
+                                        .push("/user_requisition");
+                                    setState(() {
+                                      _selectedIndex = 7;
+                                    });
+                                    // Then close the drawer
+                                  },
+                                ),
+                                ListTile(
+                                  //show_requisition
+                                  leading: const Icon(Icons.history),
+                                  title: const Text('Show Requisition'),
+                                  selected: _selectedIndex == 8,
+                                  onTap: () {
+                                    if (_selectedIndex == 8) return;
+                                    // Update the state of the app
+                                    // _onItemTapped(2);
+                                    GoRouter.of(context).pop();
+                                    GoRouter.of(context)
+                                        .push("/show_requisition");
+                                    // Then close the drawer
+                                    setState(() {
+                                      _selectedIndex = 8;
+                                    });
+                                  },
+                                ),
+                              ]),
                         ListTile(
                           leading: const Icon(Icons.notifications),
                           title: const Text('Notifications'),
@@ -490,61 +490,61 @@ class HomeViewState extends State<HomeView> {
                             });
                           },
                         ),
-                        if (globel.userType!="buet_staff")
-                        ListTile(
-                          leading: const Icon(Icons.qr_code),
-                          title: const Text('QR Code'),
-                          selected: _selectedIndex == 10,
-                          onTap: () {
-                            if (_selectedIndex == 10) return;
-                            // Update the state of the app
-                            // _onItemTapped(2);
-                            // Then close the drawer
+                        if (globel.userType != "buet_staff")
+                          ListTile(
+                            leading: const Icon(Icons.qr_code),
+                            title: const Text('QR Code'),
+                            selected: _selectedIndex == 10,
+                            onTap: () {
+                              if (_selectedIndex == 10) return;
+                              // Update the state of the app
+                              // _onItemTapped(2);
+                              // Then close the drawer
 
-                            GoRouter.of(context).pop();
-                            GoRouter.of(context).push("/qr_code");
+                              GoRouter.of(context).pop();
+                              GoRouter.of(context).push("/qr_code");
 
-                            setState(() {
-                              _selectedIndex = 10;
-                            });
-                          },
-                        ),
-                        if(globel.userType=="buet_staff")
-                        ListTile(
-                          leading: const Icon(Icons.payment),
-                          title: const Text('Bill Payment'),
-                          selected: _selectedIndex == 11,
-                          onTap: () {
-                            if (_selectedIndex == 11) return;
-                            // Update the state of the app
-                            // _onItemTapped(2);
-                            // Then close the drawer
-                            setState(() {
-                              _selectedIndex = 11; 
-                            });
-                          },
-                        ),
-                        if(globel.userType=="bus_staff")
-                        ListTile(
-                          leading: const Icon(Icons.dashboard),
-                          title: const Text('Dashboard'),
-                          selected: _selectedIndex == 12,
-                          onTap: () {
-                            if (_selectedIndex == 12) return;
-                            // Update the state of the app
-                            // _onItemTapped(2);
-                            // Then close the drawer
-                            setState(() {
-                              _selectedIndex = 12; 
-                            });
-                          },
-                        ),
+                              setState(() {
+                                _selectedIndex = 10;
+                              });
+                            },
+                          ),
+                        if (globel.userType == "buet_staff")
+                          ListTile(
+                            leading: const Icon(Icons.payment),
+                            title: const Text('Bill Payment'),
+                            selected: _selectedIndex == 11,
+                            onTap: () {
+                              if (_selectedIndex == 11) return;
+                              // Update the state of the app
+                              // _onItemTapped(2);
+                              // Then close the drawer
+                              setState(() {
+                                _selectedIndex = 11;
+                              });
+                            },
+                          ),
+                        if (globel.userType == "bus_staff")
+                          ListTile(
+                            leading: const Icon(Icons.dashboard),
+                            title: const Text('Dashboard'),
+                            selected: _selectedIndex == 12,
+                            onTap: () {
+                              if (_selectedIndex == 12) return;
+                              // Update the state of the app
+                              // _onItemTapped(2);
+                              // Then close the drawer
+                              setState(() {
+                                _selectedIndex = 12;
+                              });
+                            },
+                          ),
                         ListTile(
                           leading: const Icon(Icons.qr_code),
                           title: const Text('QR Code Scan'),
-                          selected: _selectedIndex == 10,
+                          selected: _selectedIndex == 13,
                           onTap: () {
-                            if (_selectedIndex == 11) return;
+                            if (_selectedIndex == 13) return;
                             // Update the state of the app
                             // _onItemTapped(2);
                             // Then close the drawer
@@ -553,7 +553,7 @@ class HomeViewState extends State<HomeView> {
                             GoRouter.of(context).push("/scan_qr_code");
 
                             setState(() {
-                              _selectedIndex = 11;
+                              _selectedIndex = 13;
                             });
                           },
                         ),

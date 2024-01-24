@@ -19,7 +19,7 @@ class _TicketQRState extends State<TicketQR> {
   String studentName = "";
   String studentPhone = "";
   String studentEmail = "";
-  int ticket_id = 1;
+  String ticket_id = "BLANK_TICKET";
 
   Future<void> getTicketInfo() async {
     context.loaderOverlay.show();
@@ -31,7 +31,7 @@ class _TicketQRState extends State<TicketQR> {
 
     if (json['success'] == true) {
       setState(() {
-        ticket_id = int.parse(json['ticket_id']);
+        ticket_id = json['ticket_id'];
       });
     } else {
       Fluttertoast.showToast(
@@ -61,9 +61,9 @@ class _TicketQRState extends State<TicketQR> {
     return Scaffold(
       body: Center(
         child: QrImageView(
-          data: ticket_id.toString(),
+          data: ticket_id,
           version: QrVersions.auto,
-          size: 200.0,
+          size: 350.0,
         ),
       ),
     );
