@@ -301,7 +301,7 @@ app.post('/api/getProfile', (req, res) => {
             }).catch(e => console.error(e.stack));
         } else if (req.session.user_type == "bus_staff") {
             dbclient.query(
-                `select id, name, phone, role, from bus_staff where id=$1`,
+                `select id, name, phone, role from bus_staff where id=$1`,
                 [req.session.userid]
             ).then(qres => {
                 //console.log(qres);
@@ -483,7 +483,7 @@ app.post('/api/getRoutes', (req,res) => {
 
 app.post('/api/getStations', (req,res) => {
     console.log("sending station data");
-    dbclient.query("SELECT id, name FROM station").then(qres => {
+    dbclient.query("SELECT id, name, coords FROM station").then(qres => {
         res.send(qres.rows);
     }).catch(e => console.error(e.stack));
 });
@@ -496,25 +496,45 @@ app.post('/api/getRouteStations', (req,res) => {
     }).catch(e => console.error(e.stack));
 });
 
-app.post('/api/addStudentFeedback', (req,res) => {
+app.post('/api/addFeedback', (req,res) => {
     console.log(req.body);
     if (req.session.userid) {
-        dbclient.query(
-            `INSERT INTO student_feedback (complainer_id, route, submission_timestamp, concerned_timestamp, text, subject) 
-            values ($1, $2, NOW(), $3, $4, $5)`, 
-            [req.session.userid, req.body.route==""? null:req.body.route, 
-            req.body.timestamp==""? null:req.body.timestamp, req.body.text, JSON.parse(req.body.subject)]
-        ).then(qres => {
-            console.log(qres);
-            if (qres.rowCount === 1) res.send({ 
-                success: true,
-            });
-            else if (qres.rowCount === 0) {
-                res.send({
-                    success: false,
+        if (req.session.user_type == "student") {
+            dbclient.query(
+                `INSERT INTO student_feedback (complainer_id, route, submission_timestamp, concerned_timestamp, text, subject) 
+                values ($1, $2, NOW(), $3, $4, $5)`, 
+                [req.session.userid, req.body.route==""? null:req.body.route, 
+                req.body.timestamp==""? null:req.body.timestamp, req.body.text, JSON.parse(req.body.subject)]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
                 });
-            };
-        }).catch(e => console.error(e.stack));
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        } else if (req.session.user_type == "buet_staff") {
+            dbclient.query(
+                `INSERT INTO buet_staff_feedback (complainer_id, route, submission_timestamp, concerned_timestamp, text, subject) 
+                values ($1, $2, NOW(), $3, $4, $5)`, 
+                [req.session.userid, req.body.route==""? null:req.body.route, 
+                req.body.timestamp==""? null:req.body.timestamp, req.body.text, JSON.parse(req.body.subject)]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
+                });
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        }
+        
     };
 });
 
@@ -586,43 +606,59 @@ app.post('/api/getTicketCount', (req,res) => {
 });
 
 app.post('/api/getTicketQRData', (req,res) => {
-    // console.log(req.body);
-    // if (req.session.userid) {
-    //     dbclient.query(
-    //         `select count(*) from ticket where student_id=$1`, 
-    //         [req.session.userid]
-    //     ).then(qres => {
-    //         console.log(qres);
-    //         if (qres.rowCount === 1) 
+    console.log(req.body);
+    if (req.session.userid && req.session.user_type=="student") {
+        dbclient.query(
+            `select id from ticket where student_id=$1 and is_used=false limit 1`, 
+            [req.session.userid]
+        ).then(qres => {
+            console.log(qres);
+            if (qres.rowCount === 1) 
             res.send({ 
-                ticket_id: 2130124940,
-                hash: "1d5790f3e05445b94461158d6ecb9ed5c6dab6bf8b350c23b37c5cb07a8698e1"
+                success: true,
+                ticket_id: qres.rows[0].id,
             });
-    //         else if (qres.rowCount === 0) {
-    //             res.send({
-    //                 success: false,
-    //             });
-    //         };
-    //     }).catch(e => console.error(e.stack));
-    // };
+            else if (qres.rowCount === 0) {
+                res.send({
+                    success: false,
+                });
+            };
+        }).catch(e => console.error(e.stack));
+    };
 });
 
 app.post('/api/getUserFeedback', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
-        dbclient.query(
-           `select f.*, r.terminal_point as route_name
- 	    from student_feedback as f, public.route as r 
-	    where f.route = r.id and f.complainer_id = $1`, [req.session.userid]
-        ).then(qres => {
-            console.log(qres);
-            res.send(qres.rows);
-        }).catch(e => {
-            console.error(e.stack);
-            res.send({ 
-                success: false,
+        if (req.session.user_type == "student") {
+            dbclient.query(
+            `select f.*, r.terminal_point as route_name
+            from student_feedback as f, public.route as r 
+            where f.route = r.id and f.complainer_id = $1`, [req.session.userid]
+            ).then(qres => {
+                console.log(qres);
+                res.send(qres.rows);
+            }).catch(e => {
+                console.error(e.stack);
+                res.send({ 
+                    success: false,
+                });
             });
-        });
+        } else if (req.session.user_type == "buet_staff") {
+            dbclient.query(
+            `select f.*, r.terminal_point as route_name
+            from buet_staff_feedback as f, public.route as r 
+            where f.route = r.id and f.complainer_id = $1`, [req.session.userid]
+            ).then(qres => {
+                console.log(qres);
+                res.send(qres.rows);
+            }).catch(e => {
+                console.error(e.stack);
+                res.send({ 
+                    success: false,
+                });
+            });
+        } 
     };
 });
 

@@ -44,6 +44,8 @@ dependencies:
   loader_overlay: ^3.0.4
   url_launcher: ^6.2.4
   google_maps_flutter: ^2.5.3
+  qr_flutter: ^4.1.0
+  qr_code_scanner: ^1.0.1
 
 dev_dependencies:
   flutter_test:

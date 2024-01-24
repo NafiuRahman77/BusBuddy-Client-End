@@ -51,14 +51,19 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
         defaultRouteName = json['default_route_name'];
       });
     } else {
-      Fluttertoast.showToast(
+      if(globel.userType!="student") defaultRoute = "4" ;
+      else 
+      {
+          Fluttertoast.showToast(
           msg: 'Failed to load default route.',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
+          backgroundColor: Color.fromARGB(73, 77, 65, 64),
           textColor: Colors.white,
           fontSize: 16.0);
+      }
+
     }
     print(r.content());
 
