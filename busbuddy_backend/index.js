@@ -439,21 +439,21 @@ app.post('/api/getDefaultRoute', (req, res) => {
 app.post('/api/updateProfile', (req,res) => {
     console.log(req.body);
     if (req.session.userid === req.body.id) {
-            dbclient.query(
-                `UPDATE student SET phone=$1, email=$2, default_route=$3, default_station=$4 WHERE id=$5`, 
-                [req.body.phone, req.body.email, req.body.default_route, req.body.default_station, req.body.id]
-            ).then(qres => {
-                console.log(qres);
-                if (qres.rowCount === 1) res.send({ 
-                    success: true,
+        dbclient.query(
+            `UPDATE student SET phone=$1, email=$2, default_route=$3, default_station=$4 WHERE id=$5`, 
+            [req.body.phone, req.body.email, req.body.default_route, req.body.default_station, req.body.id]
+        ).then(qres => {
+            console.log(qres);
+            if (qres.rowCount === 1) res.send({ 
+                success: true,
+            });
+            else if (qres.rowCount === 0) {
+                res.send({
+                    success: false,
                 });
-                else if (qres.rowCount === 0) {
-                    res.send({
-                        success: false,
-                    });
-                };
-            }).catch(e => console.error(e.stack));
-        };
+            };
+        }).catch(e => console.error(e.stack));
+    };
 });
 
 // app.post('/api/updatePassword', (req,res) => {
@@ -960,8 +960,7 @@ app.post('/api/getTripMapPath', (req,res) => {
 app.post('/api/getStaffTrips', (req,res) => {
     //send a dummy response
     console.log(req.body);
-    res.send({
-       data: [
+    res.send([
             {
                 trip_id: 123,
                 route_id: 5,
@@ -985,15 +984,26 @@ app.post('/api/getStaffTrips', (req,res) => {
                 prev_point: null,             
             }
            
-        ]}); });
+        ]); });
 
 app.post('/api/startTrip', (req,res) => {
-    //send a dummy response
     console.log(req.body);
-    res.send({
-        success: true,
-        time_elapsed: 455527,        
-    });
+    if (req.session.userid === req.body.id) {
+        dbclient.query(
+            `UPDATE student SET phone=$1, email=$2, default_route=$3, default_station=$4 WHERE id=$5`, 
+            [req.body.phone, req.body.email, req.body.default_route, req.body.default_station, req.body.id]
+        ).then(qres => {
+            console.log(qres);
+            if (qres.rowCount === 1) res.send({ 
+                success: true,
+            });
+            else if (qres.rowCount === 0) {
+                res.send({
+                    success: false,
+                });
+            };
+        }).catch(e => console.error(e.stack));
+    };
 });
 
 app.post('/api/endTrip', (req,res) => {
