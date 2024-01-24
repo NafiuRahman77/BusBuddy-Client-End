@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:busbuddy_app/pages/scan_ticket_qr.dart';
 import 'package:busbuddy_app/pages/ticket_qr.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'pages/ticket_choose.dart';
 import 'pages/ticket_history.dart';
@@ -54,7 +55,8 @@ class BusBuddyApp extends StatelessWidget {
         builder: ((context, state) => const HomeView(page: "Route Calendar"))),
     GoRoute(
         path: "/routetimemap",
-        builder: ((context, state) => const HomeView(page: "Route Map"))),
+        builder: ((context, state) =>
+            HomeView(page: "Route Map", extra: state.extra))),
     GoRoute(
         path: "/user_requisition",
         builder: ((context, state) =>
@@ -90,8 +92,9 @@ class BusBuddyApp extends StatelessWidget {
 }
 
 class PageBody extends StatelessWidget {
-  PageBody(this.page);
+  PageBody({required this.page, this.extra});
   String page;
+  Object? extra;
   @override
   Widget build(BuildContext context) {
     if (this.page == "User Feedback")
@@ -107,7 +110,9 @@ class PageBody extends StatelessWidget {
     else if (this.page == "Route Calendar")
       return RouteTimeCalendar();
     else if (this.page == "Route Map")
-      return RouteTimeMap();
+      return RouteTimeMap(
+        stationPoints: this.extra! as Set<Marker>,
+      );
     else if (this.page == "User Requisition")
       return Requisition();
     else if (this.page == "Feedback Response")
@@ -122,7 +127,7 @@ class PageBody extends StatelessWidget {
 }
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key, required this.page});
+  const HomeView({super.key, required this.page, this.extra});
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
   // how it looks.
@@ -133,6 +138,7 @@ class HomeView extends StatefulWidget {
   // always marked "final".
 
   final String page;
+  final Object? extra;
 
   @override
   State<HomeView> createState() => HomeViewState();
@@ -149,6 +155,7 @@ class HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
+
     _selectedIndex = 0;
   }
 
@@ -215,7 +222,7 @@ class HomeViewState extends State<HomeView> {
           foregroundColor: Colors.white,
           title: Text(widget.page),
         ),
-        body: PageBody(widget.page),
+        body: PageBody(page: widget.page, extra: widget.extra),
         drawer: SafeArea(
           child: Container(
             padding: EdgeInsets.all(0),

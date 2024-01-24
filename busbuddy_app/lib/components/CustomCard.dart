@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../globel.dart' as globel;
 
 class CustomCard extends StatefulWidget {
   final String title;
@@ -34,6 +38,17 @@ class CustomCard extends StatefulWidget {
 
 class _CustomCardState extends State<CustomCard> {
   bool isExtended = false; // Track whether the card is extended or not
+  List<dynamic> routeCoords = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    // print("hello from custom card");
+    // globel.mapMarkerSet.forEach((element) {
+    //   print(element);
+    // });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +119,7 @@ class _CustomCardState extends State<CustomCard> {
                         onPressed: () {
                           setState(() {
                             isExtended = !isExtended; // Toggle the card state
+                            print(widget.extendedInfo);
                           });
                         },
                         style: ElevatedButton.styleFrom(
@@ -127,7 +143,25 @@ class _CustomCardState extends State<CustomCard> {
                             isExtended, // Show the button when isExtended is true
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            GoRouter.of(context).push("/routetimemap");
+                            // globel.mapMarkerSet.clear();
+                            // this.routeCoords.forEach((coord) {
+                            //   if (coord != null)
+                            //     globel.mapMarkerSet.add(Marker(
+                            //       markerId: MarkerId("value"),
+                            //       position: LatLng(coord['x'], coord['y']),
+                            //     ));
+                            // });
+                            Set<Marker> jMarkerSet = Set<Marker>();
+                            widget.extendedInfo.forEach((stop) {
+                              if (stop['coord'] != null)
+                                jMarkerSet.add(Marker(
+                                  markerId: MarkerId("value"),
+                                  position: LatLng(
+                                      stop['coord']['x'], stop['coord']['y']),
+                                ));
+                            });
+                            GoRouter.of(context)
+                                .push("/routetimemap", extra: jMarkerSet);
                           },
                           style: ElevatedButton.styleFrom(
                             side: const BorderSide(

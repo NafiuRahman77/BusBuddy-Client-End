@@ -2,24 +2,43 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../components/CustomCard.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../globel.dart' as globel;
 
 class RouteTimeMap extends StatefulWidget {
   @override
   _RouteTimeMap createState() => _RouteTimeMap();
+  final Set<Marker> stationPoints;
+
+  RouteTimeMap({required this.stationPoints});
 }
 
 class _RouteTimeMap extends State<RouteTimeMap> {
-  // @override
-  // void initState() {
-  //   super.initState();
-  // }
+  // Set<Marker> markerSet = Set<Marker>();
 
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
+  @override
+  void initState() {
+    super.initState();
+    // print("hello from map");
+    // globel.mapMarkerSet.forEach((element) {
+    //   print(element);
+    // });
+    // widget.stationPoints.forEach((coord) {
+    //   if (coord != null)
+    //     markerSet.add(Marker(
+    //       markerId: MarkerId("value"),
+    //       position: LatLng(coord['x'], coord['y']),
+    //     ));
+    // });
+  }
 
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
+  // final Completer<GoogleMapController> _controller =
+  //     Completer<GoogleMapController>();
+
+  late GoogleMapController mapController;
+
+  static const CameraPosition _kBUET = CameraPosition(
+    target: LatLng(23.72759244722254, 90.39195943448034),
+    zoom: 15,
   );
 
   static const CameraPosition _kLake = CameraPosition(
@@ -35,17 +54,28 @@ class _RouteTimeMap extends State<RouteTimeMap> {
         padding: EdgeInsets.all(15),
         child: GoogleMap(
           mapType: MapType.hybrid,
-          initialCameraPosition: _kGooglePlex,
+          initialCameraPosition: CameraPosition(
+            target: LatLng(
+                (widget.stationPoints.elementAt(0).position.latitude +
+                        widget.stationPoints
+                            .elementAt(widget.stationPoints.length - 1)
+                            .position
+                            .latitude) /
+                    2,
+                (widget.stationPoints.elementAt(0).position.longitude +
+                        widget.stationPoints
+                            .elementAt(widget.stationPoints.length - 1)
+                            .position
+                            .longitude) /
+                    2),
+            zoom: 14,
+          ),
           onMapCreated: (GoogleMapController controller) {
-            _controller.complete(controller);
+            mapController = controller;
           },
+          markers: widget.stationPoints,
         ),
       ),
     );
-  }
-
-  Future<void> _goToTheLake() async {
-    final GoogleMapController controller = await _controller.future;
-    await controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
   }
 }

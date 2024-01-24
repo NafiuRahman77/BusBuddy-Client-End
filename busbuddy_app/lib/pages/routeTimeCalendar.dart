@@ -5,6 +5,7 @@ import 'package:requests/requests.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import '../../globel.dart' as globel;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 bool isSameDate(DateTime one, DateTime other) {
   print("hi am here");
@@ -32,6 +33,8 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
   List<dynamic> routeTimeData = [];
   List<dynamic> rejectedData = [];
   bool loadedRouteTimeData = false;
+  List<dynamic> routeCoords = [];
+
   @override
   void initState() {
     super.initState();
@@ -51,19 +54,18 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
         defaultRouteName = json['default_route_name'];
       });
     } else {
-      if(globel.userType!="student") defaultRoute = "4" ;
-      else 
-      {
-          Fluttertoast.showToast(
-          msg: 'Failed to load default route.',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(73, 77, 65, 64),
-          textColor: Colors.white,
-          fontSize: 16.0);
+      if (globel.userType != "student")
+        defaultRoute = "4";
+      else {
+        Fluttertoast.showToast(
+            msg: 'Failed to load default route.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(73, 77, 65, 64),
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
-
     }
     print(r.content());
 
@@ -96,12 +98,14 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
         // route_st_cnt.add(arr2j.length);
       }
     });
-    station_names.forEach((element) {
-      print(element);
-    });
+    // station_names.forEach((element) {
+    //   print(element);
+    // });
+
     station_coords.forEach((element) {
       print(element);
     });
+
     context.loaderOverlay.hide();
     await onRouteSelect(defaultRoute);
     // If the server did return a 201 CREATED response,
@@ -121,10 +125,34 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
     setState(() {
       routeTimeData = r.json();
       loadedRouteTimeData = true;
+
+      routeCoords.clear();
+      routeTimeData.forEach((j) {
+        j["array_to_json"].forEach((stop) {
+          // routeCoords.add(station_coords[int.parse(stop['station']) - 1]);
+          stop['coord'] = station_coords[int.parse(stop['station']) - 1];
+        });
+      });
+
+      routeCoords.forEach((element) {
+        print(element);
+      });
+
+      // globel.mapMarkerSet.clear();
+      // routeCoords.forEach((coord) {
+      //   if (coord != null)
+      //     globel.mapMarkerSet.add(Marker(
+      //       markerId: MarkerId("value"),
+      //       position: LatLng(coord['x'], coord['y']),
+      //     ));
+      // });
+
+      // globel.mapMarkerSet.forEach((element) {
+      //   print(element);
+      // });
     });
 
     print(r.content());
-
     // if (json['success'] == true) {
     //   setState(() {
     //     defaultRoute = json['default_route'];
