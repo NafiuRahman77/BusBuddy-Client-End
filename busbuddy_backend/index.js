@@ -962,7 +962,7 @@ app.post('/api/getStaffTrips', (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
         dbclient.query(
-            `select * from allocation where bus_staff=$1`, 
+            `select * from allocation where is_done=false bus_staff=$1`, 
             [req.session.userid]
         ).then(qres => {
             console.log(qres);
