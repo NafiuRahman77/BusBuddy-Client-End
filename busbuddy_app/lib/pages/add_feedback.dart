@@ -224,32 +224,6 @@ class _FeedbackFormState extends State<FeedbackForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Row(
-              //   children: [
-              //     Radio(
-              //       value: 'Apply for a bus',
-              //       groupValue: selectedTopic,
-              //       onChanged: (value) {
-              //         setState(() {
-              //           selectedTopic = value.toString();
-              //         });
-              //       },
-              //       activeColor: Color(0xFF781B1B), // Change to red
-              //     ),
-              //     Text('Apply for a bus'),
-              //     Radio(
-              //       value: 'Make Complaint',
-              //       groupValue: selectedTopic,
-              //       onChanged: (value) {
-              //         setState(() {
-              //           selectedTopic = value.toString();
-              //         });
-              //       },
-              //       activeColor: Color(0xFF781B1B), // Change to red
-              //     ),
-              //     Text('Make Complaint'),
-              //   ],
-              // ),
               SizedBox(height: 16.0),
               Container(
                 margin: const EdgeInsets.only(left: 10.0),

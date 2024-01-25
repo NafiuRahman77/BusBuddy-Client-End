@@ -18,6 +18,7 @@ import 'pages/Requisition.dart';
 import 'package:shurjopay/utilities/functions.dart';
 import 'pages/ShowFeedback.dart';
 import 'pages/manage_trips.dart';
+import 'pages/req_and_repair.dart';
 import 'pages/ShowRequisition.dart';
 import 'package:requests/requests.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -41,7 +42,8 @@ class BusBuddyApp extends StatelessWidget {
     GoRoute(
         path: "/edit_profile",
         builder: ((context, state) => const HomeView(page: "Edit Profile"))),
-    GoRoute(path: "/login", builder: ((context, state) => const LoginPage())),
+    GoRoute(path: "/login",
+     builder: ((context, state) => const LoginPage())),
     GoRoute(
         path: "/ticket_choose",
         builder: ((context, state) => const HomeView(page: "Choose Ticket"))),
@@ -79,6 +81,9 @@ class BusBuddyApp extends StatelessWidget {
     GoRoute(
         path: "/manage_trips",
         builder: ((context, state) => const HomeView(page: "Manage Trips"))),
+    GoRoute(
+        path: "/req_repair",
+        builder: ((context, state) => const HomeView(page: "Request Repair"))),
   ]);
   // This widget is the root of your application.
   @override
@@ -127,6 +132,7 @@ class PageBody extends StatelessWidget {
       return TicketQR();
     else if (this.page == "Scan QR Code") return ScanTicketQR();
     else if (this.page == "Manage Trips") return ManageTrips();
+    else if (this.page == "Request Repair") return ReqRepair();
     return (Container());
   }
 }
@@ -207,7 +213,8 @@ class HomeViewState extends State<HomeView> {
       _selectedIndex = 13;
     } else if(currentRouteName == '/manage_trips') {
       _selectedIndex = 14 ; 
-    }
+    } else if(currentRouteName == '/req_repair') {
+      _selectedIndex = 15 ; }
      else {
       _selectedIndex = 0;
     }
@@ -505,6 +512,27 @@ class HomeViewState extends State<HomeView> {
                             });
                           },
                         ),
+
+                        if(globel.userType=="bus_staff")
+                        ListTile(
+                          leading: const Icon(Icons.car_repair),
+                          title: const Text('Request Repair'),
+                          selected: _selectedIndex == 15,
+                          onTap: () {
+                            if (_selectedIndex == 15) return;
+                            // Update the state of the app
+                            // _onItemTapped(2);
+                            // Then close the drawer
+                            GoRouter.of(context).pop();
+                            GoRouter.of(context).push("/req_repair");
+                            setState(() {
+                              _selectedIndex = 15;
+                            });
+                          },
+                        ),
+
+
+
                         if (globel.userType != "buet_staff")
                           ListTile(
                             leading: const Icon(Icons.qr_code),
