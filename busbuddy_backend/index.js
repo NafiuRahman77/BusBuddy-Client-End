@@ -962,32 +962,26 @@ app.post('/api/getStaffTrips', (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
         dbclient.query(
-            `select * from allocation where is_done=false bus_staff=$1`, 
+            `select * from allocation where is_done=false and bus_staff=$1`, 
             [req.session.userid]
         ).then(qres => {
             console.log(qres);
-            if (qres.rowCount === 0) {
-                res.send({
-                    success: false,
-                });
-            } else {
-                dbclient.query(
-                    `select * from trip where bus_staff=$1`, 
-                    [req.session.userid]
-                ).then(qres2 => {
-                    console.log(qres2);
-                    if (qres.rowCount === 0) {
-                        res.send({
-                            success: false,
-                        });
-                    } else {
-                        res.send({
-                            upcoming: [...qres.rows],
-                            actual: [...qres2.rows]
-                        });
-                    };
-                }).catch(e => console.error(e.stack));
-            };
+            dbclient.query(
+                `select * from trip where bus_staff=$1`, 
+                [req.session.userid]
+            ).then(qres2 => {
+                console.log(qres2);
+                if (qres.rows.length === 0 && qres2.rows.length === 0) {
+                    res.send({
+                        success: false,
+                    });
+                } else {
+                    res.send({
+                        upcoming: [...qres.rows],
+                        actual: [...qres2.rows]
+                    });
+                };
+            }).catch(e => console.error(e.stack));
         }).catch(e => console.error(e.stack));
     };
 });
