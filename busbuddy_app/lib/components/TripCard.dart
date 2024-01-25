@@ -17,17 +17,20 @@ class TripCard extends StatefulWidget {
   final String TripID;
   final String PrevP;
   final bool islive;
+  final Function() parentReloadCallback;
+  final Function() parentTabController;
 
-  TripCard({
-    required this.SourceLocation,
-    required this.DestinationLocation,
-    required this.StartTime,
-    this.EndTime,
-    required this.BusNo,
-    required this.TripID,
-    required this.PrevP,
-    required this.islive,
-  });
+  TripCard(
+      {required this.SourceLocation,
+      required this.DestinationLocation,
+      required this.StartTime,
+      this.EndTime,
+      required this.BusNo,
+      required this.TripID,
+      required this.PrevP,
+      required this.islive,
+      required this.parentReloadCallback,
+      required this.parentTabController});
 
   @override
   _TripCardState createState() => _TripCardState();
@@ -132,7 +135,7 @@ class _TripCardState extends State<TripCard> {
                 child: ElevatedButton(
                   onPressed: () async {
                     bool startTrip = await onTripStart(widget.TripID);
-                    if (startTrip)
+                    if (startTrip) {
                       setState(() {
                         running_trip = !running_trip;
                         print(running_trip);
@@ -140,6 +143,9 @@ class _TripCardState extends State<TripCard> {
                         buttontxt = running_trip ? buttonText2 : buttonText1;
                         print(widget.TripID);
                       });
+                      widget.parentTabController();
+                      await widget.parentReloadCallback();
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     primary: buttonColor,
