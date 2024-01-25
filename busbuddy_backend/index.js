@@ -959,32 +959,49 @@ app.post('/api/getTripMapPath', (req,res) => {
 //get trip data
 app.post('/api/getStaffTrips', (req,res) => {
     //send a dummy response
-    console.log(req.body);
-    res.send([
-            {
-                trip_id: "471",
-                route_id: "8",
-                start_time: "2023-09-11T06:40:00+06:00",
-                end_time: "2023-09-11T07:50:00+06:00",
-                start_location: "Mirpur-12",
-                end_location: "BUET",
-                bus_id: "14",
-                is_live: true,
-                prev_point: "23",             
-            },   
-            {
-                trip_id: "132",
-                route_id: "5",
-                start_time: "2023-09-12T06:40:00+06:00",
-                end_time: "2023-09-12T07:50:00+06:00",
-                start_location: "Mirpur-12",
-                end_location: "BUET",
-                bus_id: "14",
-                is_live: false,
-                prev_point: null,             
-            }
-           
-        ]); });
+    if (req.session.userid && req.session.user_type=="bus_staff") {
+        console.log(req.body);
+        dbclient.query(
+            `select * from allocation where bus_staff=$1`, 
+            [req.session.userid]
+        ).then(qres => {
+            console.log(qres);
+            if (qres.rowCount === 0) {
+                res.send({
+                    success: false,
+                });
+            } else res.send({ 
+                success: true,
+                ...qres.rows
+            });
+        }).catch(e => console.error(e.stack));
+        // res.send([
+        //     {
+        //         trip_id: "471",
+        //         route_id: "8",
+        //         start_time: "2023-09-11T06:40:00+06:00",
+        //         end_time: "2023-09-11T07:50:00+06:00",
+        //         start_location: "Mirpur-12",
+        //         end_location: "BUET",
+        //         bus_id: "14",
+        //         is_live: true,
+        //         prev_point: "23",             
+        //     },   
+        //     {
+        //         trip_id: "132",
+        //         route_id: "5",
+        //         start_time: "2023-09-12T06:40:00+06:00",
+        //         end_time: "2023-09-12T07:50:00+06:00",
+        //         start_location: "Mirpur-12",
+        //         end_location: "BUET",
+        //         bus_id: "14",
+        //         is_live: false,
+        //         prev_point: null,             
+        //     }
+            
+        // ]); 
+    };
+});
 
 app.post('/api/startTrip', (req,res) => {
     console.log(req.body);
