@@ -15,14 +15,22 @@ class ManageTrips extends StatefulWidget {
 class _ManageTripsState extends State<ManageTrips>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<String> Source_List = [];
-  List<String> Destination_List = [];
-  List<String> Start_Time = [];
-  List<String> End_Time = [];
-  List<String> BusNo = [];
-  List<String> TripID = [];
-  List<String> PrevPoint = [];
-  List<bool> isliveara = [];
+  List<String> Up_Source_List = [],
+      Up_Destination_List = [],
+      Up_Start_Time = [],
+      Up_End_Time = [],
+      Up_BusNo = [],
+      Up_TripID = [],
+      Up_PrevPoint = [];
+  List<bool> Up_isliveara = [];
+  List<String> Cur_Source_List = [],
+      Cur_Destination_List = [],
+      Cur_Start_Time = [],
+      Cur_End_Time = [],
+      Cur_BusNo = [],
+      Cur_TripID = [],
+      Cur_PrevPoint = [];
+  List<bool> Cur_isliveara = [];
 
   @override
   void initState() {
@@ -42,24 +50,41 @@ class _ManageTripsState extends State<ManageTrips>
     var r = await Requests.post(globel.serverIp + 'getStaffTrips');
     r.raiseForStatus();
     print(r.content());
-    List<dynamic> tripInformation = r.json();
+    dynamic tripInformation = r.json();
     setState(() {
-      for (int i = 0; i < tripInformation.length; i++) {
+      for (int i = 0; i < tripInformation['upcoming'].length; i++) {
         // Source_List.add(tripInformation[i]['start_location']) ;
         // Destination_List.add(tripInformation[i]['end_location']) ;
-        Source_List.add("buet");
-        Destination_List.add("buet");
-        Start_Time.add(tripInformation[i]['start_timestamp']);
-        End_Time.add(
-            tripInformation[i]['start_timestamp']); //jalal vua code lekhasie
-        BusNo.add(tripInformation[i]['bus']);
-        TripID.add(tripInformation[i]['id']);
+        Up_Source_List.add("buet");
+        Up_Destination_List.add("buet");
+        Up_Start_Time.add(tripInformation['upcoming'][i]['start_timestamp']);
+        Up_End_Time.add(tripInformation['upcoming'][i]
+            ['start_timestamp']); //jalal vua code lekhasie
+        Up_BusNo.add(tripInformation['upcoming'][i]['bus']);
+        Up_TripID.add(tripInformation['upcoming'][i]['id']);
         // if(tripInformation[i]['prev_point']!=null)
         //   PrevPoint.add(tripInformation[i]['prev_point']);
         // else
         //   PrevPoint.add("-1");
-        PrevPoint.add("vua");
-        isliveara.add(false);
+        Up_PrevPoint.add("vua");
+        Up_isliveara.add(false);
+      }
+      for (int i = 0; i < tripInformation['actual'].length; i++) {
+        // Source_List.add(tripInformation[i]['start_location']) ;
+        // Destination_List.add(tripInformation[i]['end_location']) ;
+        Cur_Source_List.add("buet");
+        Cur_Destination_List.add("buet");
+        Cur_Start_Time.add(tripInformation['actual'][i]['start_timestamp']);
+        Cur_End_Time.add(tripInformation['actual'][i]
+            ['start_timestamp']); //jalal vua code lekhasie
+        Cur_BusNo.add(tripInformation['actual'][i]['bus']);
+        Cur_TripID.add(tripInformation['actual'][i]['id']);
+        // if(tripInformation[i]['prev_point']!=null)
+        //   PrevPoint.add(tripInformation[i]['prev_point']);
+        // else
+        //   PrevPoint.add("-1");
+        Cur_PrevPoint.add("vua");
+        Cur_isliveara.add(false);
       }
     });
     context.loaderOverlay.hide();
@@ -90,17 +115,17 @@ class _ManageTripsState extends State<ManageTrips>
               //Upcoming trips view
               Center(
                 child: ListView.builder(
-                  itemCount: Source_List.length,
+                  itemCount: Up_Source_List.length,
                   itemBuilder: (context, index) {
                     return TripCard(
-                      SourceLocation: Source_List[index],
-                      DestinationLocation: Destination_List[index],
-                      StartTime: Start_Time[index],
-                      EndTime: End_Time[index],
-                      BusNo: BusNo[index],
-                      TripID: TripID[index],
-                      PrevP: PrevPoint[index],
-                      islive: isliveara[index],
+                      SourceLocation: Up_Source_List[index],
+                      DestinationLocation: Up_Destination_List[index],
+                      StartTime: Up_Start_Time[index],
+                      EndTime: Up_End_Time[index],
+                      BusNo: Up_BusNo[index],
+                      TripID: Up_TripID[index],
+                      PrevP: Up_PrevPoint[index],
+                      islive: Up_isliveara[index],
                     );
                   },
                 ),
@@ -108,17 +133,17 @@ class _ManageTripsState extends State<ManageTrips>
               //Actual trips view
               Center(
                 child: ListView.builder(
-                  itemCount: Source_List.length,
+                  itemCount: Cur_Source_List.length,
                   itemBuilder: (context, index) {
                     return TripCard(
-                      SourceLocation: Source_List[index],
-                      DestinationLocation: Destination_List[index],
-                      StartTime: Start_Time[index],
-                      EndTime: End_Time[index],
-                      BusNo: BusNo[index],
-                      TripID: TripID[index],
-                      PrevP: PrevPoint[index],
-                      islive: isliveara[index],
+                      SourceLocation: Cur_Source_List[index],
+                      DestinationLocation: Cur_Destination_List[index],
+                      StartTime: Cur_Start_Time[index],
+                      EndTime: Cur_End_Time[index],
+                      BusNo: Cur_BusNo[index],
+                      TripID: Cur_TripID[index],
+                      PrevP: Cur_PrevPoint[index],
+                      islive: Cur_isliveara[index],
                     );
                   },
                 ),
