@@ -970,33 +970,25 @@ app.post('/api/getStaffTrips', (req,res) => {
                 res.send({
                     success: false,
                 });
-            } else res.send(qres.rows);
+            } else {
+                dbclient.query(
+                    `select * from trip where bus_staff=$1`, 
+                    [req.session.userid]
+                ).then(qres2 => {
+                    console.log(qres2);
+                    if (qres.rowCount === 0) {
+                        res.send({
+                            success: false,
+                        });
+                    } else {
+                        res.send({
+                            upcoming: [...qres.rows],
+                            actual: [...qres2.rows]
+                        });
+                    };
+                }).catch(e => console.error(e.stack));
+            };
         }).catch(e => console.error(e.stack));
-        // res.send([
-        //     {
-        //         trip_id: "471",
-        //         route_id: "8",
-        //         start_time: "2023-09-11T06:40:00+06:00",
-        //         end_time: "2023-09-11T07:50:00+06:00",
-        //         start_location: "Mirpur-12",
-        //         end_location: "BUET",
-        //         bus_id: "14",
-        //         is_live: true,
-        //         prev_point: "23",             
-        //     },   
-        //     {
-        //         trip_id: "132",
-        //         route_id: "5",
-        //         start_time: "2023-09-12T06:40:00+06:00",
-        //         end_time: "2023-09-12T07:50:00+06:00",
-        //         start_location: "Mirpur-12",
-        //         end_location: "BUET",
-        //         bus_id: "14",
-        //         is_live: false,
-        //         prev_point: null,             
-        //     }
-            
-        // ]); 
     };
 });
 
