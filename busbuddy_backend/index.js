@@ -962,8 +962,8 @@ app.post('/api/getStaffTrips', (req,res) => {
     console.log(req.body);
     res.send([
             {
-                trip_id: "123",
-                route_id: "5",
+                trip_id: "471",
+                route_id: "8",
                 start_time: "2023-09-11T06:40:00+06:00",
                 end_time: "2023-09-11T07:50:00+06:00",
                 start_location: "Mirpur-12",
@@ -994,14 +994,30 @@ app.post('/api/startTrip', (req,res) => {
             [req.body.trip_id, req.session.userid]
         ).then(qres => {
             console.log(qres);
-            if (qres.rowCount === 1) res.send({ 
-                success: true,
-            });
-            else if (qres.rowCount === 0) {
-                res.send({
-                    success: false,
-                });
-            };
+            dbclient.query(
+                `select count(*) from trip where id=$1`, 
+                [req.body.trip_id]
+            ).then(qres2 => {
+                console.log(qres2);
+                if (qres2.rows[0].count == 1)
+                     res.send({ 
+                        success: true,
+                    });
+                else {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+
+            // if (qres.command == 'CALL') res.send({ 
+            //     success: true,
+            // });
+            // else {
+            //     res.send({
+            //         success: false,
+            //     });
+            // };
         }).catch(e => console.error(e.stack));
     };
 });
