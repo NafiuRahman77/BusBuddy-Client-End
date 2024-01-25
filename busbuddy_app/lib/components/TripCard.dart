@@ -1,12 +1,14 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:requests/requests.dart';
 import '../../globel.dart' as globel;
+import 'dart:async'; // Import this for Timer
 
 class TripCard extends StatefulWidget {
   final String SourceLocation;
@@ -42,6 +44,10 @@ class _TripCardState extends State<TripCard> {
 
   String buttontxt = "Turn On GPS";
 
+  Timer? locationUpdateTimer; // Timer to periodically send location updates
+  double? latitude;
+  double? longitude;
+
   Map<String, String> getDateAndTime(String dateTimeString) {
     DateTime dateTime = DateTime.parse(dateTimeString);
     String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime.toUtc());
@@ -50,13 +56,88 @@ class _TripCardState extends State<TripCard> {
     return {'Sdate': formattedDate, 'Stime': formattedTime};
   }
 
+  // Function to get the current location
+  Future<void> _getCurrentLocation() async {
+    bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!isLocationServiceEnabled) {
+      // Handle the case where location services are not enabled
+      // You may want to show a dialog or redirect the user to the device settings
+      print('Location services are not enabled.');
+      return;
+    }
+
+    // Check if the app has location permission
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      // Request location permission
+      permission = await Geolocator.requestPermission();
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
+        // Handle the case where the user denied location permission
+        print('User denied location permission.');
+        return;
+      }
+    }
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best,
+      );
+
+      setState(() {
+        latitude = position.latitude;
+        longitude = position.longitude;
+      });
+    } catch (e) {
+      print("Error getting location: $e");
+    }
+  }
+
+  // Function to send location updates
+  Future<void> _sendLocationUpdate(String tripID) async {
+    await _getCurrentLocation();
+
+    // var r = await Requests.post(globel.serverIp + 'updateLocation',
+    //     body: {
+    //       'trip_id': tripID,
+    //       'latitude': latitude.toString(),
+    //       'longitude': longitude.toString(),
+    //     },
+    //     bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+
+    // r.raiseForStatus();
+    print(tripID);
+    print(latitude.toString());
+    print(longitude.toString());
+  }
+
+  @override
+  void dispose() {
+    locationUpdateTimer
+        ?.cancel(); // Cancel the timer when the widget is disposed
+    super.dispose();
+  }
+
+  // Function to stop the timer for location updates
+  void stopLocationUpdateTimer() {
+    locationUpdateTimer?.cancel();
+  }
+
   Future<bool> onTripStart(String tripID) async {
     context.loaderOverlay.show();
+    // Get initial location
+    await _getCurrentLocation();
+
     var r2 = await Requests.post(globel.serverIp + 'startTrip',
         body: {
           'trip_id': tripID,
+          'latitude': latitude.toString(),
+          'longitude': longitude.toString(),
         },
         bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+
+    print(tripID);
+    print(latitude.toString());
+    print(longitude.toString());
 
     r2.raiseForStatus();
 
@@ -64,6 +145,12 @@ class _TripCardState extends State<TripCard> {
     //print(json2);
 
     if (json2['success'] == true) {
+      // Start the timer for location updates
+      locationUpdateTimer =
+          Timer.periodic(Duration(seconds: 10), (Timer timer) {
+        _sendLocationUpdate(tripID);
+      });
+
       context.loaderOverlay.hide();
       return true;
     }
@@ -131,15 +218,27 @@ class _TripCardState extends State<TripCard> {
               Center(
                 child: ElevatedButton(
                   onPressed: () async {
-                    bool startTrip = await onTripStart(widget.TripID);
-                    if (startTrip)
+                    // bool startTrip = await onTripStart(widget.TripID);
+
+                    if (running_trip) {
                       setState(() {
                         running_trip = !running_trip;
-                        print(running_trip);
                         buttonColor = running_trip ? Colors.red : Colors.green;
                         buttontxt = running_trip ? buttonText2 : buttonText1;
-                        print(widget.TripID);
                       });
+                      stopLocationUpdateTimer();
+                    } else {
+                      // Turn On GPS button clicked
+                      bool startTrip = await onTripStart(widget.TripID);
+                      if (startTrip) {
+                        setState(() {
+                          running_trip = !running_trip;
+                          buttonColor =
+                              running_trip ? Colors.red : Colors.green;
+                          buttontxt = running_trip ? buttonText2 : buttonText1;
+                        });
+                      }
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     primary: buttonColor,
