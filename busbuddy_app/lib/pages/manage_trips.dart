@@ -52,6 +52,14 @@ class _ManageTripsState extends State<ManageTrips>
     print(r.content());
     dynamic tripInformation = r.json();
     setState(() {
+      Up_Source_List.clear();
+      Up_Destination_List.clear();
+      Up_Start_Time.clear();
+      Up_End_Time.clear();
+      Up_BusNo.clear();
+      Up_TripID.clear();
+      Up_PrevPoint.clear();
+      Up_isliveara.clear();
       for (int i = 0; i < tripInformation['upcoming'].length; i++) {
         // Source_List.add(tripInformation[i]['start_location']) ;
         // Destination_List.add(tripInformation[i]['end_location']) ;
@@ -69,6 +77,14 @@ class _ManageTripsState extends State<ManageTrips>
         Up_PrevPoint.add("vua");
         Up_isliveara.add(false);
       }
+      Cur_Source_List.clear();
+      Cur_Destination_List.clear();
+      Cur_Start_Time.clear();
+      Cur_End_Time.clear();
+      Cur_BusNo.clear();
+      Cur_TripID.clear();
+      Cur_PrevPoint.clear();
+      Cur_isliveara.clear();
       for (int i = 0; i < tripInformation['actual'].length; i++) {
         // Source_List.add(tripInformation[i]['start_location']) ;
         // Destination_List.add(tripInformation[i]['end_location']) ;
@@ -88,6 +104,12 @@ class _ManageTripsState extends State<ManageTrips>
       }
     });
     context.loaderOverlay.hide();
+  }
+
+  void switchToOngoing() {
+    setState(() {
+      _tabController.index = 1;
+    });
   }
 
   @override
@@ -126,6 +148,8 @@ class _ManageTripsState extends State<ManageTrips>
                       TripID: Up_TripID[index],
                       PrevP: Up_PrevPoint[index],
                       islive: Up_isliveara[index],
+                      parentReloadCallback: getTripInfo,
+                      parentTabController: switchToOngoing,
                     );
                   },
                 ),
@@ -144,6 +168,8 @@ class _ManageTripsState extends State<ManageTrips>
                       TripID: Cur_TripID[index],
                       PrevP: Cur_PrevPoint[index],
                       islive: Cur_isliveara[index],
+                      parentReloadCallback: getTripInfo,
+                      parentTabController: switchToOngoing,
                     );
                   },
                 ),
