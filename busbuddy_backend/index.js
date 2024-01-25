@@ -970,10 +970,7 @@ app.post('/api/getStaffTrips', (req,res) => {
                 res.send({
                     success: false,
                 });
-            } else res.send({ 
-                success: true,
-                ...qres.rows
-            });
+            } else res.send(qres.rows);
         }).catch(e => console.error(e.stack));
         // res.send([
         //     {
