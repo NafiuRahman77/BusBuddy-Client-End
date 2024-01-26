@@ -863,7 +863,7 @@ app.post('/api/getTripData', (req,res) => {
     console.log(req.body);
     res.send({
         success: true,
-        ...runningTrips.get(req.body.trip_id),
+        ...tracking.runningTrips.get(req.body.trip_id),
     });
 });
 
@@ -988,7 +988,7 @@ app.post('/api/startTrip', (req,res) => {
                     tracking.runningTrips.set (newTrip.id, newTrip);
                     res.send({ 
                         success: true,
-                        ...runningTrips.get(newTrip.id),
+                        ...tracking.runningTrips.get(newTrip.id),
                     });
                 } else {
                     res.send({
