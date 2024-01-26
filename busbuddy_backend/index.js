@@ -1011,9 +1011,11 @@ app.post('/api/startTrip', (req,res) => {
 
 app.post('/api/endTrip', (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
+        let trip = tracking.runningTrips.get(req.body.trip_id);
         dbclient.query(
-            `update trip set end_timestamp=current_timestamp, is_live=false where id = $1 and bus_staff='$2'`, 
-            [req.body.trip_id, req.session.userid]
+            `update trip set end_timestamp=current_timestamp, passenger_count=$1, end_location[0]=$2, end_location[1]=$3, 
+             is_live=false where id=$4 and bus_staff=$5 `, 
+            [trip.passenger_count, trip.end_location.latitude, trip.end_location.longitude, req.body.trip_id, req.session.userid]
         ).then(qres => {
             console.log(qres);
             if (qres.rowCount === 1) res.send({ 
@@ -1025,51 +1027,49 @@ app.post('/api/endTrip', (req,res) => {
                 });
             };
         }).catch(e => console.error(e.stack));
+        tracking.runningTrips.delete(req.body.trip_id);
     };
 });
 
 app.post('/api/updateStaffLocation', (req,res) => {
     //send a dummy response
-    console.log(req.body);
-    res.send({
-        success: true,
-        new_path: [
-            { "latitude": 23.7651, "longitude": 90.3652 },
-            { "latitude": 23.7649, "longitude": 90.3653 },
-            { "latitude": 23.7652, "longitude": 90.3650 },
-            { "latitude": 23.7650, "longitude": 90.3651 },
-            { "latitude": 23.7653, "longitude": 90.3652 },
-            { "latitude": 23.7651, "longitude": 90.3649 },
-            { "latitude": 23.7649, "longitude": 90.3650 },
-            { "latitude": 23.7652, "longitude": 90.3653 },
-            { "latitude": 23.7650, "longitude": 90.3648 },
-            { "latitude": 23.7653, "longitude": 90.3651 },
-            { "latitude": 23.7651, "longitude": 90.3650 },
-            { "latitude": 23.7649, "longitude": 90.3652 },
-            { "latitude": 23.7652, "longitude": 90.3651 },
-            { "latitude": 23.7650, "longitude": 90.3653 },
-            { "latitude": 23.7653, "longitude": 90.3650 },
-            { "latitude": 23.7651, "longitude": 90.3652 },
-            { "latitude": 23.7649, "longitude": 90.3651 },
-            { "latitude": 23.7652, "longitude": 90.3649 },
-            { "latitude": 23.7650, "longitude": 90.3652 },
-            { "latitude": 23.7653, "longitude": 90.3651 },
-            { "latitude": 23.7651, "longitude": 90.3648 },
-            { "latitude": 23.7649, "longitude": 90.3653 },
-            { "latitude": 23.7652, "longitude": 90.3650 },
-            { "latitude": 23.7650, "longitude": 90.3652 },
-        ]
-    });
+    if (req.session.userid && req.session.user_type=="bus_staff") {
+        console.log(req.body);
+        tracking.runningTrips.get(req.body.trip_id).path.push({
+            latitude: req.body.latitude, 
+            longitude: req.body.longitude
+        });
+        res.send({
+            success: true,
+            // new_path: [
+            //     { "latitude": 23.7651, "longitude": 90.3652 },
+            //     { "latitude": 23.7652, "longitude": 90.3650 },
+            //     { "latitude": 23.7650, "longitude": 90.3651 },
+            // ]
+        });
+    };
 });
 
 app.post('/api/staffScanTicket', (req,res) => {
     //send a dummy response
-    console.log(req.body);
-    res.send({
-        success: true,
-        student_id: "1905067",
-        passenger_count: 34
-    });
+    if (req.session.userid && req.session.user_type=="bus_staff") {
+        console.log(req.body);
+        dbclient.query(
+            `update ticket set trip_id=$1, is_used=true where id=$2 returning student_id`, 
+            [trip.passenger_count, trip.end_location.latitude, trip.end_location.longitude, req.body.trip_id, req.session.userid]
+        ).then(qres => {
+            console.log(qres);
+            if (qres.rowCount === 1) res.send({ 
+                success: true,
+                student_id: qres.rows[0].student_id
+            });
+            else if (qres.rowCount === 0) {
+                res.send({
+                    success: false,
+                });
+            };
+        }).catch(e => console.error(e.stack));
+    };
 });
 
 app.listen(port, () => {

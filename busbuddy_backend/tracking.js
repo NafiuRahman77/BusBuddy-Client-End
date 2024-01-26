@@ -16,14 +16,12 @@ class RunningTrip {
     start_location;
     end_location;
     path = [];
-    is_live = false;
-    is_done = true;
     passenger_count = 0;
 
     constructor (id, start_timestamp, route, time_type, 
                  travel_direction, bus, is_default,
                  bus_staff, approved_by, end_timestamp,
-                 start_location, end_location) {
+                 start_location, end_location, is_live) {
         this.id = id;
         this.start_timestamp = start_timestamp;
         this.route = route;
@@ -38,8 +36,6 @@ class RunningTrip {
         this.end_location = end_location;
         this.time_list = [];
         this.path = [];
-        this.is_live = false;
-        this.is_done = true;
     };
 };
 
