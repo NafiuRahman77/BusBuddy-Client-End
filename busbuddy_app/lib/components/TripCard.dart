@@ -18,24 +18,32 @@ class TripCard extends StatefulWidget {
   final String BusNo;
   final String TripID;
   final String PrevP;
-  final bool islive;
+  bool islive;
+  final Function() parentReloadCallback;
+  final Function() parentTabController;
+  final Color buttonColor;
+  final String title;
 
-  TripCard({
-    required this.SourceLocation,
-    required this.DestinationLocation,
-    required this.StartTime,
-    this.EndTime,
-    required this.BusNo,
-    required this.TripID,
-    required this.PrevP,
-    required this.islive,
-  });
+  TripCard(
+      {required this.SourceLocation,
+      required this.DestinationLocation,
+      required this.StartTime,
+      this.EndTime,
+      required this.BusNo,
+      required this.TripID,
+      required this.PrevP,
+      required this.islive,
+      required this.parentReloadCallback,
+      required this.parentTabController,
+      required this.buttonColor,
+      required this.title});
 
   @override
   _TripCardState createState() => _TripCardState();
 }
 
-class _TripCardState extends State<TripCard> {
+class _TripCardState extends State<TripCard>
+    with AutomaticKeepAliveClientMixin {
   bool running_trip = false;
   Color buttonColor = Colors.green;
 
@@ -48,6 +56,9 @@ class _TripCardState extends State<TripCard> {
   double? latitude;
   double? longitude;
 
+  @override
+  bool get wantKeepAlive => true;
+
   Map<String, String> getDateAndTime(String dateTimeString) {
     DateTime dateTime = DateTime.parse(dateTimeString);
     String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime.toUtc());
@@ -57,13 +68,24 @@ class _TripCardState extends State<TripCard> {
   }
 
   // Function to get the current location
-  Future<void> _getCurrentLocation() async {
+  Future<bool> _getCurrentLocation() async {
     bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+    print(isLocationServiceEnabled);
+
     if (!isLocationServiceEnabled) {
       // Handle the case where location services are not enabled
-      // You may want to show a dialog or redirect the user to the device settings
+      // You may want to show a toast or display a message
       print('Location services are not enabled.');
-      return;
+      Fluttertoast.showToast(
+        msg: "Please enable location services.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      return false;
     }
 
     // Check if the app has location permission
@@ -75,7 +97,7 @@ class _TripCardState extends State<TripCard> {
           permission != LocationPermission.always) {
         // Handle the case where the user denied location permission
         print('User denied location permission.');
-        return;
+        return false;
       }
     }
     try {
@@ -87,8 +109,10 @@ class _TripCardState extends State<TripCard> {
         latitude = position.latitude;
         longitude = position.longitude;
       });
+      return true;
     } catch (e) {
       print("Error getting location: $e");
+      return false;
     }
   }
 
@@ -96,15 +120,6 @@ class _TripCardState extends State<TripCard> {
   Future<void> _sendLocationUpdate(String tripID) async {
     await _getCurrentLocation();
 
-    // var r = await Requests.post(globel.serverIp + 'updateLocation',
-    //     body: {
-    //       'trip_id': tripID,
-    //       'latitude': latitude.toString(),
-    //       'longitude': longitude.toString(),
-    //     },
-    //     bodyEncoding: RequestBodyEncoding.FormURLEncoded);
-
-    // r.raiseForStatus();
     print(tripID);
     print(latitude.toString());
     print(longitude.toString());
@@ -112,14 +127,16 @@ class _TripCardState extends State<TripCard> {
 
   @override
   void dispose() {
-    locationUpdateTimer
-        ?.cancel(); // Cancel the timer when the widget is disposed
     super.dispose();
   }
 
   // Function to stop the timer for location updates
   void stopLocationUpdateTimer() {
-    locationUpdateTimer?.cancel();
+    // cancel the timer if it is not null
+    if (locationUpdateTimer != null) {
+      locationUpdateTimer!.cancel();
+      locationUpdateTimer = null;
+    }
   }
 
   Future<bool> onTripStart(String tripID) async {
@@ -146,8 +163,8 @@ class _TripCardState extends State<TripCard> {
 
     if (json2['success'] == true) {
       // Start the timer for location updates
-      locationUpdateTimer =
-          Timer.periodic(Duration(seconds: 10), (Timer timer) {
+
+      locationUpdateTimer = Timer.periodic(Duration(seconds: 2), (Timer timer) {
         _sendLocationUpdate(tripID);
       });
 
@@ -157,6 +174,29 @@ class _TripCardState extends State<TripCard> {
     context.loaderOverlay.hide();
     return false;
   }
+
+  // Future<bool> onTripEnd(String tripID) async {
+  //   context.loaderOverlay.show();
+  //   await _getCurrentLocation();
+
+  //   var r2 = await Requests.post(globel.serverIp + 'endTrip',
+  //       body: {
+  //         'trip_id': tripID,
+  //       },
+  //       bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+
+  //   r2.raiseForStatus();
+
+  //   dynamic json2 = r2.json();
+  //   //print(json2);
+
+  //   if (json2['success'] == true) {
+  //     context.loaderOverlay.hide();
+  //     return true;
+  //   }
+  //   context.loaderOverlay.hide();
+  //   return false;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -216,36 +256,39 @@ class _TripCardState extends State<TripCard> {
                 ),
               SizedBox(height: 10),
               Center(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    // bool startTrip = await onTripStart(widget.TripID);
+                child: // show the button only if title is "Upcoming Trip" or title is "Ongoing trip" and islive is true
 
-                    if (running_trip) {
-                      setState(() {
-                        running_trip = !running_trip;
-                        buttonColor = running_trip ? Colors.red : Colors.green;
-                        buttontxt = running_trip ? buttonText2 : buttonText1;
-                      });
-                      stopLocationUpdateTimer();
-                    } else {
-                      // Turn On GPS button clicked
-                      bool startTrip = await onTripStart(widget.TripID);
-                      if (startTrip) {
-                        setState(() {
-                          running_trip = !running_trip;
-                          buttonColor =
-                              running_trip ? Colors.red : Colors.green;
-                          buttontxt = running_trip ? buttonText2 : buttonText1;
-                        });
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: buttonColor,
-                    onPrimary: Colors.white,
-                  ),
-                  child: Text(buttontxt),
-                ),
+                    (widget.title == "Upcoming Trip" ||
+                            (widget.title == "Ongoing Trip" &&
+                                widget.islive == true))
+                        ? ElevatedButton(
+                            onPressed: () async {
+                              bool isLocationEnabled =
+                                  await _getCurrentLocation();
+
+                              if (isLocationEnabled) {
+                                // Location services are enabled, proceed with the action
+                                if (widget.title == "Upcoming Trip") {
+                                  bool startTrip =
+                                      await onTripStart(widget.TripID);
+                                  // widget.parentTabController();
+                                  // await widget.parentReloadCallback();
+                                }
+                              } else {
+                                //stopLocationUpdateTimer();
+                                // bool endTrip = await onTripEnd(widget.TripID);
+                                // await widget.parentReloadCallback();
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: widget.buttonColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            child: Text(widget.title),
+                          )
+                        : SizedBox.shrink(),
               ),
             ],
           ),
