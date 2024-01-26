@@ -18,7 +18,7 @@ const multer = require('multer');
 // const html = fs.readFileSync("src/ticket.html", "utf8");
 const { Readable } = require('stream');
 const imageToBase64 = require('image-to-base64');
-import {runningTrips, RunningTrip} from "../tracking.js";
+const tracking = require('./tracking.js');
 
 dotenv.config();
 
