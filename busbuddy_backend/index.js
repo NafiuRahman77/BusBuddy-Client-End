@@ -18,7 +18,7 @@ const multer = require('multer');
 // const html = fs.readFileSync("src/ticket.html", "utf8");
 const { Readable } = require('stream');
 const imageToBase64 = require('image-to-base64');
-const tracking = require('tracking.js');
+import './tracking';
 
 dotenv.config();
 
@@ -38,17 +38,10 @@ app.enable('trust proxy');
 // const store_passwd = process.env.SSLCZ_PASSWORD;
 // const is_live = false;
 
-const getSHA256 = (input) => {
-    return crypto.createHash('sha256').update(JSON.stringify(input)).digest('hex');
-};
-
 const getSHA512 = (input) => {
     return crypto.createHash('sha512').update(JSON.stringify(input)).digest('hex');
 };
 
-const getMD5 = (input) => {
-    return crypto.createHash('md5').update(JSON.stringify(input)).digest('hex');
-};
 
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -63,7 +56,6 @@ app.use(session({
 
 
 const { Pool, Client } = require('pg');
-const e = require('express');
 
 const dbclient = new Client({
   user: process.env.DB_USER,
