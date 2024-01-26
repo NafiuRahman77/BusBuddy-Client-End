@@ -980,7 +980,7 @@ app.post('/api/startTrip', (req,res) => {
                 // console.log(qres2);
                 if (qres2.rows.length == 1) {
                     let td = {...qres2.rows[0]};
-                    let newTrip = tracking.RunningTrip 
+                    let newTrip = new tracking.RunningTrip 
                        (td.id, td.start_timestamp, td.route, td.time_type, 
                         td.travel_direction, td.bus, td.is_default,
                         td.bus_staff, td.approved_by, td.end_timestamp,
