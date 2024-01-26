@@ -863,20 +863,7 @@ app.post('/api/getTripData', (req,res) => {
     console.log(req.body);
     res.send({
         success: true,
-        data: [
-            {
-                trip_id: 123,
-                route_id: 5,
-                start_time: "10:00:00",
-                end_time: "12:00:00",
-                start_location: "Mirpur",
-                end_location: "BUET",
-                bus_id: 1,
-                is_live: true,
-                prev_point: 23,             
-            },       
-           
-        ]
+        ...runningTrips.get(req.body.trip_id),
     });
 });
 
@@ -991,14 +978,19 @@ app.post('/api/startTrip', (req,res) => {
                 [req.body.trip_id]
             ).then(qres2 => {
                 // console.log(qres2);
-                let trip_details = {...qres2.rows[0]};
-                delete trip_details.time_list;
-                if (qres2.rows[0].count == 1)
+                if (qres2.rows.length == 1) {
+                    let td = {...qres2.rows[0]};
+                    let newTrip = tracking.RunningTrip 
+                       (td.id, td.start_timestamp, td.route, td.time_type, 
+                        td.travel_direction, td.bus, td.is_default,
+                        td.bus_staff, td.approved_by, td.end_timestamp,
+                        td.start_location, td.end_location);
+                    tracking.runningTrips.set (newTrip.id, newTrip);
                     res.send({ 
                         success: true,
-                        ...trip_details,
+                        ...runningTrips.get(newTrip.id),
                     });
-                else {
+                } else {
                     res.send({
                         success: false,
                     });
