@@ -18,7 +18,7 @@ const multer = require('multer');
 // const html = fs.readFileSync("src/ticket.html", "utf8");
 const { Readable } = require('stream');
 const imageToBase64 = require('image-to-base64');
-
+import 'tracking.js';
 
 dotenv.config();
 
@@ -993,15 +993,18 @@ app.post('/api/startTrip', (req,res) => {
             `call initiate_trip($1, $2)`, 
             [req.body.trip_id, req.session.userid]
         ).then(qres => {
-            console.log(qres);
+            // console.log(qres);
             dbclient.query(
-                `select count(*) from trip where id=$1`, 
+                `select *, array_to_json(time_list) as time_list_ from trip where id=$1`, 
                 [req.body.trip_id]
             ).then(qres2 => {
-                console.log(qres2);
+                // console.log(qres2);
+                let trip_details = {...qres2.rows[0]};
+                delete trip_details.time_list;
                 if (qres2.rows[0].count == 1)
-                     res.send({ 
+                    res.send({ 
                         success: true,
+                        ...trip_details,
                     });
                 else {
                     res.send({
