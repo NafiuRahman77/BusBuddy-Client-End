@@ -1,6 +1,7 @@
-export const runningTrips = new Map();
 
-export class RunningTrip {
+const runningTrips = new Map();
+
+class RunningTrip {
     id;
     start_timestamp;
     route;
@@ -41,3 +42,5 @@ export class RunningTrip {
         this.is_done = true;
     };
 };
+
+module.exports = {RunningTrip, runningTrips}
