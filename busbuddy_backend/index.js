@@ -966,9 +966,9 @@ app.post('/api/startTrip', (req,res) => {
     };
 });
 
-app.post('/api/endTrip', (req,res) => {
+app.post('/api/endTrip', async (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
-        let trip = tracking.runningTrips.get(req.body.trip_id);
+        let trip = await tracking.runningTrips.get(req.body.trip_id);
         let pathStr = "{";
         for (let i=0; i<trip.path.length; i++) {
             pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
