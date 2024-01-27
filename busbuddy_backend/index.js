@@ -941,7 +941,11 @@ app.post('/api/startTrip', (req,res) => {
                        (td.id, td.start_timestamp, td.route, td.time_type, 
                         td.travel_direction, td.bus, td.is_default,
                         td.bus_staff, td.approved_by, td.end_timestamp,
-                        td.start_location, td.end_location);
+                        {   
+                            latitude: req.body.latitude, 
+                            longitude: req.body.longitude
+                        }, 
+                        td.end_location);
                     tracking.runningTrips.set (newTrip.id, newTrip);
                     res.send({ 
                         success: true,
@@ -968,6 +972,7 @@ app.post('/api/startTrip', (req,res) => {
 
 app.post('/api/endTrip', async (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
+        console.log(req.body);
         let trip = await tracking.runningTrips.get(req.body.trip_id);
         let pathStr = "{";
         for (let i=0; i<trip.path.length; i++) {
