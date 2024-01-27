@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:busbuddy_app/pages/scan_ticket_qr.dart';
 import 'package:busbuddy_app/pages/ticket_qr.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'pages/ticket_choose.dart';
 import 'pages/ticket_history.dart';
@@ -23,10 +25,65 @@ import 'pages/ShowRequisition.dart';
 import 'package:requests/requests.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+
 import 'globel.dart' as globel;
 
-void main() {
+@pragma(
+    'vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
+final LocationSettings locationSettings = LocationSettings(
+  accuracy: LocationAccuracy.high,
+  distanceFilter: 100,
+);
+Future<bool> _getCurrentLocation() async {
+  bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+  // print(isLocationServiceEnabled);
+
+  if (!isLocationServiceEnabled) {
+    // Handle the case where location services are not enabled
+    // You may want to show a toast or display a message
+    print('Location services are not enabled.');
+    Fluttertoast.showToast(
+      msg: "Please enable location services.",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+    return false;
+  }
+
+  // Check if the app has location permission
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    // Request location permission
+    permission = await Geolocator.requestPermission();
+    if (permission != LocationPermission.whileInUse &&
+        permission != LocationPermission.always) {
+      // Handle the case where the user denied location permission
+      print('User denied location permission.');
+      return false;
+    }
+  }
+  try {
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.best,
+    );
+
+    globel.p_latitude = position.latitude;
+    globel.p_longitude = position.longitude;
+
+    return true;
+  } catch (e) {
+    print("Error getting location: $e");
+    return false;
+  }
+}
+
+void main() async {
   initializeShurjopay(environment: "sandbox");
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(BusBuddyApp());
 }
 
@@ -42,8 +99,7 @@ class BusBuddyApp extends StatelessWidget {
     GoRoute(
         path: "/edit_profile",
         builder: ((context, state) => const HomeView(page: "Edit Profile"))),
-    GoRoute(path: "/login",
-     builder: ((context, state) => const LoginPage())),
+    GoRoute(path: "/login", builder: ((context, state) => const LoginPage())),
     GoRoute(
         path: "/ticket_choose",
         builder: ((context, state) => const HomeView(page: "Choose Ticket"))),
@@ -130,8 +186,10 @@ class PageBody extends StatelessWidget {
       return ShowRequisition();
     else if (this.page == "QR Code")
       return TicketQR();
-    else if (this.page == "Scan QR Code") return ScanTicketQR();
-    else if (this.page == "Manage Trips") return ManageTrips();
+    else if (this.page == "Scan QR Code")
+      return ScanTicketQR();
+    else if (this.page == "Manage Trips")
+      return ManageTrips();
     else if (this.page == "Request Repair") return ReqRepair();
     return (Container());
   }
@@ -211,11 +269,11 @@ class HomeViewState extends State<HomeView> {
     } else if (currentRouteName == '/scan_qr_code') {
       // You are currently on the '/your_route_name' route
       _selectedIndex = 13;
-    } else if(currentRouteName == '/manage_trips') {
-      _selectedIndex = 14 ; 
-    } else if(currentRouteName == '/req_repair') {
-      _selectedIndex = 15 ; }
-     else {
+    } else if (currentRouteName == '/manage_trips') {
+      _selectedIndex = 14;
+    } else if (currentRouteName == '/req_repair') {
+      _selectedIndex = 15;
+    } else {
       _selectedIndex = 0;
     }
     // This method is rerun every time setState is called, for instance as done
@@ -365,6 +423,7 @@ class HomeViewState extends State<HomeView> {
                               // Update the state of the app
                               // _onItemTapped(2);
                               // Then close the drawer
+
                               setState(() {
                                 _selectedIndex = 4;
                               });
@@ -512,27 +571,23 @@ class HomeViewState extends State<HomeView> {
                             });
                           },
                         ),
-
-                        if(globel.userType=="bus_staff")
-                        ListTile(
-                          leading: const Icon(Icons.car_repair),
-                          title: const Text('Request Repair'),
-                          selected: _selectedIndex == 15,
-                          onTap: () {
-                            if (_selectedIndex == 15) return;
-                            // Update the state of the app
-                            // _onItemTapped(2);
-                            // Then close the drawer
-                            GoRouter.of(context).pop();
-                            GoRouter.of(context).push("/req_repair");
-                            setState(() {
-                              _selectedIndex = 15;
-                            });
-                          },
-                        ),
-
-
-
+                        if (globel.userType == "bus_staff")
+                          ListTile(
+                            leading: const Icon(Icons.car_repair),
+                            title: const Text('Request Repair'),
+                            selected: _selectedIndex == 15,
+                            onTap: () {
+                              if (_selectedIndex == 15) return;
+                              // Update the state of the app
+                              // _onItemTapped(2);
+                              // Then close the drawer
+                              GoRouter.of(context).pop();
+                              GoRouter.of(context).push("/req_repair");
+                              setState(() {
+                                _selectedIndex = 15;
+                              });
+                            },
+                          ),
                         if (globel.userType != "buet_staff")
                           ListTile(
                             leading: const Icon(Icons.qr_code),

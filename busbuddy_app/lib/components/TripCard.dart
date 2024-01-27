@@ -1,12 +1,21 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geolocator_apple/geolocator_apple.dart';
+import 'package:geolocator_android/geolocator_android.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:requests/requests.dart';
 import '../../globel.dart' as globel;
+import 'dart:async'; // Import this for Timer
+
+// final LocationSettings locationSettings = LocationSettings(
+//   accuracy: LocationAccuracy.high,
+//   distanceFilter: 100,
+// );
 
 class TripCard extends StatefulWidget {
   final String SourceLocation;
@@ -16,9 +25,11 @@ class TripCard extends StatefulWidget {
   final String BusNo;
   final String TripID;
   final String PrevP;
-  final bool islive;
+  bool islive;
   final Function() parentReloadCallback;
   final Function() parentTabController;
+  final Color buttonColor;
+  final String title;
 
   TripCard(
       {required this.SourceLocation,
@@ -30,13 +41,16 @@ class TripCard extends StatefulWidget {
       required this.PrevP,
       required this.islive,
       required this.parentReloadCallback,
-      required this.parentTabController});
+      required this.parentTabController,
+      required this.buttonColor,
+      required this.title});
 
   @override
   _TripCardState createState() => _TripCardState();
 }
 
-class _TripCardState extends State<TripCard> {
+class _TripCardState extends State<TripCard>
+    with AutomaticKeepAliveClientMixin {
   bool running_trip = false;
   Color buttonColor = Colors.green;
 
@@ -44,6 +58,13 @@ class _TripCardState extends State<TripCard> {
   String buttonText2 = "Turn Off GPS";
 
   String buttontxt = "Turn On GPS";
+
+  Timer? locationUpdateTimer; // Timer to periodically send location updates
+  double? latitude;
+  double? longitude;
+
+  @override
+  bool get wantKeepAlive => true;
 
   Map<String, String> getDateAndTime(String dateTimeString) {
     DateTime dateTime = DateTime.parse(dateTimeString);
@@ -53,18 +74,130 @@ class _TripCardState extends State<TripCard> {
     return {'Sdate': formattedDate, 'Stime': formattedTime};
   }
 
+  // Function to get the current location
+  Future<bool> _getCurrentLocation() async {
+    bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+    // print(isLocationServiceEnabled);
+
+    if (!isLocationServiceEnabled) {
+      // Handle the case where location services are not enabled
+      // You may want to show a toast or display a message
+      print('Location services are not enabled.');
+      Fluttertoast.showToast(
+        msg: "Please enable location services.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      return false;
+    }
+
+    // Check if the app has location permission
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      // Request location permission
+      permission = await Geolocator.requestPermission();
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
+        // Handle the case where the user denied location permission
+        print('User denied location permission.');
+        return false;
+      }
+    }
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best,
+      );
+
+      setState(() {
+        latitude = position.latitude;
+        longitude = position.longitude;
+      });
+      return true;
+    } catch (e) {
+      print("Error getting location: $e");
+      return false;
+    }
+  }
+
+  // Function to send location updates
+  Future<void> _sendLocationUpdate(String tripID) async {
+    await _getCurrentLocation();
+
+    print(tripID);
+    print(latitude.toString());
+    print(longitude.toString());
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  // Function to stop the timer for location updates
+  void stopLocationUpdateTimer() {
+    // cancel the timer if it is not null
+    if (locationUpdateTimer != null) {
+      locationUpdateTimer!.cancel();
+      locationUpdateTimer = null;
+    }
+  }
+
   Future<bool> onTripStart(String tripID) async {
     context.loaderOverlay.show();
+    // Get initial location
+    await _getCurrentLocation();
+
     var r2 = await Requests.post(globel.serverIp + 'startTrip',
         body: {
           'trip_id': tripID,
+          'latitude': latitude.toString(),
+          'longitude': longitude.toString(),
+        },
+        bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+
+    print(tripID);
+    print(latitude.toString());
+    print(longitude.toString());
+
+    r2.raiseForStatus();
+
+    dynamic json2 = r2.json();
+    //print(json2);
+
+    if (json2['success'] == true) {
+      // Start the timer for location updates
+
+      // locationUpdateTimer = Timer.periodic(Duration(seconds: 2), (Timer timer) {
+      //   _sendLocationUpdate(tripID);
+      // });
+
+      context.loaderOverlay.hide();
+      return true;
+    }
+    context.loaderOverlay.hide();
+    return false;
+  }
+
+  Future<bool> onTripEnd(String tripID) async {
+    context.loaderOverlay.show();
+    await _getCurrentLocation();
+
+    var r2 = await Requests.post(globel.serverIp + 'endTrip',
+        body: {
+          'trip_id': tripID,
+          'latitude': latitude.toString(),
+          'longitude': longitude.toString(),
         },
         bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
     r2.raiseForStatus();
 
     dynamic json2 = r2.json();
-    //print(json2);
+    print(json2);
 
     if (json2['success'] == true) {
       context.loaderOverlay.hide();
@@ -76,7 +209,7 @@ class _TripCardState extends State<TripCard> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.SourceLocation);
+    // print(widget.SourceLocation);
 
     Map<String, String> Sdt = getDateAndTime(widget.StartTime);
     Map<String, String> Ddt = getDateAndTime(widget.EndTime!);
@@ -132,27 +265,95 @@ class _TripCardState extends State<TripCard> {
                 ),
               SizedBox(height: 10),
               Center(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    bool startTrip = await onTripStart(widget.TripID);
-                    if (startTrip) {
-                      setState(() {
-                        running_trip = !running_trip;
-                        print(running_trip);
-                        buttonColor = running_trip ? Colors.red : Colors.green;
-                        buttontxt = running_trip ? buttonText2 : buttonText1;
-                        print(widget.TripID);
-                      });
-                      widget.parentTabController();
-                      await widget.parentReloadCallback();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: buttonColor,
-                    onPrimary: Colors.white,
-                  ),
-                  child: Text(buttontxt),
-                ),
+                child: // show the button only if title is "Upcoming Trip" or title is "Ongoing trip" and islive is true
+
+                    (widget.title == "Start Trip" ||
+                            (widget.title == "End Trip" &&
+                                widget.islive == true))
+                        ? ElevatedButton(
+                            onPressed: () async {
+                              // Check if location services are enabled
+                              bool isLocationEnabled =
+                                  await _getCurrentLocation();
+
+                              if (isLocationEnabled) {
+                                // Location services are enabled, proceed with the action
+                                if (widget.title == "Start Trip") {
+                                  bool startTrip =
+                                      await onTripStart(widget.TripID);
+
+                                  // Workmanager()
+                                  //     .registerOneOffTask("bus", "sojib");
+                                  late LocationSettings locationSettings;
+
+                                  locationSettings = AndroidSettings(
+                                      accuracy: LocationAccuracy.high,
+                                      distanceFilter: 100,
+                                      forceLocationManager: true,
+                                      intervalDuration:
+                                          const Duration(seconds: 10),
+                                      //(Optional) Set foreground notification config to keep the app alive
+                                      //when going to the background
+                                      foregroundNotificationConfig:
+                                          const ForegroundNotificationConfig(
+                                        notificationText:
+                                            "Example app will continue to receive your location even when you aren't using it",
+                                        notificationTitle:
+                                            "Running in Background",
+                                        enableWakeLock: true,
+                                      ));
+
+                                  StreamSubscription<Position> positionStream =
+                                      Geolocator.getPositionStream(
+                                              locationSettings:
+                                                  locationSettings)
+                                          .listen((Position? position) async {
+                                    print(position == null
+                                        ? 'Unknown'
+                                        : '${position.latitude.toString()}, ${position.longitude.toString()}');
+
+                                    if (position != null) {
+                                      var r2 = await Requests.post(
+                                          globel.serverIp +
+                                              'updateStaffLocation',
+                                          body: {
+                                            'trip_id': widget.TripID,
+                                            'latitude':
+                                                position.latitude.toString(),
+                                            'longitude':
+                                                position.longitude.toString(),
+                                          },
+                                          bodyEncoding: RequestBodyEncoding
+                                              .FormURLEncoded);
+
+                                      r2.raiseForStatus();
+                                    }
+                                  });
+                                  widget.parentTabController();
+                                  await widget.parentReloadCallback();
+                                } else if (widget.title == "End Trip") {
+                                  bool endTrip = await onTripEnd(widget.TripID);
+                                  if (endTrip) {
+                                    print("ebdbdbdbdbedbdbd");
+                                    widget.parentTabController();
+                                    await widget.parentReloadCallback();
+                                  }
+                                }
+                              } else {
+                                //stopLocationUpdateTimer();
+                                // bool endTrip = await onTripEnd(widget.TripID);
+                                // await widget.parentReloadCallback();
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: widget.buttonColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            child: Text(widget.title),
+                          )
+                        : SizedBox.shrink(),
               ),
             ],
           ),

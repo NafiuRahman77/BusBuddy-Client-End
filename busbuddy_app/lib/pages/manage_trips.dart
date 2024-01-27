@@ -51,6 +51,8 @@ class _ManageTripsState extends State<ManageTrips>
     r.raiseForStatus();
     print(r.content());
     dynamic tripInformation = r.json();
+    if (tripInformation['success'] == false) return;
+
     setState(() {
       Up_Source_List.clear();
       Up_Destination_List.clear();
@@ -100,7 +102,7 @@ class _ManageTripsState extends State<ManageTrips>
         // else
         //   PrevPoint.add("-1");
         Cur_PrevPoint.add("vua");
-        Cur_isliveara.add(false);
+        Cur_isliveara.add(tripInformation['actual'][i]['is_live']);
       }
     });
     context.loaderOverlay.hide();
@@ -109,6 +111,12 @@ class _ManageTripsState extends State<ManageTrips>
   void switchToOngoing() {
     setState(() {
       _tabController.index = 1;
+    });
+  }
+
+  void switchToUpcoming() {
+    setState(() {
+      _tabController.index = 0;
     });
   }
 
@@ -150,6 +158,8 @@ class _ManageTripsState extends State<ManageTrips>
                       islive: Up_isliveara[index],
                       parentReloadCallback: getTripInfo,
                       parentTabController: switchToOngoing,
+                      buttonColor: Colors.green,
+                      title: "Start Trip",
                     );
                   },
                 ),
@@ -169,7 +179,9 @@ class _ManageTripsState extends State<ManageTrips>
                       PrevP: Cur_PrevPoint[index],
                       islive: Cur_isliveara[index],
                       parentReloadCallback: getTripInfo,
-                      parentTabController: switchToOngoing,
+                      parentTabController: switchToUpcoming,
+                      buttonColor: Colors.red,
+                      title: "End Trip",
                     );
                   },
                 ),
