@@ -123,14 +123,14 @@ class _TripCardState extends State<TripCard>
     }
   }
 
-  // Function to send location updates
-  Future<void> _sendLocationUpdate(String tripID) async {
-    await _getCurrentLocation();
+  // // Function to send location updates
+  // Future<void> _sendLocationUpdate(String tripID) async {
+  //   await _getCurrentLocation();
 
-    print(tripID);
-    print(latitude.toString());
-    print(longitude.toString());
-  }
+  //   print(tripID);
+  //   print(latitude.toString());
+  //   print(longitude.toString());
+  // }
 
   @override
   void dispose() {
@@ -277,10 +277,11 @@ class _TripCardState extends State<TripCard>
                                   await _getCurrentLocation();
 
                               if (isLocationEnabled) {
+                                globel.runningTripId = widget.TripID;
                                 // Location services are enabled, proceed with the action
                                 if (widget.title == "Start Trip") {
                                   bool startTrip =
-                                      await onTripStart(widget.TripID);
+                                      await onTripStart(globel.runningTripId);
 
                                   // Workmanager()
                                   //     .registerOneOffTask("bus", "sojib");
@@ -317,7 +318,7 @@ class _TripCardState extends State<TripCard>
                                           globel.serverIp +
                                               'updateStaffLocation',
                                           body: {
-                                            'trip_id': widget.TripID,
+                                            'trip_id': globel.runningTripId,
                                             'latitude':
                                                 position.latitude.toString(),
                                             'longitude':
@@ -332,7 +333,8 @@ class _TripCardState extends State<TripCard>
                                   widget.parentTabController();
                                   await widget.parentReloadCallback();
                                 } else if (widget.title == "End Trip") {
-                                  bool endTrip = await onTripEnd(widget.TripID);
+                                  bool endTrip =
+                                      await onTripEnd(globel.runningTripId);
                                   if (endTrip) {
                                     print("ebdbdbdbdbedbdbd");
                                     widget.parentTabController();
