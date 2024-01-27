@@ -2,6 +2,8 @@ import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:geolocator_apple/geolocator_apple.dart';
+import 'package:geolocator_android/geolocator_android.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -280,18 +282,36 @@ class _TripCardState extends State<TripCard>
                                       await onTripStart(widget.TripID);
                                   // widget.parentTabController();
                                   // await widget.parentReloadCallback();
-                                  Workmanager()
-                                      .registerOneOffTask("bus", "sojib");
+                                  // Workmanager()
+                                  //     .registerOneOffTask("bus", "sojib");
+                                  late LocationSettings locationSettings;
 
-                                  // StreamSubscription<Position> positionStream =
-                                  //     Geolocator.getPositionStream(
-                                  //             locationSettings:
-                                  //                 locationSettings)
-                                  //         .listen((Position? position) {
-                                  //   print(position == null
-                                  //       ? 'Unknown'
-                                  //       : '${position.latitude.toString()}, ${position.longitude.toString()}');
-                                  // });
+                                  locationSettings = AndroidSettings(
+                                      accuracy: LocationAccuracy.high,
+                                      distanceFilter: 100,
+                                      forceLocationManager: true,
+                                      intervalDuration:
+                                          const Duration(seconds: 10),
+                                      //(Optional) Set foreground notification config to keep the app alive
+                                      //when going to the background
+                                      foregroundNotificationConfig:
+                                          const ForegroundNotificationConfig(
+                                        notificationText:
+                                            "Example app will continue to receive your location even when you aren't using it",
+                                        notificationTitle:
+                                            "Running in Background",
+                                        enableWakeLock: true,
+                                      ));
+
+                                  StreamSubscription<Position> positionStream =
+                                      Geolocator.getPositionStream(
+                                              locationSettings:
+                                                  locationSettings)
+                                          .listen((Position? position) {
+                                    print(position == null
+                                        ? 'Unknown'
+                                        : '${position.latitude.toString()}, ${position.longitude.toString()}');
+                                  });
                                 }
                               } else {
                                 //stopLocationUpdateTimer();
