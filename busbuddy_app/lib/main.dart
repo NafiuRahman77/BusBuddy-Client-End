@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:busbuddy_app/pages/scan_ticket_qr.dart';
@@ -30,7 +31,10 @@ import 'globel.dart' as globel;
 
 @pragma(
     'vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
-
+final LocationSettings locationSettings = LocationSettings(
+  accuracy: LocationAccuracy.high,
+  distanceFilter: 100,
+);
 Future<bool> _getCurrentLocation() async {
   bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
   // print(isLocationServiceEnabled);
@@ -83,15 +87,24 @@ void callbackDispatcher() {
     print(task);
     if (task == "sojib") {
       print("fiajia");
-      while (true) {
-        await Future.delayed(Duration(seconds: 10), () async {
-          await _getCurrentLocation();
-          print(globel.p_latitude.toString() +
-              ", " +
-              globel.p_longitude.toString() +
-              " e asi");
-        });
-      }
+      // while (true) {
+      //   await Future.delayed(Duration(seconds: 10), () async {
+      //     await _getCurrentLocation();
+      //     print(globel.p_latitude.toString() +
+      //         ", " +
+      //         globel.p_longitude.toString() +
+      //         " e asi");
+      //   });
+      // }
+
+      StreamSubscription<Position> positionStream =
+          Geolocator.getPositionStream(locationSettings: locationSettings)
+              .listen((Position? position) {
+        print(position == null
+            ? 'Unknown'
+            : '${position.latitude.toString()}, ${position.longitude.toString()}');
+      });
+
       //while(true) print("bhai kaaj kor , sojib kaantese")  ;
     }
 

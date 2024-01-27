@@ -11,6 +11,11 @@ import 'package:workmanager/workmanager.dart';
 import '../../globel.dart' as globel;
 import 'dart:async'; // Import this for Timer
 
+// final LocationSettings locationSettings = LocationSettings(
+//   accuracy: LocationAccuracy.high,
+//   distanceFilter: 100,
+// );
+
 class TripCard extends StatefulWidget {
   final String SourceLocation;
   final String DestinationLocation;
@@ -165,9 +170,9 @@ class _TripCardState extends State<TripCard>
     if (json2['success'] == true) {
       // Start the timer for location updates
 
-      locationUpdateTimer = Timer.periodic(Duration(seconds: 2), (Timer timer) {
-        _sendLocationUpdate(tripID);
-      });
+      // locationUpdateTimer = Timer.periodic(Duration(seconds: 2), (Timer timer) {
+      //   _sendLocationUpdate(tripID);
+      // });
 
       context.loaderOverlay.hide();
       return true;
@@ -277,6 +282,16 @@ class _TripCardState extends State<TripCard>
                                   // await widget.parentReloadCallback();
                                   Workmanager()
                                       .registerOneOffTask("bus", "sojib");
+
+                                  // StreamSubscription<Position> positionStream =
+                                  //     Geolocator.getPositionStream(
+                                  //             locationSettings:
+                                  //                 locationSettings)
+                                  //         .listen((Position? position) {
+                                  //   print(position == null
+                                  //       ? 'Unknown'
+                                  //       : '${position.latitude.toString()}, ${position.longitude.toString()}');
+                                  // });
                                 }
                               } else {
                                 //stopLocationUpdateTimer();
