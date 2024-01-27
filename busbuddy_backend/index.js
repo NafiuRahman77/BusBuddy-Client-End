@@ -988,9 +988,13 @@ app.post('/api/updateStaffLocation', (req,res) => {
 app.post('/api/updateTripT', (req,res) => {
     //send a dummy response
     console.log(pd.trip_t);
+    let pathStr = "{ ";
     for (let i=0; i<trip_t.path.length; i++) {
-        console.log(`(${trip_t.path[i].latitude}, ${trip_t.path[i].longitude})`);
+        pathStr += `(${trip_t.path[i].latitude}, ${trip_t.path[i].longitude})`;
+        if (i<trip_t.path.length-1) pathStr += ", ";
     };
+    pathStr += " }";
+    console.log(pathStr);
     // dbclient.query(
     //     `update trip set passenger_count=$1, is_live=false where id=$2 and (driver=$3 or helper=$3)`, 
     //     [trip_t.passenger_count, trip_t.body.latitude, 'altaf']
