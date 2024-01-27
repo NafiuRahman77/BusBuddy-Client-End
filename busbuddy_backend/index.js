@@ -712,6 +712,28 @@ app.post('/api/getRouteTimeData', (req, res) => {
     };
 });
 
+app.post('/api/getTrackingData', (req, res) => {
+    console.log(req.session);
+    if (req.session.userid) {
+        dbclient.query(
+            `select lpad(id::varchar, 8, '0') as id, start_timestamp, route, array_to_json(time_list), array_to_json(path) as path_, bus
+             from trip where route=$1`, [req.body.route]
+        ).then(qres => {
+	    let list = [...qres.rows];
+	    //list.forEach(trip => {
+	//	trip.time_list = JSON.parse(trip.timeList);
+	  //  });
+            console.log(list);
+            res.send(qres.rows);
+        }).catch(e => {
+            console.error(e.stack);
+            res.send({ 
+                success: false,
+            });
+        });
+    };
+});
+
 //dummy
 
 app.post('/api/sendRepairRequest', (req,res) => {
@@ -957,7 +979,7 @@ app.post('/api/endTrip', (req,res) => {
         dbclient.query(
             `update trip set end_timestamp=current_timestamp, passenger_count=$1, end_location='($2,$3)', 
              is_live=false, path=$6 where id=$4 and (driver=$5 or helper=$5)`, 
-            [trip.passenger_count, req.body.latitude, req.body.longitude, req.body.trip_id, req.session.userid]
+            [trip.passenger_count, req.body.latitude, req.body.longitude, req.body.trip_id, req.session.userid, pathStr]
         ).then(qres => {
             console.log(qres);
             if (qres.rowCount === 1) res.send({ 
