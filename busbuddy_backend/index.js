@@ -19,6 +19,8 @@ const multer = require('multer');
 const { Readable } = require('stream');
 const imageToBase64 = require('image-to-base64');
 const tracking = require('./tracking.js');
+const pd = require('./path_dump.js');
+trip_t = pd.trip_t;
 
 dotenv.config();
 
@@ -867,74 +869,6 @@ app.post('/api/getTripData', (req,res) => {
     });
 });
 
-app.post('/api/getTripTimeList', (req,res) => {
-    //send a dummy response
-    console.log(req.body);
-    res.send({
-        success: true,
-        data: [
-            {"station":"17","time":"2023-09-11T06:40:00+06:00"},{"station":"18","time":"2023-09-11T06:42:00+06:00"},{"station":"19","time":"2023-09-11T06:44:00+06:00"},{"station":"20","time":"2023-09-11T06:46:00+06:00"},{"station":"21","time":"2023-09-11T06:48:00+06:00"}     
-        ]
-    });
-});
-
-//get map path
-app.post('/api/getTripMapPath', (req,res) => {
-    //send a dummy response
-    console.log(req.body);
-    res.send({
-        success: true,
-        data: [
-            { "latitude": 23.7651, "longitude": 90.3652 },
-            { "latitude": 23.7649, "longitude": 90.3653 },
-            { "latitude": 23.7652, "longitude": 90.3650 },
-            { "latitude": 23.7650, "longitude": 90.3651 },
-            { "latitude": 23.7653, "longitude": 90.3652 },
-            { "latitude": 23.7651, "longitude": 90.3649 },
-            { "latitude": 23.7649, "longitude": 90.3650 },
-            { "latitude": 23.7652, "longitude": 90.3653 },
-            { "latitude": 23.7650, "longitude": 90.3648 },
-            { "latitude": 23.7653, "longitude": 90.3651 },
-            { "latitude": 23.7651, "longitude": 90.3650 },
-            { "latitude": 23.7649, "longitude": 90.3652 },
-            { "latitude": 23.7652, "longitude": 90.3651 },
-            { "latitude": 23.7650, "longitude": 90.3653 },
-            { "latitude": 23.7653, "longitude": 90.3650 },
-            { "latitude": 23.7651, "longitude": 90.3652 },
-            { "latitude": 23.7649, "longitude": 90.3651 },
-            { "latitude": 23.7652, "longitude": 90.3649 },
-            { "latitude": 23.7650, "longitude": 90.3652 },
-            { "latitude": 23.7653, "longitude": 90.3651 },
-            { "latitude": 23.7651, "longitude": 90.3648 },
-            { "latitude": 23.7649, "longitude": 90.3653 },
-            { "latitude": 23.7652, "longitude": 90.3650 },
-            { "latitude": 23.7650, "longitude": 90.3652 },
-            { "latitude": 23.7653, "longitude": 90.3650 },
-            { "latitude": 23.7651, "longitude": 90.3652 },
-            { "latitude": 23.7649, "longitude": 90.3650 },
-            { "latitude": 23.7652, "longitude": 90.3649 },
-            { "latitude": 23.7650, "longitude": 90.3653 },
-            { "latitude": 23.7653, "longitude": 90.3651 },
-            { "latitude": 23.7651, "longitude": 90.3650 },
-            { "latitude": 23.7649, "longitude": 90.3652 },
-            { "latitude": 23.7652, "longitude": 90.3651 },
-            { "latitude": 23.7650, "longitude": 90.3653 },
-            { "latitude": 23.7653, "longitude": 90.3650 },
-            { "latitude": 23.7651, "longitude": 90.3652 },
-            { "latitude": 23.7649, "longitude": 90.3651 },
-            { "latitude": 23.7652, "longitude": 90.3649 },
-            { "latitude": 23.7650, "longitude": 90.3652 },
-            { "latitude": 23.7653, "longitude": 90.3651 },
-            { "latitude": 23.7651, "longitude": 90.3648 },
-            { "latitude": 23.7649, "longitude": 90.3653 },
-            { "latitude": 23.7652, "longitude": 90.3650 },
-            { "latitude": 23.7650, "longitude": 90.3652 },
-            { "latitude": 23.7653, "longitude": 90.3650 },
-            { "latitude": 23.7651, "longitude": 90.3652 },
-            { "latitude": 23.7649, "longitude": 90.3650 }]
-    });
-});
-
 //get trip data
 app.post('/api/getStaffTrips', (req,res) => {
     //send a dummy response
@@ -1049,6 +983,11 @@ app.post('/api/updateStaffLocation', (req,res) => {
             // ]
         });
     };
+});
+
+app.post('/api/updateTripT', (req,res) => {
+    //send a dummy response
+    console.log(pd.trip_t);
 });
 
 app.post('/api/staffScanTicket', (req,res) => {
