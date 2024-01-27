@@ -977,7 +977,7 @@ app.post('/api/endTrip', (req,res) => {
         pathStr += "}";
         console.log(pathStr);
         dbclient.query(
-            `update trip set end_timestamp=current_timestamp, passenger_count=$1, end_location='($2,$3)', 
+            `update trip set end_timestamp=current_timestamp, passenger_count=$1, end_location[0]=$2, end_location[1]=$3, 
              is_live=false, path=$6 where id=$4 and (driver=$5 or helper=$5)`, 
             [trip.passenger_count, req.body.latitude, req.body.longitude, req.body.trip_id, req.session.userid, pathStr]
         ).then(qres => {
