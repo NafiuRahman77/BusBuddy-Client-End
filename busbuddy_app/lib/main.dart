@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:busbuddy_app/pages/scan_ticket_qr.dart';
 import 'package:busbuddy_app/pages/ticket_qr.dart';
@@ -273,8 +274,11 @@ class HomeViewState extends State<HomeView> {
       _selectedIndex = 14;
     } else if (currentRouteName == '/req_repair') {
       _selectedIndex = 15;
+    } else if (currentRouteName == '/route_map') {
+      print("route map");
+      _selectedIndex = 3;
     } else {
-      _selectedIndex = 0;
+      _selectedIndex = 1000;
     }
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
