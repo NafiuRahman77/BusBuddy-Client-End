@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:requests/requests.dart';
+import 'package:workmanager/workmanager.dart';
 import '../../globel.dart' as globel;
 import 'dart:async'; // Import this for Timer
 
@@ -263,7 +264,7 @@ class _TripCardState extends State<TripCard>
                                 widget.islive == true))
                         ? ElevatedButton(
                             onPressed: () async {
-                              globel.wmg = true;
+                              
                               // Check if location services are enabled
                               bool isLocationEnabled =
                                   await _getCurrentLocation();
@@ -275,6 +276,9 @@ class _TripCardState extends State<TripCard>
                                       await onTripStart(widget.TripID);
                                   // widget.parentTabController();
                                   // await widget.parentReloadCallback();
+                                  Workmanager().registerOneOffTask("bus" , "sojib") ; 
+                                
+                                
                                 }
                               } else {
                                 //stopLocationUpdateTimer();

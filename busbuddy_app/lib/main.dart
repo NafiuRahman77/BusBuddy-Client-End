@@ -30,10 +30,23 @@ import 'globel.dart' as globel;
 @pragma(
     'vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
 void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) {
+  Workmanager().executeTask((task, inputData) async{
+    print(task) ; 
+    if(task=="sojib")
+    {
     print("Native called background task: $task");
     print("fiajia");
-    //simpleTask will be emitted here.
+    while(true) {
+          await Future.delayed(Duration(seconds: 10), () {
+      print("bhai kaaj kor , sojib kaantese")  ; 
+    });
+
+     
+    }
+    //while(true) print("bhai kaaj kor , sojib kaantese")  ; 
+
+    }
+
     return Future.value(true);
   });
 }
@@ -46,7 +59,8 @@ void main() async {
       isInDebugMode:
           true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
       );
-
+  if(globel.wmg)
+      await Workmanager().registerOneOffTask("geko", "sojib");
   runApp(BusBuddyApp());
 }
 
@@ -297,9 +311,7 @@ class HomeViewState extends State<HomeView> {
                           leading: const Icon(Icons.account_box),
                           title: const Text('Profile'),
                           selected: _selectedIndex == 0,
-                          onTap: () async {
-                            await Workmanager()
-                                .registerOneOffTask("geko", "sojib");
+                          onTap: ()  {
                             // Update the state of the app
                             if (_selectedIndex == 0) return;
                             GoRouter.of(context).pop();
