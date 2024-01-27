@@ -947,9 +947,16 @@ app.post('/api/startTrip', (req,res) => {
 app.post('/api/endTrip', (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         let trip = tracking.runningTrips.get(req.body.trip_id);
+        let pathStr = "{";
+        for (let i=0; i<trip.path.length; i++) {
+            pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
+            if (i<trip.path.length-1) pathStr += ", ";
+        };
+        pathStr += "}";
+        console.log(pathStr);
         dbclient.query(
-            `update trip set end_timestamp=current_timestamp, passenger_count=$1, end_location[0]=$2, end_location[1]=$3, 
-             is_live=false where id=$4 and (driver=$5 or helper=$5)`, 
+            `update trip set end_timestamp=current_timestamp, passenger_count=$1, end_location='($2,$3)', 
+             is_live=false, path=$6 where id=$4 and (driver=$5 or helper=$5)`, 
             [trip.passenger_count, req.body.latitude, req.body.longitude, req.body.trip_id, req.session.userid]
         ).then(qres => {
             console.log(qres);
@@ -987,7 +994,7 @@ app.post('/api/updateStaffLocation', (req,res) => {
 
 app.post('/api/updateTripT', (req,res) => {
     //send a dummy response
-    console.log(pd.trip_t);
+    //console.log(pd.trip_t);
     let pathStr = "{";
     for (let i=0; i<trip_t.path.length; i++) {
         pathStr += `"(${trip_t.path[i].latitude}, ${trip_t.path[i].longitude})"`;
