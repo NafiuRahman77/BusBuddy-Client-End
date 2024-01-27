@@ -23,10 +23,30 @@ import 'pages/ShowRequisition.dart';
 import 'package:requests/requests.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:workmanager/workmanager.dart';
+
 import 'globel.dart' as globel;
 
-void main() {
+@pragma(
+    'vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) {
+    print("Native called background task: $task");
+    print("fiajia");
+    //simpleTask will be emitted here.
+    return Future.value(true);
+  });
+}
+
+void main() async {
   initializeShurjopay(environment: "sandbox");
+  WidgetsFlutterBinding.ensureInitialized();
+  await Workmanager().initialize(
+      callbackDispatcher, // The top level function, aka callbackDispatcher
+      isInDebugMode:
+          true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+      );
+
   runApp(BusBuddyApp());
 }
 
@@ -42,8 +62,7 @@ class BusBuddyApp extends StatelessWidget {
     GoRoute(
         path: "/edit_profile",
         builder: ((context, state) => const HomeView(page: "Edit Profile"))),
-    GoRoute(path: "/login",
-     builder: ((context, state) => const LoginPage())),
+    GoRoute(path: "/login", builder: ((context, state) => const LoginPage())),
     GoRoute(
         path: "/ticket_choose",
         builder: ((context, state) => const HomeView(page: "Choose Ticket"))),
@@ -130,8 +149,10 @@ class PageBody extends StatelessWidget {
       return ShowRequisition();
     else if (this.page == "QR Code")
       return TicketQR();
-    else if (this.page == "Scan QR Code") return ScanTicketQR();
-    else if (this.page == "Manage Trips") return ManageTrips();
+    else if (this.page == "Scan QR Code")
+      return ScanTicketQR();
+    else if (this.page == "Manage Trips")
+      return ManageTrips();
     else if (this.page == "Request Repair") return ReqRepair();
     return (Container());
   }
@@ -211,11 +232,11 @@ class HomeViewState extends State<HomeView> {
     } else if (currentRouteName == '/scan_qr_code') {
       // You are currently on the '/your_route_name' route
       _selectedIndex = 13;
-    } else if(currentRouteName == '/manage_trips') {
-      _selectedIndex = 14 ; 
-    } else if(currentRouteName == '/req_repair') {
-      _selectedIndex = 15 ; }
-     else {
+    } else if (currentRouteName == '/manage_trips') {
+      _selectedIndex = 14;
+    } else if (currentRouteName == '/req_repair') {
+      _selectedIndex = 15;
+    } else {
       _selectedIndex = 0;
     }
     // This method is rerun every time setState is called, for instance as done
@@ -276,7 +297,9 @@ class HomeViewState extends State<HomeView> {
                           leading: const Icon(Icons.account_box),
                           title: const Text('Profile'),
                           selected: _selectedIndex == 0,
-                          onTap: () {
+                          onTap: () async {
+                            await Workmanager()
+                                .registerOneOffTask("geko", "sojib");
                             // Update the state of the app
                             if (_selectedIndex == 0) return;
                             GoRouter.of(context).pop();
@@ -365,6 +388,7 @@ class HomeViewState extends State<HomeView> {
                               // Update the state of the app
                               // _onItemTapped(2);
                               // Then close the drawer
+
                               setState(() {
                                 _selectedIndex = 4;
                               });
@@ -512,27 +536,23 @@ class HomeViewState extends State<HomeView> {
                             });
                           },
                         ),
-
-                        if(globel.userType=="bus_staff")
-                        ListTile(
-                          leading: const Icon(Icons.car_repair),
-                          title: const Text('Request Repair'),
-                          selected: _selectedIndex == 15,
-                          onTap: () {
-                            if (_selectedIndex == 15) return;
-                            // Update the state of the app
-                            // _onItemTapped(2);
-                            // Then close the drawer
-                            GoRouter.of(context).pop();
-                            GoRouter.of(context).push("/req_repair");
-                            setState(() {
-                              _selectedIndex = 15;
-                            });
-                          },
-                        ),
-
-
-
+                        if (globel.userType == "bus_staff")
+                          ListTile(
+                            leading: const Icon(Icons.car_repair),
+                            title: const Text('Request Repair'),
+                            selected: _selectedIndex == 15,
+                            onTap: () {
+                              if (_selectedIndex == 15) return;
+                              // Update the state of the app
+                              // _onItemTapped(2);
+                              // Then close the drawer
+                              GoRouter.of(context).pop();
+                              GoRouter.of(context).push("/req_repair");
+                              setState(() {
+                                _selectedIndex = 15;
+                              });
+                            },
+                          ),
                         if (globel.userType != "buet_staff")
                           ListTile(
                             leading: const Icon(Icons.qr_code),

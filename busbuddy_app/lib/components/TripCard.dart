@@ -263,6 +263,8 @@ class _TripCardState extends State<TripCard>
                                 widget.islive == true))
                         ? ElevatedButton(
                             onPressed: () async {
+                              globel.wmg = true;
+                              // Check if location services are enabled
                               bool isLocationEnabled =
                                   await _getCurrentLocation();
 
