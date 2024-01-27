@@ -997,7 +997,7 @@ app.post('/api/updateTripT', (req,res) => {
     console.log(pathStr);
     dbclient.query(
         `update trip set passenger_count=$1, is_live=false, path=$4 where id=$2 and (driver=$3 or helper=$3)`, 
-        [trip_t.passenger_count, trip_t.body.latitude, 'altaf', pathStr]
+        [trip_t.passenger_count, trip_t.id, 'altaf', pathStr]
     ).then(qres => {
         console.log(qres);
         if (qres.rowCount === 1) res.send({ 
