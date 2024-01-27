@@ -71,7 +71,7 @@ class _TripCardState extends State<TripCard>
   // Function to get the current location
   Future<bool> _getCurrentLocation() async {
     bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
-    print(isLocationServiceEnabled);
+    // print(isLocationServiceEnabled);
 
     if (!isLocationServiceEnabled) {
       // Handle the case where location services are not enabled
@@ -201,7 +201,7 @@ class _TripCardState extends State<TripCard>
 
   @override
   Widget build(BuildContext context) {
-    print(widget.SourceLocation);
+    // print(widget.SourceLocation);
 
     Map<String, String> Sdt = getDateAndTime(widget.StartTime);
     Map<String, String> Ddt = getDateAndTime(widget.EndTime!);
@@ -264,7 +264,6 @@ class _TripCardState extends State<TripCard>
                                 widget.islive == true))
                         ? ElevatedButton(
                             onPressed: () async {
-                              
                               // Check if location services are enabled
                               bool isLocationEnabled =
                                   await _getCurrentLocation();
@@ -276,9 +275,8 @@ class _TripCardState extends State<TripCard>
                                       await onTripStart(widget.TripID);
                                   // widget.parentTabController();
                                   // await widget.parentReloadCallback();
-                                  Workmanager().registerOneOffTask("bus" , "sojib") ; 
-                                
-                                
+                                  Workmanager()
+                                      .registerOneOffTask("bus", "sojib");
                                 }
                               } else {
                                 //stopLocationUpdateTimer();

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:busbuddy_app/pages/scan_ticket_qr.dart';
 import 'package:busbuddy_app/pages/ticket_qr.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'pages/ticket_choose.dart';
 import 'pages/ticket_history.dart';
@@ -29,22 +30,69 @@ import 'globel.dart' as globel;
 
 @pragma(
     'vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) async{
-    print(task) ; 
-    if(task=="sojib")
-    {
-    print("Native called background task: $task");
-    print("fiajia");
-    while(true) {
-          await Future.delayed(Duration(seconds: 10), () {
-      print("bhai kaaj kor , sojib kaantese")  ; 
-    });
 
-     
+Future<bool> _getCurrentLocation() async {
+  bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+  // print(isLocationServiceEnabled);
+
+  if (!isLocationServiceEnabled) {
+    // Handle the case where location services are not enabled
+    // You may want to show a toast or display a message
+    print('Location services are not enabled.');
+    Fluttertoast.showToast(
+      msg: "Please enable location services.",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+    return false;
+  }
+
+  // Check if the app has location permission
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    // Request location permission
+    permission = await Geolocator.requestPermission();
+    if (permission != LocationPermission.whileInUse &&
+        permission != LocationPermission.always) {
+      // Handle the case where the user denied location permission
+      print('User denied location permission.');
+      return false;
     }
-    //while(true) print("bhai kaaj kor , sojib kaantese")  ; 
+  }
+  try {
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.best,
+    );
 
+    globel.p_latitude = position.latitude;
+    globel.p_longitude = position.longitude;
+
+    return true;
+  } catch (e) {
+    print("Error getting location: $e");
+    return false;
+  }
+}
+
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    print(task);
+    if (task == "sojib") {
+      print("fiajia");
+      while (true) {
+        await Future.delayed(Duration(seconds: 10), () async {
+          await _getCurrentLocation();
+          print(globel.p_latitude.toString() +
+              ", " +
+              globel.p_longitude.toString() +
+              " e asi");
+        });
+      }
+      //while(true) print("bhai kaaj kor , sojib kaantese")  ;
     }
 
     return Future.value(true);
@@ -59,8 +107,7 @@ void main() async {
       isInDebugMode:
           true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
       );
-  if(globel.wmg)
-      await Workmanager().registerOneOffTask("geko", "sojib");
+  if (globel.wmg) await Workmanager().registerOneOffTask("geko", "sojib");
   runApp(BusBuddyApp());
 }
 
@@ -311,7 +358,7 @@ class HomeViewState extends State<HomeView> {
                           leading: const Icon(Icons.account_box),
                           title: const Text('Profile'),
                           selected: _selectedIndex == 0,
-                          onTap: ()  {
+                          onTap: () {
                             // Update the state of the app
                             if (_selectedIndex == 0) return;
                             GoRouter.of(context).pop();
