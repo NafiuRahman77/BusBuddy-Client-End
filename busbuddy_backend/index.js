@@ -990,7 +990,7 @@ app.post('/api/updateTripT', (req,res) => {
     console.log(pd.trip_t);
     let pathStr = "{";
     for (let i=0; i<trip_t.path.length; i++) {
-        pathStr += `"(${trip_t.path[i].latitude}, ${trip_t.path[i].longitude})`;
+        pathStr += `"(${trip_t.path[i].latitude}, ${trip_t.path[i].longitude})"`;
         if (i<trip_t.path.length-1) pathStr += ", ";
     };
     pathStr += "}";
