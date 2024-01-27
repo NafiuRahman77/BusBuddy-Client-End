@@ -25,7 +25,6 @@ import 'pages/ShowRequisition.dart';
 import 'package:requests/requests.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loader_overlay/loader_overlay.dart';
-import 'package:workmanager/workmanager.dart';
 
 import 'globel.dart' as globel;
 
@@ -82,45 +81,9 @@ Future<bool> _getCurrentLocation() async {
   }
 }
 
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) async {
-    print(task);
-    if (task == "sojib") {
-      print("fiajia");
-      // while (true) {
-      //   await Future.delayed(Duration(seconds: 10), () async {
-      //     await _getCurrentLocation();
-      //     print(globel.p_latitude.toString() +
-      //         ", " +
-      //         globel.p_longitude.toString() +
-      //         " e asi");
-      //   });
-      // }
-
-      StreamSubscription<Position> positionStream =
-          Geolocator.getPositionStream(locationSettings: locationSettings)
-              .listen((Position? position) {
-        print(position == null
-            ? 'Unknown'
-            : '${position.latitude.toString()}, ${position.longitude.toString()}');
-      });
-
-      //while(true) print("bhai kaaj kor , sojib kaantese")  ;
-    }
-
-    return Future.value(true);
-  });
-}
-
 void main() async {
   initializeShurjopay(environment: "sandbox");
   WidgetsFlutterBinding.ensureInitialized();
-  await Workmanager().initialize(
-      callbackDispatcher, // The top level function, aka callbackDispatcher
-      isInDebugMode:
-          true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
-      );
-  if (globel.wmg) await Workmanager().registerOneOffTask("geko", "sojib");
   runApp(BusBuddyApp());
 }
 
