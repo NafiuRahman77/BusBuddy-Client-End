@@ -982,9 +982,12 @@ app.post('/api/endTrip', async (req,res) => {
         pathStr += "}";
         console.log(pathStr);
         dbclient.query(
-            `update trip set end_timestamp=current_timestamp, passenger_count=$1, end_location[0]=$2, end_location[1]=$3, 
+            `update trip set end_timestamp=current_timestamp, passenger_count=$1, start_location=$2, end_location=$3, 
              is_live=false, path=$6 where id=$4 and (driver=$5 or helper=$5)`, 
-            [trip.passenger_count, req.body.latitude, req.body.longitude, req.body.trip_id, req.session.userid, pathStr]
+            [trip.passenger_count,
+             ('('+trip.start_location.latitude+','+trip.start_location.longitude+')'),  
+             ('('+req.body.latitude+','+req.body.longitude+')'), 
+             req.body.trip_id, req.session.userid, pathStr]
         ).then(qres => {
             console.log(qres);
             if (qres.rowCount === 1) res.send({ 
