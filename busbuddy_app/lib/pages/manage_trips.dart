@@ -51,6 +51,8 @@ class _ManageTripsState extends State<ManageTrips>
     r.raiseForStatus();
     print(r.content());
     dynamic tripInformation = r.json();
+    if (tripInformation['success'] == false) return;
+
     setState(() {
       Up_Source_List.clear();
       Up_Destination_List.clear();
@@ -112,6 +114,12 @@ class _ManageTripsState extends State<ManageTrips>
     });
   }
 
+  void switchToUpcoming() {
+    setState(() {
+      _tabController.index = 0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -151,7 +159,7 @@ class _ManageTripsState extends State<ManageTrips>
                       parentReloadCallback: getTripInfo,
                       parentTabController: switchToOngoing,
                       buttonColor: Colors.green,
-                      title: "Upcoming Trip",
+                      title: "Start Trip",
                     );
                   },
                 ),
@@ -171,9 +179,9 @@ class _ManageTripsState extends State<ManageTrips>
                       PrevP: Cur_PrevPoint[index],
                       islive: Cur_isliveara[index],
                       parentReloadCallback: getTripInfo,
-                      parentTabController: switchToOngoing,
+                      parentTabController: switchToUpcoming,
                       buttonColor: Colors.red,
-                      title: "Ongoing Trip",
+                      title: "End Trip",
                     );
                   },
                 ),

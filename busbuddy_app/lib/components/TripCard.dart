@@ -182,28 +182,30 @@ class _TripCardState extends State<TripCard>
     return false;
   }
 
-  // Future<bool> onTripEnd(String tripID) async {
-  //   context.loaderOverlay.show();
-  //   await _getCurrentLocation();
+  Future<bool> onTripEnd(String tripID) async {
+    context.loaderOverlay.show();
+    await _getCurrentLocation();
 
-  //   var r2 = await Requests.post(globel.serverIp + 'endTrip',
-  //       body: {
-  //         'trip_id': tripID,
-  //       },
-  //       bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+    var r2 = await Requests.post(globel.serverIp + 'endTrip',
+        body: {
+          'trip_id': tripID,
+          'latitude': latitude.toString(),
+          'longitude': longitude.toString(),
+        },
+        bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
-  //   r2.raiseForStatus();
+    r2.raiseForStatus();
 
-  //   dynamic json2 = r2.json();
-  //   //print(json2);
+    dynamic json2 = r2.json();
+    print(json2);
 
-  //   if (json2['success'] == true) {
-  //     context.loaderOverlay.hide();
-  //     return true;
-  //   }
-  //   context.loaderOverlay.hide();
-  //   return false;
-  // }
+    if (json2['success'] == true) {
+      context.loaderOverlay.hide();
+      return true;
+    }
+    context.loaderOverlay.hide();
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -265,8 +267,8 @@ class _TripCardState extends State<TripCard>
               Center(
                 child: // show the button only if title is "Upcoming Trip" or title is "Ongoing trip" and islive is true
 
-                    (widget.title == "Upcoming Trip" ||
-                            (widget.title == "Ongoing Trip" &&
+                    (widget.title == "Start Trip" ||
+                            (widget.title == "End Trip" &&
                                 widget.islive == true))
                         ? ElevatedButton(
                             onPressed: () async {
@@ -276,11 +278,10 @@ class _TripCardState extends State<TripCard>
 
                               if (isLocationEnabled) {
                                 // Location services are enabled, proceed with the action
-                                if (widget.title == "Upcoming Trip") {
+                                if (widget.title == "Start Trip") {
                                   bool startTrip =
                                       await onTripStart(widget.TripID);
-                                  // widget.parentTabController();
-                                  // await widget.parentReloadCallback();
+
                                   // Workmanager()
                                   //     .registerOneOffTask("bus", "sojib");
                                   late LocationSettings locationSettings;
@@ -306,11 +307,37 @@ class _TripCardState extends State<TripCard>
                                       Geolocator.getPositionStream(
                                               locationSettings:
                                                   locationSettings)
-                                          .listen((Position? position) {
+                                          .listen((Position? position) async {
                                     print(position == null
                                         ? 'Unknown'
                                         : '${position.latitude.toString()}, ${position.longitude.toString()}');
+
+                                    if (position != null) {
+                                      var r2 = await Requests.post(
+                                          globel.serverIp +
+                                              'updateStaffLocation',
+                                          body: {
+                                            'trip_id': widget.TripID,
+                                            'latitude':
+                                                position.latitude.toString(),
+                                            'longitude':
+                                                position.longitude.toString(),
+                                          },
+                                          bodyEncoding: RequestBodyEncoding
+                                              .FormURLEncoded);
+
+                                      r2.raiseForStatus();
+                                    }
                                   });
+                                  widget.parentTabController();
+                                  await widget.parentReloadCallback();
+                                } else if (widget.title == "End Trip") {
+                                  bool endTrip = await onTripEnd(widget.TripID);
+                                  if (endTrip) {
+                                    print("ebdbdbdbdbedbdbd");
+                                    widget.parentTabController();
+                                    await widget.parentReloadCallback();
+                                  }
                                 }
                               } else {
                                 //stopLocationUpdateTimer();
