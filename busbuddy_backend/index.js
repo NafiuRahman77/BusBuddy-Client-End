@@ -712,25 +712,23 @@ app.post('/api/getRouteTimeData', (req, res) => {
     };
 });
 
-app.post('/api/getTrackingData', (req, res) => {
+app.post('/api/getTrackingData', async (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
-        dbclient.query(
-            `select lpad(id::varchar, 8, '0') as id, start_timestamp, route, array_to_json(time_list), array_to_json(path) as path_, bus
-             from trip where route=$1`, [req.body.route]
-        ).then(qres => {
-	    let list = [...qres.rows];
-	    //list.forEach(trip => {
+        // dbclient.query(
+        //     `select lpad(id::varchar, 8, '0') as id, start_timestamp, route, array_to_json(time_list), array_to_json(path) as path_, bus
+        //      from trip where route=$1`, [req.body.route]
+        // ).then(qres => {
+	    let list = [];
+        //iterating over map
+        tracking.runningTrips.forEach( async trip => {
+            if (trip.route == req.body.route) await list.add (trip);
+        });
+ 	    //list.forEach(trip => {
 	//	trip.time_list = JSON.parse(trip.timeList);
 	  //  });
-            console.log(list);
-            res.send(qres.rows);
-        }).catch(e => {
-            console.error(e.stack);
-            res.send({ 
-                success: false,
-            });
-        });
+        console.log(list);
+        res.send(list);
     };
 });
 
@@ -1023,32 +1021,32 @@ app.post('/api/updateStaffLocation', (req,res) => {
     };
 });
 
-app.post('/api/updateTripT', (req,res) => {
-    //send a dummy response
-    //console.log(pd.trip_t);
-    let pathStr = "{";
-    for (let i=0; i<trip_t.path.length; i++) {
-        pathStr += `"(${trip_t.path[i].latitude}, ${trip_t.path[i].longitude})"`;
-        if (i<trip_t.path.length-1) pathStr += ", ";
-    };
-    pathStr += "}";
-    console.log(pathStr);
-    dbclient.query(
-        `update trip set passenger_count=$1, is_live=false, path=$4 where id=$2 and (driver=$3 or helper=$3)`, 
-        [trip_t.passenger_count, trip_t.id, 'altaf', pathStr]
-    ).then(qres => {
-        console.log(qres);
-        if (qres.rowCount === 1) res.send({ 
-            success: true,
-        });
-        else if (qres.rowCount === 0) {
-            res.send({
-                success: false,
-            });
-        };
-    }).catch(e => console.error(e.stack));
-    tracking.runningTrips.delete(req.body.trip_id);
-});
+// app.post('/api/updateTripT', (req,res) => {
+//     //send a dummy response
+//     //console.log(pd.trip_t);
+//     let pathStr = "{";
+//     for (let i=0; i<trip_t.path.length; i++) {
+//         pathStr += `"(${trip_t.path[i].latitude}, ${trip_t.path[i].longitude})"`;
+//         if (i<trip_t.path.length-1) pathStr += ", ";
+//     };
+//     pathStr += "}";
+//     console.log(pathStr);
+//     dbclient.query(
+//         `update trip set passenger_count=$1, is_live=false, path=$4 where id=$2 and (driver=$3 or helper=$3)`, 
+//         [trip_t.passenger_count, trip_t.id, 'altaf', pathStr]
+//     ).then(qres => {
+//         console.log(qres);
+//         if (qres.rowCount === 1) res.send({ 
+//             success: true,
+//         });
+//         else if (qres.rowCount === 0) {
+//             res.send({
+//                 success: false,
+//             });
+//         };
+//     }).catch(e => console.error(e.stack));
+//     tracking.runningTrips.delete(req.body.trip_id);
+// });
 
 app.post('/api/staffScanTicket', (req,res) => {
     //send a dummy response
