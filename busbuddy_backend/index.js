@@ -956,6 +956,7 @@ app.post('/api/getStaffTrips', (req,res) => {
                     });
                 } else {
                     res.send({
+                        success: true,
                         upcoming: [...qres.rows],
                         actual: [...qres2.rows]
                     });
@@ -1015,7 +1016,7 @@ app.post('/api/endTrip', (req,res) => {
         dbclient.query(
             `update trip set end_timestamp=current_timestamp, passenger_count=$1, end_location[0]=$2, end_location[1]=$3, 
              is_live=false where id=$4 and (driver=$5 or helper=$5)`, 
-            [trip.passenger_count, trip.end_location.latitude, trip.end_location.longitude, req.body.trip_id, req.session.userid]
+            [trip.passenger_count, req.body.latitude, req.body.longitude, req.body.trip_id, req.session.userid]
         ).then(qres => {
             console.log(qres);
             if (qres.rowCount === 1) res.send({ 
