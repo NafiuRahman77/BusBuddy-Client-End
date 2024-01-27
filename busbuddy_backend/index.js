@@ -722,7 +722,7 @@ app.post('/api/getTrackingData', async (req, res) => {
 	    let list = [];
         //iterating over map
         tracking.runningTrips.forEach( async trip => {
-            if (trip.route == req.body.route) await list.add (trip);
+            if (trip.route == req.body.route) list.push (trip);
         });
  	    //list.forEach(trip => {
 	//	trip.time_list = JSON.parse(trip.timeList);
