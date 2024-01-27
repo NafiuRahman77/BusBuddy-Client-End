@@ -20,7 +20,7 @@ const { Readable } = require('stream');
 const imageToBase64 = require('image-to-base64');
 const tracking = require('./tracking.js');
 
-dotenv.config();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
+dotenv.config();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
