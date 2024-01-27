@@ -20,7 +20,7 @@ const { Readable } = require('stream');
 const imageToBase64 = require('image-to-base64');
 const tracking = require('./tracking.js');
 
-dotenv.config();
+dotenv.config();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
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -941,12 +941,12 @@ app.post('/api/getStaffTrips', (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
         dbclient.query(
-            `select * from allocation where is_done=false and bus_staff=$1`, 
+            `select * from allocation where is_done=false and (driver=$1 or helper=$1)`, 
             [req.session.userid]
         ).then(qres => {
             console.log(qres);
             dbclient.query(
-                `select * from trip where bus_staff=$1`, 
+                `select * from trip where (driver=$1 or helper=$1)`, 
                 [req.session.userid]
             ).then(qres2 => {
                 console.log(qres2);
@@ -1014,7 +1014,7 @@ app.post('/api/endTrip', (req,res) => {
         let trip = tracking.runningTrips.get(req.body.trip_id);
         dbclient.query(
             `update trip set end_timestamp=current_timestamp, passenger_count=$1, end_location[0]=$2, end_location[1]=$3, 
-             is_live=false where id=$4 and bus_staff=$5 `, 
+             is_live=false where id=$4 and (driver=$5 or helper=$5)`, 
             [trip.passenger_count, trip.end_location.latitude, trip.end_location.longitude, req.body.trip_id, req.session.userid]
         ).then(qres => {
             console.log(qres);
