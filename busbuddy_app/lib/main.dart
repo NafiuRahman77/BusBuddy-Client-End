@@ -204,7 +204,8 @@ class PageBody extends StatelessWidget {
     else if (this.page == "Tracking") return Tracking();
     else if (this.page == "Tracking Map")
       return trackingMap(
-        RouteID: this.extra! as String,
+        extra:  this.extra! as dynamic,
+        // pathCoords: this.extra! as List<dynamic>,
       );
     return (Container());
   }
