@@ -995,21 +995,21 @@ app.post('/api/updateTripT', (req,res) => {
     };
     pathStr += "}";
     console.log(pathStr);
-    // dbclient.query(
-    //     `update trip set passenger_count=$1, is_live=false where id=$2 and (driver=$3 or helper=$3)`, 
-    //     [trip_t.passenger_count, trip_t.body.latitude, 'altaf']
-    // ).then(qres => {
-    //     console.log(qres);
-    //     if (qres.rowCount === 1) res.send({ 
-    //         success: true,
-    //     });
-    //     else if (qres.rowCount === 0) {
-    //         res.send({
-    //             success: false,
-    //         });
-    //     };
-    // }).catch(e => console.error(e.stack));
-    // tracking.runningTrips.delete(req.body.trip_id);
+    dbclient.query(
+        `update trip set passenger_count=$1, is_live=false, path=$4 where id=$2 and (driver=$3 or helper=$3)`, 
+        [trip_t.passenger_count, trip_t.body.latitude, 'altaf', pathStr]
+    ).then(qres => {
+        console.log(qres);
+        if (qres.rowCount === 1) res.send({ 
+            success: true,
+        });
+        else if (qres.rowCount === 0) {
+            res.send({
+                success: false,
+            });
+        };
+    }).catch(e => console.error(e.stack));
+    tracking.runningTrips.delete(req.body.trip_id);
 });
 
 app.post('/api/staffScanTicket', (req,res) => {
