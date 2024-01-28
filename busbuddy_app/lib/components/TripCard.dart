@@ -25,11 +25,12 @@ class TripCard extends StatefulWidget {
   final String BusNo;
   final String TripID;
   final String PrevP;
-  bool islive;
+  final bool islive;
   final Function() parentReloadCallback;
   final Function() parentTabController;
   final Color buttonColor;
   final String title;
+  final String Route;
 
   TripCard(
       {required this.SourceLocation,
@@ -43,7 +44,8 @@ class TripCard extends StatefulWidget {
       required this.parentReloadCallback,
       required this.parentTabController,
       required this.buttonColor,
-      required this.title});
+      required this.title,
+      required this.Route});
 
   @override
   _TripCardState createState() => _TripCardState();
@@ -66,13 +68,13 @@ class _TripCardState extends State<TripCard>
   @override
   bool get wantKeepAlive => true;
 
-  Map<String, String> getDateAndTime(String dateTimeString) {
-    DateTime dateTime = DateTime.parse(dateTimeString);
-    String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime.toUtc());
-    String formattedTime = DateFormat('HH:mm:ss').format(dateTime.toUtc());
+  // Map<String, String> getDateAndTime(String dateTimeString) {
+  //   DateTime dateTime = DateTime.parse(dateTimeString);
+  //   String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime.toUtc());
+  //   String formattedTime = DateFormat('HH:mm:ss').format(dateTime.toUtc());
 
-    return {'Sdate': formattedDate, 'Stime': formattedTime};
-  }
+  //   return {'Sdate': formattedDate, 'Stime': formattedTime};
+  // }
 
   // Function to get the current location
   Future<bool> _getCurrentLocation() async {
@@ -147,7 +149,7 @@ class _TripCardState extends State<TripCard>
   }
 
   Future<bool> onTripStart(String tripID) async {
-    context.loaderOverlay.show();
+    // context.loaderOverlay.show();
     // Get initial location
     await _getCurrentLocation();
 
@@ -175,15 +177,15 @@ class _TripCardState extends State<TripCard>
       //   _sendLocationUpdate(tripID);
       // });
 
-      context.loaderOverlay.hide();
+      // context.loaderOverlay.hide();
       return true;
     }
-    context.loaderOverlay.hide();
+    // context.loaderOverlay.hide();
     return false;
   }
 
   Future<bool> onTripEnd(String tripID) async {
-    context.loaderOverlay.show();
+    // context.loaderOverlay.show();
     await _getCurrentLocation();
 
     var r2 = await Requests.post(globel.serverIp + 'endTrip',
@@ -201,10 +203,10 @@ class _TripCardState extends State<TripCard>
 
     if (json2['success'] == true) {
       await globel.positionStream?.cancel();
-      context.loaderOverlay.hide();
+      // context.loaderOverlay.hide();
       return true;
     }
-    context.loaderOverlay.hide();
+    // context.loaderOverlay.hide();
     return false;
   }
 
@@ -212,8 +214,8 @@ class _TripCardState extends State<TripCard>
   Widget build(BuildContext context) {
     // print(widget.SourceLocation);
 
-    Map<String, String> Sdt = getDateAndTime(widget.StartTime);
-    Map<String, String> Ddt = getDateAndTime(widget.EndTime!);
+    // Map<String, String> Sdt = getDateAndTime(widget.StartTime);
+    // Map<String, String> Ddt = getDateAndTime(widget.EndTime!);
 
     Duration remaining =
         DateTime.now().difference(DateTime.parse(widget.StartTime));
@@ -238,17 +240,52 @@ class _TripCardState extends State<TripCard>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: buildDataTable({
-                  'Source': widget.SourceLocation,
-                  'Destination': widget.DestinationLocation,
-                  'Start Date': Sdt['Sdate']!,
-                  'Start Time': Sdt['Stime']!,
-                  'End Date': Ddt['Sdate']!,
-                  'End Time': Ddt['Stime']!,
-                  'Bus No': widget.BusNo,
-                }),
-              ),
+              if (!widget.islive && widget.EndTime != "")
+                Center(
+                  child: buildDataTable({
+                    'Route': widget.Route,
+                    'Trip #': widget.TripID,
+                    'Start Date': DateTime.parse(widget.StartTime)
+                        .toLocal()
+                        .toString()
+                        .split(' ')
+                        .first,
+                    'Start Time': DateTime.parse(widget.StartTime)
+                        .toLocal()
+                        .toString()
+                        .split(' ')
+                        .last,
+                    'End Date': DateTime.parse(widget.EndTime!)
+                        .toLocal()
+                        .toString()
+                        .split(' ')
+                        .first,
+                    'End Time': DateTime.parse(widget.EndTime!)
+                        .toLocal()
+                        .toString()
+                        .split(' ')
+                        .last,
+                    'Bus No': widget.BusNo,
+                  }),
+                ),
+              if (widget.islive || widget.EndTime == "")
+                Center(
+                  child: buildDataTable({
+                    'Route': widget.Route,
+                    'Trip #': widget.TripID,
+                    'Start Date': DateTime.parse(widget.StartTime)
+                        .toLocal()
+                        .toString()
+                        .split(' ')
+                        .first,
+                    'Start Time': DateTime.parse(widget.StartTime)
+                        .toLocal()
+                        .toString()
+                        .split(' ')
+                        .last,
+                    'Bus No': widget.BusNo,
+                  }),
+                ),
               SizedBox(height: 16),
               if (showWarning)
                 Text(
@@ -274,6 +311,7 @@ class _TripCardState extends State<TripCard>
                         ? ElevatedButton(
                             onPressed: () async {
                               // Check if location services are enabled
+                              context.loaderOverlay.show();
                               bool isLocationEnabled =
                                   await _getCurrentLocation();
 
@@ -347,6 +385,7 @@ class _TripCardState extends State<TripCard>
                                 // bool endTrip = await onTripEnd(widget.TripID);
                                 // await widget.parentReloadCallback();
                               }
+                              context.loaderOverlay.hide();
                             },
                             style: ElevatedButton.styleFrom(
                               primary: widget.buttonColor,

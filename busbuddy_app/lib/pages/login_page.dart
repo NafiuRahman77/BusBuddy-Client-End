@@ -19,7 +19,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  bool hidepass = true ; 
+  bool hidepass = true;
   // text editing controllers
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
@@ -32,7 +32,6 @@ class _LoginPageState extends State<LoginPage> {
     //   },
     //   body: jsonEncode(<String, String>{'id': id, 'password': password}),
     // );
-    context.loaderOverlay.show();
     var r = await Requests.post(globel.serverIp + 'login',
         body: {
           'id': id,
@@ -52,8 +51,8 @@ class _LoginPageState extends State<LoginPage> {
     // print(r2.content());
 
     if (json['success'] == true) {
-      globel.userType = json['user_type'] ; 
-      print(globel.userType) ; 
+      globel.userType = json['user_type'];
+      print(globel.userType);
       Fluttertoast.showToast(
           msg: 'Welcome, ${json['name']}',
           toastLength: Toast.LENGTH_SHORT,
@@ -62,7 +61,6 @@ class _LoginPageState extends State<LoginPage> {
           backgroundColor: Color.fromARGB(73, 56, 52, 52),
           textColor: Colors.white,
           fontSize: 16.0);
-      context.loaderOverlay.hide();
       return true;
     } else {
       Fluttertoast.showToast(
@@ -74,14 +72,11 @@ class _LoginPageState extends State<LoginPage> {
           textColor: Colors.white,
           fontSize: 16.0);
     }
-    context.loaderOverlay.hide();
     return false;
   }
   // sign user in method
 
   Future<void> onProfileReady() async {
-    context.loaderOverlay.show();
-
     var r = await Requests.post(globel.serverIp + 'getProfileStatic');
 
     r.raiseForStatus();
@@ -103,11 +98,9 @@ class _LoginPageState extends State<LoginPage> {
           textColor: Colors.white,
           fontSize: 16.0);
     }
-    context.loaderOverlay.hide();
   }
 
   Future<void> onProfileMount() async {
-    context.loaderOverlay.show();
     var r = await Requests.post(globel.serverIp + 'getProfile');
 
     r.raiseForStatus();
@@ -120,26 +113,20 @@ class _LoginPageState extends State<LoginPage> {
     //print('bb: ${jsonDecode(response.body)['email']}');
     if (json['success'] == true) {
       setState(() {
-
         globel.userName = json['name'];
         globel.userPhone = json['phone'];
-        if(globel.userType=="student")
-        {        
-        globel.userEmail = json['email'];
-        globel.userDefaultRouteId = json['default_route'];
-        globel.userDefaultRouteName = json['default_route_name'];
-        globel.userDefaultStationId = json['default_station'];
-        globel.userDefaultStationName = json['default_station_name'];
-        }
-        else if(globel.userType=="buet_staff")
-        {
-          globel.teacherDepartment = json['department'] ; 
-          globel.teacherDesignation = json['designation'] ; 
-          globel.teacherResidence = json['residence'] ; 
-
-        }
-        else if(globel.userType=="bus_staff"){
-           globel.staffRole = json['role'] ; 
+        if (globel.userType == "student") {
+          globel.userEmail = json['email'];
+          globel.userDefaultRouteId = json['default_route'];
+          globel.userDefaultRouteName = json['default_route_name'];
+          globel.userDefaultStationId = json['default_station'];
+          globel.userDefaultStationName = json['default_station_name'];
+        } else if (globel.userType == "buet_staff") {
+          globel.teacherDepartment = json['department'];
+          globel.teacherDesignation = json['designation'];
+          globel.teacherResidence = json['residence'];
+        } else if (globel.userType == "bus_staff") {
+          globel.staffRole = json['role'];
         }
 
         globel.userId = json['id'];
@@ -154,7 +141,6 @@ class _LoginPageState extends State<LoginPage> {
           textColor: Colors.white,
           fontSize: 16.0);
     }
-    context.loaderOverlay.hide();
   }
 
   @override
@@ -209,7 +195,7 @@ class _LoginPageState extends State<LoginPage> {
                       controller: usernameController,
                       hintText: 'Username',
                       obscureText: false,
-                      ispass: false, 
+                      ispass: false,
                     ),
 
                     const SizedBox(height: 50),
@@ -224,12 +210,12 @@ class _LoginPageState extends State<LoginPage> {
 
                     const SizedBox(width: 20),
 
-
                     const SizedBox(height: 25),
 
                     // sign in button
                     MyButton(onTap: () async {
                       //GoRouter.of(context).go("/show_profile");
+                      context.loaderOverlay.show();
                       bool lgin = await onLogin(
                           usernameController.text, passwordController.text);
                       if (lgin == true) {
