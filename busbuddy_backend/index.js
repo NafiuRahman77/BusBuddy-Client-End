@@ -903,7 +903,6 @@ app.post('/api/checkStaffRunningTrip', (req,res) => {
     });
     else res.send({
         success: false,
-        ...rt,
     });
 });
 
