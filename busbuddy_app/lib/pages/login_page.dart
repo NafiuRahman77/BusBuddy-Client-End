@@ -223,6 +223,7 @@ class _LoginPageState extends State<LoginPage> {
                         await onProfileMount();
                         GoRouter.of(context).go("/show_profile");
                       }
+                      context.loaderOverlay.hide();
                     }),
 
                     const SizedBox(height: 50),
