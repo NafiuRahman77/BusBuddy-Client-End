@@ -70,18 +70,18 @@ class _trackingMapUIState extends State<trackingMap> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Map with Markers'),
+         
         ),
         body: GoogleMap(
           initialCameraPosition: CameraPosition(
-            target: LatLng(23.7623975, 90.3646323), // Initial center of the map
+            target: LatLng(23.7623975, 90.3646323), 
             zoom: 12, // Zoom level
           ),
           polylines: Set<Polyline>.of([
             Polyline(
               polylineId: PolylineId('fsef'),
-              color: Colors.red, // Color of the polyline
-              points: x, // Pass your list of coordinates here
+              color: Colors.red, 
+              points: x, 
             ),
           ]),
         ),
