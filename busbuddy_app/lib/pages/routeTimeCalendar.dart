@@ -73,6 +73,10 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
     r1.raiseForStatus();
     List<dynamic> json1 = r1.json();
     setState(() {
+      //clear the lists
+      route_ids.clear();
+      route_names.clear();
+
       for (int i = 0; i < json1.length; i++) {
         route_ids.add(json1[i]['id']);
         route_names.add(json1[i]['terminal_point']);
@@ -90,6 +94,10 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
     r2.raiseForStatus();
     List<dynamic> json2 = r2.json();
     setState(() {
+      //clear the lists
+      station_ids.clear();
+      station_names.clear();
+      station_coords.clear();
       for (int i = 0; i < json2.length; i++) {
         // List<dynamic> arr2j = json2[i]['array_to_json'];
         station_ids.add(json2[i]['id']);
@@ -118,6 +126,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       routeTimeData.add(element);
     });
     List<dynamic> acceptedList = [];
+    rejectedData.clear();
     routeTimeData.forEach((bus) {
       print(bus['array_to_json'][0]['time']);
       print(selectedDate!);
@@ -127,8 +136,10 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
         acceptedList.add(bus);
       } else
         rejectedData.add(bus);
-      routeTimeData = acceptedList;
     });
+    routeTimeData = acceptedList;
+
+    print(routeTimeData.length);
   }
 
   Future<void> onRouteSelect(String route) async {
@@ -153,17 +164,15 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       });
 
       setDateInit();
-
     });
 
-   
     context.loaderOverlay.hide();
   }
 
   void _showDatePicker() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 5)),
     );

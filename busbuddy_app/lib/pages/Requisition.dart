@@ -38,7 +38,7 @@ class _RequisitionState extends State<Requisition> {
   void _showDatePicker() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2030),
     );

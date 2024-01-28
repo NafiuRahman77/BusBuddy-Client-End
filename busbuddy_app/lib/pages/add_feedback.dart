@@ -47,19 +47,18 @@ class _FeedbackFormState extends State<FeedbackForm> {
         defaultRouteName = json['default_route_name'];
       });
     } else {
-      if(globel.userType!="student") {defaultRoute = "4" ;}
-      else 
-      {
-          Fluttertoast.showToast(
-          msg: 'Failed to load default route.',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(73, 77, 65, 64),
-          textColor: Colors.white,
-          fontSize: 16.0);
+      if (globel.userType != "student") {
+        defaultRoute = "4";
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Failed to load default route.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(73, 77, 65, 64),
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
-
     }
     print(r.content());
     var r1 = await Requests.post(globel.serverIp + 'getRoutes');
@@ -94,9 +93,9 @@ class _FeedbackFormState extends State<FeedbackForm> {
   void _showDatePicker() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime.now().subtract(const Duration(days: 30)),
-      lastDate: DateTime(2030),
+      lastDate: DateTime.now(),
     );
 
     if (pickedDate != null && pickedDate != selectedDate) {
@@ -323,7 +322,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: Colors.grey.withOpacity(0.6)),
                 ),
                 child: Padding(
                   padding:
@@ -368,7 +367,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10.0),
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: Colors.grey.withOpacity(0.6)),
                       ),
                       child: MaterialButton(
                         onPressed: _showDatePicker,

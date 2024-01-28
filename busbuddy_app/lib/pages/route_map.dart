@@ -29,6 +29,18 @@ class _RouteTimeMap extends State<RouteTimeMap> {
 
   @override
   Widget build(BuildContext context) {
+    Marker startMarker = Marker(
+      markerId: MarkerId('start'),
+      position: stationLatLngPoints.first,
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+    );
+
+    Marker endMarker = Marker(
+      markerId: MarkerId('end'),
+      position: stationLatLngPoints.last,
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+    );
+
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.all(15),
@@ -48,14 +60,17 @@ class _RouteTimeMap extends State<RouteTimeMap> {
           onMapCreated: (GoogleMapController controller) {
             mapController = controller;
           },
-          markers: widget.stationPoints,
+          //markers: widget.stationPoints,
+          // change marker of first and last station to be different
+          // plz change here
+          markers: {...widget.stationPoints, startMarker, endMarker},
           polylines: Set<Polyline>.of([
-             Polyline(
-            polylineId: PolylineId('fsef'),
-            color: Colors.blue,
-            width: 5, 
-            points: stationLatLngPoints,
-          ),
+            Polyline(
+              polylineId: PolylineId('fsef'),
+              color: Colors.red,
+              width: 5,
+              points: stationLatLngPoints,
+            ),
           ]),
         ),
       ),
