@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:busbuddy_app/pages/scan_ticket_qr.dart';
 import 'package:busbuddy_app/pages/ticket_qr.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-
+import 'pages/tracking.dart';
+import 'pages/trackingMap.dart';
 import 'pages/ticket_choose.dart';
 import 'pages/ticket_history.dart';
 import 'package:flutter/material.dart';
@@ -140,6 +142,15 @@ class BusBuddyApp extends StatelessWidget {
     GoRoute(
         path: "/req_repair",
         builder: ((context, state) => const HomeView(page: "Request Repair"))),
+    GoRoute(
+        path: "/tracking",
+        builder: ((context, state) => const HomeView(page: "Tracking"))),
+    GoRoute(
+        path: "/trackingmap",
+        builder: ((context, state) =>
+            HomeView(page: "Tracking Map", extra: state.extra))),
+  
+  
   ]);
   // This widget is the root of your application.
   @override
@@ -191,6 +202,12 @@ class PageBody extends StatelessWidget {
     else if (this.page == "Manage Trips")
       return ManageTrips();
     else if (this.page == "Request Repair") return ReqRepair();
+    else if (this.page == "Tracking") return Tracking();
+    else if (this.page == "Tracking Map")
+      return trackingMap(
+        extra:  this.extra! as dynamic,
+        // pathCoords: this.extra! as List<dynamic>,
+      );
     return (Container());
   }
 }
@@ -273,8 +290,11 @@ class HomeViewState extends State<HomeView> {
       _selectedIndex = 14;
     } else if (currentRouteName == '/req_repair') {
       _selectedIndex = 15;
+    } else if (currentRouteName == '/route_map') {
+      print("route map");
+      _selectedIndex = 3;
     } else {
-      _selectedIndex = 0;
+      _selectedIndex = 1000;
     }
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
@@ -423,7 +443,8 @@ class HomeViewState extends State<HomeView> {
                               // Update the state of the app
                               // _onItemTapped(2);
                               // Then close the drawer
-
+                              GoRouter.of(context).pop();
+                              GoRouter.of(context).push("/tracking");
                               setState(() {
                                 _selectedIndex = 4;
                               });

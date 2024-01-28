@@ -200,6 +200,7 @@ class _TripCardState extends State<TripCard>
     print(json2);
 
     if (json2['success'] == true) {
+      await globel.positionStream?.cancel();
       context.loaderOverlay.hide();
       return true;
     }
@@ -304,7 +305,7 @@ class _TripCardState extends State<TripCard>
                                         enableWakeLock: true,
                                       ));
 
-                                  StreamSubscription<Position> positionStream =
+                                  globel.positionStream =
                                       Geolocator.getPositionStream(
                                               locationSettings:
                                                   locationSettings)

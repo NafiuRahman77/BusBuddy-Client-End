@@ -1,16 +1,30 @@
 import 'package:flutter/material.dart';
 
-class MyTextField extends StatelessWidget {
+class MyTextField extends StatefulWidget {
   final controller;
   final String hintText;
-  final bool obscureText;
+  bool obscureText;
+  bool showicon = true ; 
+  bool ispass; 
 
-  const MyTextField({
-    super.key,
+  MyTextField({
+    Key? key,
     required this.controller,
     required this.hintText,
     required this.obscureText,
-  });
+    required this.ispass,
+  }) : super(key: key);
+
+  @override
+  State<MyTextField> createState() => MyTextState();
+}
+
+class MyTextState extends State<MyTextField> {
+  @override
+  void initState() {
+    super.initState();
+    // Add any initialization logic if needed
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,22 +32,26 @@ class MyTextField extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
       child: TextField(
         style: TextStyle(color: Colors.white),
-        controller: controller,
-        obscureText: obscureText,
+        controller: widget.controller,
+        obscureText: widget.obscureText,
         decoration: InputDecoration(
           border: InputBorder.none,
-          // Remove the border
           focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.white), // Underline color
+            borderSide: BorderSide(color: Colors.white),
           ),
           enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.white), // Underline color
+            borderSide: BorderSide(color: Colors.white),
           ),
           fillColor: Colors.transparent,
-          // Set background to transparent
           filled: true,
-          hintText: hintText,
+          hintText: widget.hintText,
           hintStyle: TextStyle(color: Color.fromARGB(160, 255, 255, 255)),
+          suffixIcon: widget.ispass? IconButton(icon: Icon(widget.showicon? Icons.visibility:Icons.visibility_off),onPressed: (){
+            setState(() {
+              widget.obscureText = !widget.obscureText ; 
+              widget.showicon = !widget.showicon ; 
+            });
+          },):null 
         ),
       ),
     );
