@@ -19,6 +19,8 @@ const multer = require('multer');
 const { Readable } = require('stream');
 const imageToBase64 = require('image-to-base64');
 const tracking = require('./tracking.js');
+const pd = require('./path_dump.js');
+trip_t = pd.trip_t;
 
 dotenv.config();
 
@@ -710,6 +712,26 @@ app.post('/api/getRouteTimeData', (req, res) => {
     };
 });
 
+app.post('/api/getTrackingData', async (req, res) => {
+    console.log(req.session);
+    if (req.session.userid) {
+        // dbclient.query(
+        //     `select lpad(id::varchar, 8, '0') as id, start_timestamp, route, array_to_json(time_list), array_to_json(path) as path_, bus
+        //      from trip where route=$1`, [req.body.route]
+        // ).then(qres => {
+	    let list = [];
+        //iterating over map
+        tracking.runningTrips.forEach( async trip => {
+            if (trip.route == req.body.route) list.push (trip);
+        });
+ 	    //list.forEach(trip => {
+	//	trip.time_list = JSON.parse(trip.timeList);
+	  //  });
+        console.log(list);
+        res.send(list);
+    };
+});
+
 //dummy
 
 app.post('/api/sendRepairRequest', (req,res) => {
@@ -867,74 +889,6 @@ app.post('/api/getTripData', (req,res) => {
     });
 });
 
-app.post('/api/getTripTimeList', (req,res) => {
-    //send a dummy response
-    console.log(req.body);
-    res.send({
-        success: true,
-        data: [
-            {"station":"17","time":"2023-09-11T06:40:00+06:00"},{"station":"18","time":"2023-09-11T06:42:00+06:00"},{"station":"19","time":"2023-09-11T06:44:00+06:00"},{"station":"20","time":"2023-09-11T06:46:00+06:00"},{"station":"21","time":"2023-09-11T06:48:00+06:00"}     
-        ]
-    });
-});
-
-//get map path
-app.post('/api/getTripMapPath', (req,res) => {
-    //send a dummy response
-    console.log(req.body);
-    res.send({
-        success: true,
-        data: [
-            { "latitude": 23.7651, "longitude": 90.3652 },
-            { "latitude": 23.7649, "longitude": 90.3653 },
-            { "latitude": 23.7652, "longitude": 90.3650 },
-            { "latitude": 23.7650, "longitude": 90.3651 },
-            { "latitude": 23.7653, "longitude": 90.3652 },
-            { "latitude": 23.7651, "longitude": 90.3649 },
-            { "latitude": 23.7649, "longitude": 90.3650 },
-            { "latitude": 23.7652, "longitude": 90.3653 },
-            { "latitude": 23.7650, "longitude": 90.3648 },
-            { "latitude": 23.7653, "longitude": 90.3651 },
-            { "latitude": 23.7651, "longitude": 90.3650 },
-            { "latitude": 23.7649, "longitude": 90.3652 },
-            { "latitude": 23.7652, "longitude": 90.3651 },
-            { "latitude": 23.7650, "longitude": 90.3653 },
-            { "latitude": 23.7653, "longitude": 90.3650 },
-            { "latitude": 23.7651, "longitude": 90.3652 },
-            { "latitude": 23.7649, "longitude": 90.3651 },
-            { "latitude": 23.7652, "longitude": 90.3649 },
-            { "latitude": 23.7650, "longitude": 90.3652 },
-            { "latitude": 23.7653, "longitude": 90.3651 },
-            { "latitude": 23.7651, "longitude": 90.3648 },
-            { "latitude": 23.7649, "longitude": 90.3653 },
-            { "latitude": 23.7652, "longitude": 90.3650 },
-            { "latitude": 23.7650, "longitude": 90.3652 },
-            { "latitude": 23.7653, "longitude": 90.3650 },
-            { "latitude": 23.7651, "longitude": 90.3652 },
-            { "latitude": 23.7649, "longitude": 90.3650 },
-            { "latitude": 23.7652, "longitude": 90.3649 },
-            { "latitude": 23.7650, "longitude": 90.3653 },
-            { "latitude": 23.7653, "longitude": 90.3651 },
-            { "latitude": 23.7651, "longitude": 90.3650 },
-            { "latitude": 23.7649, "longitude": 90.3652 },
-            { "latitude": 23.7652, "longitude": 90.3651 },
-            { "latitude": 23.7650, "longitude": 90.3653 },
-            { "latitude": 23.7653, "longitude": 90.3650 },
-            { "latitude": 23.7651, "longitude": 90.3652 },
-            { "latitude": 23.7649, "longitude": 90.3651 },
-            { "latitude": 23.7652, "longitude": 90.3649 },
-            { "latitude": 23.7650, "longitude": 90.3652 },
-            { "latitude": 23.7653, "longitude": 90.3651 },
-            { "latitude": 23.7651, "longitude": 90.3648 },
-            { "latitude": 23.7649, "longitude": 90.3653 },
-            { "latitude": 23.7652, "longitude": 90.3650 },
-            { "latitude": 23.7650, "longitude": 90.3652 },
-            { "latitude": 23.7653, "longitude": 90.3650 },
-            { "latitude": 23.7651, "longitude": 90.3652 },
-            { "latitude": 23.7649, "longitude": 90.3650 }]
-    });
-});
-
 //get trip data
 app.post('/api/getStaffTrips', (req,res) => {
     //send a dummy response
@@ -985,7 +939,11 @@ app.post('/api/startTrip', (req,res) => {
                        (td.id, td.start_timestamp, td.route, td.time_type, 
                         td.travel_direction, td.bus, td.is_default,
                         td.bus_staff, td.approved_by, td.end_timestamp,
-                        td.start_location, td.end_location);
+                        {   
+                            latitude: req.body.latitude, 
+                            longitude: req.body.longitude
+                        }, 
+                        td.end_location);
                     tracking.runningTrips.set (newTrip.id, newTrip);
                     res.send({ 
                         success: true,
@@ -1010,13 +968,25 @@ app.post('/api/startTrip', (req,res) => {
     };
 });
 
-app.post('/api/endTrip', (req,res) => {
+app.post('/api/endTrip', async (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
-        let trip = tracking.runningTrips.get(req.body.trip_id);
+        console.log(req.body);
+        let trip = await tracking.runningTrips.get(req.body.trip_id);
+        let pathStr = "{";
+        for (let i=0; i<trip.path.length; i++) {
+            pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
+            if (i<trip.path.length-1) pathStr += ", ";
+        };
+        pathStr += "}";
+        console.log(pathStr);
+        let lt = await trip.start_location.latitude;
+        let lg = await trip.start_location.longitude;
         dbclient.query(
-            `update trip set end_timestamp=current_timestamp, passenger_count=$1, end_location[0]=$2, end_location[1]=$3, 
-             is_live=false where id=$4 and (driver=$5 or helper=$5)`, 
-            [trip.passenger_count, req.body.latitude, req.body.longitude, req.body.trip_id, req.session.userid]
+            `update trip set end_timestamp=current_timestamp, passenger_count=$1, start_location=$2, end_location=$3, 
+             is_live=false, path=$6 where id=$4 and (driver=$5 or helper=$5)`, 
+            [trip.passenger_count, ('('+lt+','+lg+')'),  
+             ('('+req.body.latitude+','+req.body.longitude+')'), 
+             req.body.trip_id, req.session.userid, pathStr]
         ).then(qres => {
             console.log(qres);
             if (qres.rowCount === 1) res.send({ 
@@ -1050,6 +1020,33 @@ app.post('/api/updateStaffLocation', (req,res) => {
         });
     };
 });
+
+// app.post('/api/updateTripT', (req,res) => {
+//     //send a dummy response
+//     //console.log(pd.trip_t);
+//     let pathStr = "{";
+//     for (let i=0; i<trip_t.path.length; i++) {
+//         pathStr += `"(${trip_t.path[i].latitude}, ${trip_t.path[i].longitude})"`;
+//         if (i<trip_t.path.length-1) pathStr += ", ";
+//     };
+//     pathStr += "}";
+//     console.log(pathStr);
+//     dbclient.query(
+//         `update trip set passenger_count=$1, is_live=false, path=$4 where id=$2 and (driver=$3 or helper=$3)`, 
+//         [trip_t.passenger_count, trip_t.id, 'altaf', pathStr]
+//     ).then(qres => {
+//         console.log(qres);
+//         if (qres.rowCount === 1) res.send({ 
+//             success: true,
+//         });
+//         else if (qres.rowCount === 0) {
+//             res.send({
+//                 success: false,
+//             });
+//         };
+//     }).catch(e => console.error(e.stack));
+//     tracking.runningTrips.delete(req.body.trip_id);
+// });
 
 app.post('/api/staffScanTicket', (req,res) => {
     //send a dummy response
