@@ -924,8 +924,8 @@ app.post('/api/startTrip', (req,res) => {
     console.log(req.body);
     if (req.session.userid && req.session.user_type=="bus_staff") {
         dbclient.query(
-            `call initiate_trip($1, $2)`, 
-            [req.body.trip_id, req.session.userid]
+            `call initiate_trip2($1, $2, $3)`, 
+            [req.body.trip_id, req.session.userid, ('('+req.body.latitude+','+req.body.longitude+')')]
         ).then(qres => {
             // console.log(qres);
             dbclient.query(
@@ -972,33 +972,50 @@ app.post('/api/endTrip', async (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
         let trip = await tracking.runningTrips.get(req.body.trip_id);
-        let pathStr = "{";
-        for (let i=0; i<trip.path.length; i++) {
-            pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
-            if (i<trip.path.length-1) pathStr += ", ";
-        };
-        pathStr += "}";
-        console.log(pathStr);
-        let lt = await trip.start_location.latitude;
-        let lg = await trip.start_location.longitude;
-        dbclient.query(
-            `update trip set end_timestamp=current_timestamp, passenger_count=$1, start_location=$2, end_location=$3, 
-             is_live=false, path=$6 where id=$4 and (driver=$5 or helper=$5)`, 
-            [trip.passenger_count, ('('+lt+','+lg+')'),  
-             ('('+req.body.latitude+','+req.body.longitude+')'), 
-             req.body.trip_id, req.session.userid, pathStr]
-        ).then(qres => {
-            console.log(qres);
-            if (qres.rowCount === 1) res.send({ 
-                success: true,
-            });
-            else if (qres.rowCount === 0) {
-                res.send({
-                    success: false,
-                });
+        if (trip) {
+            let pathStr = "{";
+            for (let i=0; i<trip.path.length; i++) {
+                pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
+                if (i<trip.path.length-1) pathStr += ", ";
             };
-        }).catch(e => console.error(e.stack));
-        tracking.runningTrips.delete(req.body.trip_id);
+            pathStr += "}";
+            console.log(pathStr);
+            let lt = await trip.start_location.latitude;
+            let lg = await trip.start_location.longitude;
+            dbclient.query(
+                `update trip set end_timestamp=current_timestamp, passenger_count=$1, start_location=$2, end_location=$3, 
+                is_live=false, path=$6 where id=$4 and (driver=$5 or helper=$5)`, 
+                [trip.passenger_count, ('('+lt+','+lg+')'),  
+                ('('+req.body.latitude+','+req.body.longitude+')'), 
+                req.body.trip_id, req.session.userid, pathStr]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
+                });
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+            tracking.runningTrips.delete(req.body.trip_id);
+        } else {
+            dbclient.query(
+                `update trip set end_timestamp=current_timestamp, is_live=false where id=$1 and (driver=$2 or helper=$2)`, 
+                [req.body.trip_id, req.session.userid, pathStr]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
+                });
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        }
     };
 });
 
@@ -1006,18 +1023,20 @@ app.post('/api/updateStaffLocation', (req,res) => {
     //send a dummy response
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
-        tracking.runningTrips.get(req.body.trip_id).path.push({
-            latitude: req.body.latitude, 
-            longitude: req.body.longitude
-        });
-        res.send({
-            success: true,
-            // new_path: [
-            //     { "latitude": 23.7651, "longitude": 90.3652 },
-            //     { "latitude": 23.7652, "longitude": 90.3650 },
-            //     { "latitude": 23.7650, "longitude": 90.3651 },
-            // ]
-        });
+        let trip = tracking.runningTrips.get(req.body.trip_id);
+        if (trip) {
+            trip.path.push({
+                latitude: req.body.latitude, 
+                longitude: req.body.longitude
+            });
+            res.send({
+                success: true,
+            });
+        } else {
+            res.send({
+                success: false,
+            });
+        }
     };
 });
 
