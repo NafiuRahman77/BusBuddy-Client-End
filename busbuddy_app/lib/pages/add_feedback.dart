@@ -322,7 +322,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: Colors.grey.withOpacity(0.6)),
                 ),
                 child: Padding(
                   padding:
@@ -367,7 +367,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10.0),
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: Colors.grey.withOpacity(0.6)),
                       ),
                       child: MaterialButton(
                         onPressed: _showDatePicker,
