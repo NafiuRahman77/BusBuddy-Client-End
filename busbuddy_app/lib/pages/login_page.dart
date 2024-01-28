@@ -19,6 +19,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  bool hidepass = true ; 
   // text editing controllers
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
@@ -208,6 +209,7 @@ class _LoginPageState extends State<LoginPage> {
                       controller: usernameController,
                       hintText: 'Username',
                       obscureText: false,
+                      ispass: false, 
                     ),
 
                     const SizedBox(height: 50),
@@ -216,8 +218,12 @@ class _LoginPageState extends State<LoginPage> {
                     MyTextField(
                       controller: passwordController,
                       hintText: 'Password',
-                      obscureText: true,
+                      obscureText: hidepass,
+                      ispass: true,
                     ),
+
+                    const SizedBox(width: 20),
+
 
                     const SizedBox(height: 25),
 

@@ -23,6 +23,7 @@ String teacherResidence = "";
 String staffRole = "";
 String serverIp = 'http://3.141.62.8:6969/api/';
 String runningTripId = "";
+String trackingTripId = ""  ; 
 bool wmg = false;
 StreamSubscription<Position>? positionStream;
 

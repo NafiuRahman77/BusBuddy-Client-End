@@ -153,40 +153,10 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       });
 
       setDateInit();
-      // routeCoords.forEach((element) {
-      //   print(element);
-      // });
 
-      // globel.mapMarkerSet.clear();
-      // routeCoords.forEach((coord) {
-      //   if (coord != null)
-      //     globel.mapMarkerSet.add(Marker(
-      //       markerId: MarkerId("value"),
-      //       position: LatLng(coord['x'], coord['y']),
-      //     ));
-      // });
-
-      // globel.mapMarkerSet.forEach((element) {
-      //   print(element);
-      // });
     });
 
-    // print(r.content());
-    // if (json['success'] == true) {
-    //   setState(() {
-    //     defaultRoute = json['default_route'];
-    //     defaultRouteName = json['default_route_name'];
-    //   });
-    // } else {
-    //   Fluttertoast.showToast(
-    //       msg: 'Failed to load default route.',
-    //       toastLength: Toast.LENGTH_SHORT,
-    //       gravity: ToastGravity.CENTER,
-    //       timeInSecForIosWeb: 1,
-    //       backgroundColor: Colors.red,
-    //       textColor: Colors.white,
-    //       fontSize: 16.0);
-    // }
+   
     context.loaderOverlay.hide();
   }
 
@@ -261,44 +231,6 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
                 ),
               ),
               SizedBox(height: 16),
-              // Align(
-              //   alignment: Alignment.centerLeft,
-              //   child: Padding(
-              //     padding: EdgeInsets.only(left: 12.0, bottom: 6.0),
-              //     child: Text(
-              //       'Select Bus',
-              //       style: TextStyle(
-              //         fontSize: 12,
-              //         fontWeight: FontWeight.bold,
-              //         color: Colors.grey.withOpacity(0.9),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-
-              // Container(
-              //   padding: const EdgeInsets.all(8.0),
-              //   decoration: BoxDecoration(
-              //     borderRadius: BorderRadius.circular(10.0),
-              //     border: Border.all(color: Colors.grey.withOpacity(0.5)),
-              //   ),
-              //   child: Padding(
-              //     padding: const EdgeInsets.only(left: 10),
-              //     child: DropdownButtonFormField<String>(
-              //       value: selectedValue2,
-              //       onChanged: (value) {},
-              //       items: ['DH-0974', 'DH-0954', 'DH-0972', 'DH-0927']
-              //           .map<DropdownMenuItem<String>>((String value) {
-              //         return DropdownMenuItem<String>(
-              //           value: value,
-              //           child: Text(value),
-              //         );
-              //       }).toList(),
-              //     ),
-              //   ),
-              // ),
-              // SizedBox(height: 16),
-              // Calendar widget code here
               SizedBox(height: 16),
               // Choose Date dropdown
               Align(
