@@ -582,7 +582,7 @@ app.post('/api/getTicketCount', (req,res) => {
     // console.log(req.body);
     if (req.session.userid) {
         dbclient.query(
-            `select count(*) from ticket where student_id=$1`, 
+            `select count(*) from ticket where student_id=$1 and is_used = false`, 
             [req.session.userid]
         ).then(qres => {
             console.log(qres);
