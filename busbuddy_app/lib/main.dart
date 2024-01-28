@@ -149,8 +149,6 @@ class BusBuddyApp extends StatelessWidget {
         path: "/trackingmap",
         builder: ((context, state) =>
             HomeView(page: "Tracking Map", extra: state.extra))),
-  
-  
   ]);
   // This widget is the root of your application.
   @override
@@ -201,11 +199,13 @@ class PageBody extends StatelessWidget {
       return ScanTicketQR();
     else if (this.page == "Manage Trips")
       return ManageTrips();
-    else if (this.page == "Request Repair") return ReqRepair();
-    else if (this.page == "Tracking") return Tracking();
+    else if (this.page == "Request Repair")
+      return ReqRepair();
+    else if (this.page == "Tracking")
+      return Tracking();
     else if (this.page == "Tracking Map")
       return trackingMap(
-        extra:  this.extra! as dynamic,
+        extra: this.extra! as dynamic,
         // pathCoords: this.extra! as List<dynamic>,
       );
     return (Container());
@@ -683,6 +683,18 @@ class HomeViewState extends State<HomeView> {
                           selected: _selectedIndex == 13,
                           onTap: () {
                             if (_selectedIndex == 13) return;
+                            if (globel.runningTripId == "") {
+                              Fluttertoast.showToast(
+                                  msg: 'Please start a trip first.',
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.CENTER,
+                                  timeInSecForIosWeb: 1,
+                                  backgroundColor:
+                                      Color.fromARGB(118, 185, 26, 5),
+                                  textColor: Colors.white,
+                                  fontSize: 16.0);
+                              return;
+                            }
                             // Update the state of the app
                             // _onItemTapped(2);
                             // Then close the drawer

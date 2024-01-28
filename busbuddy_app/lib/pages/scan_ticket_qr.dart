@@ -169,6 +169,7 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
     var r = await Requests.post(globel.serverIp + 'staffScanTicket',
         body: {
           'ticket_id': ticket_id,
+          'trip_id': globel.runningTripId,
         },
         bodyEncoding: RequestBodyEncoding.JSON);
 
@@ -178,7 +179,8 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
 
     if (json['success'] == true) {
       Fluttertoast.showToast(
-          msg: 'Ticket Scanned Successfully.',
+          msg:
+              'Ticket from Student#${json['student_id']} Scanned Successfully.',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
           timeInSecForIosWeb: 1,
