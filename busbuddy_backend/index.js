@@ -862,16 +862,6 @@ app.post('/api/checkStaffRunningTrip', (req,res) => {
         ...rt,
     });
 });
-
-
-    
-          
-            
-    
-
-          
-          Expand Down
-    
     
   
 //get trip data
