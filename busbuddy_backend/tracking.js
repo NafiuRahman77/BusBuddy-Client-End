@@ -21,7 +21,7 @@ class RunningTrip {
 
     constructor (id, start_timestamp, route, time_type, 
                  travel_direction, bus, is_default,
-                 bus_staff, approved_by, end_timestamp,
+                 driver, helper, approved_by, end_timestamp,
                  start_location, end_location, is_live) {
         this.id = id;
         this.start_timestamp = start_timestamp;
