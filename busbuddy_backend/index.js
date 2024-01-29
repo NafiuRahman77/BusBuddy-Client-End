@@ -75,18 +75,18 @@ dbclient.query(
     `select * from trip where is_live=true`
 ).then(qres2 => {
     console.log(qres2.rows[0].start_location);
-    // qres2.rows.forEach(td => {
-    //     let newTrip = new tracking.RunningTrip 
-    //         (td.id, td.start_timestamp, td.route, td.time_type, 
-    //         td.travel_direction, td.bus, td.is_default,
-    //         td.bus_staff, td.approved_by, td.end_timestamp,
-    //         {   
-    //             latitude: req.body.latitude, 
-    //             longitude: req.body.longitude
-    //         }, 
-    //         td.end_location);
-    //     tracking.runningTrips.set (newTrip.id, newTrip);
-    // });
+    qres2.rows.forEach(td => {
+        let newTrip = new tracking.RunningTrip 
+            (td.id, td.start_timestamp, td.route, td.time_type, 
+            td.travel_direction, td.bus, td.is_default,
+            td.bus_staff, td.approved_by, td.end_timestamp,
+            {   
+                latitude: td.start_location.x, 
+                longitude: td.start_location.y
+            }, 
+            td.end_location);
+        tracking.runningTrips.set (newTrip.id, newTrip);
+    });
 }).catch(e => console.error(e.stack));
 
 app.post('/api/getSession',(req,res) => {
