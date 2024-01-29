@@ -74,12 +74,12 @@ const getRealISODate = () => {
 dbclient.query(
     `select * from trip where is_live=true`
 ).then(qres2 => {
-    console.log(qres2.rows[0].start_location);
+    //console.log(qres2.rows[0].start_location);
     qres2.rows.forEach(td => {
         let newTrip = new tracking.RunningTrip 
             (td.id, td.start_timestamp, td.route, td.time_type, 
             td.travel_direction, td.bus, td.is_default,
-            td.bus_staff, td.approved_by, td.end_timestamp,
+            td.driver, td.helper, td.approved_by, td.end_timestamp,
             {   
                 latitude: td.start_location.x, 
                 longitude: td.start_location.y
@@ -849,18 +849,20 @@ app.post('/api/getTripData', (req,res) => {
 app.post('/api/checkStaffRunningTrip', (req,res) => {
     //send a dummy response
     console.log(req.body);
-    let rt =  null;
-    tracking.runningTrips.forEach( async trip => {
-        if (trip.driver == req.session.userid) rt = trip;
-    });
-    if (rt) res.send({
-        success: true,
-        ...rt,
-    });
-    else res.send({
-        success: false,
-        ...rt,
-    });
+    if (req.session.userid && req.session.user_type=="bus_staff") {
+        let rt =  null;
+        tracking.runningTrips.forEach( async trip => {
+            if (trip.driver == req.session.userid) rt = trip;
+        });
+        if (rt) res.send({
+            success: true,
+            ...rt,
+        });
+        else res.send({
+            success: false,
+            ...rt,
+        });
+    };
 });
     
   
@@ -870,12 +872,12 @@ app.post('/api/getStaffTrips', (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
         dbclient.query(
-            `select * from allocation where is_done=false and (driver=$1 or helper=$1)`, 
+            `select * from allocation where is_done=false and (driver=$1 or helper=$1) order by start_timestamp asc`, 
             [req.session.userid]
         ).then(qres => {
             console.log(qres);
             dbclient.query(
-                `select * from trip where (driver=$1 or helper=$1)`, 
+                `select * from trip where (driver=$1 or helper=$1) order by start_timestamp desc`, 
                 [req.session.userid]
             ).then(qres2 => {
                 console.log(qres2);
@@ -912,7 +914,7 @@ app.post('/api/startTrip', (req,res) => {
                     let newTrip = new tracking.RunningTrip 
                        (td.id, td.start_timestamp, td.route, td.time_type, 
                         td.travel_direction, td.bus, td.is_default,
-                        td.bus_staff, td.approved_by, td.end_timestamp,
+                        td.driver, td.helper, td.approved_by, td.end_timestamp,
                         {   
                             latitude: req.body.latitude, 
                             longitude: req.body.longitude
