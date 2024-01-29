@@ -217,10 +217,22 @@ class _TripCardState extends State<TripCard>
     // Map<String, String> Sdt = getDateAndTime(widget.StartTime);
     // Map<String, String> Ddt = getDateAndTime(widget.EndTime!);
 
-    Duration remaining =
-        DateTime.now().difference(DateTime.parse(widget.StartTime));
-    bool showWarning = false;
-    if (remaining.inMinutes < 10) showWarning = true;
+    Duration remaining = DateTime.now().difference(DateTime.parse(widget.StartTime));
+    Duration remaining2 = DateTime.now().difference(DateTime.parse(widget.StartTime));
+    remaining = remaining.abs();
+    remaining2 = remaining2.abs() ; 
+    running_trip = widget.islive ; 
+    bool showWarning = !widget.islive;
+    bool ended_trip = false ; 
+    if(running_trip==false && widget.EndTime!="") {ended_trip = true ; showWarning = false ; }
+
+    int start_hours = remaining.inHours;
+    int start_minutes = (remaining.inMinutes % 60);
+
+    int end_hours = remaining2.inHours;
+    int end_minutes= (remaining2.inMinutes % 60);
+    //bool running =  DateTime.now().isAfter(DateTime.parse(widget.StartTime)) && DateTime.now().isBefore(DateTime.parse(widget.EndTime));
+    //if (remaining.inMinutes < 10) showWarning = true;
 
     return Card(
       margin: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
@@ -289,18 +301,28 @@ class _TripCardState extends State<TripCard>
               SizedBox(height: 16),
               if (showWarning)
                 Text(
-                  'Trip Scheduled in ${remaining.inMinutes} from now',
+                  'Trip Scheduled in $start_hours hours and $start_minutes minutes from now',
                   style: TextStyle(
                     color: Colors.red,
+                    fontWeight : FontWeight.bold,
                   ),
                 ),
               if (running_trip)
                 Text(
-                  'The trip is running currenlty',
+                  'The trip is running currently for $start_hours hours and $start_minutes minutes',
                   style: TextStyle(
-                    color: Color.fromARGB(255, 38, 194, 27),
+                    color: Color.fromARGB(255, 16, 9, 202),
                   ),
                 ),
+              if (ended_trip)
+                Text(
+                  'The trip is finished $end_hours hours and $end_minutes minutes ago',
+                  textAlign: TextAlign.center, // Center the text
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 4, 154, 94),
+                  ),
+                ),
+
               SizedBox(height: 10),
               Center(
                 child: // show the button only if title is "Upcoming Trip" or title is "Ongoing trip" and islive is true

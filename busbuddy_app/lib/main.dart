@@ -677,6 +677,7 @@ class HomeViewState extends State<HomeView> {
                               });
                             },
                           ),
+                        if (globel.userType == "bus_staff")
                         ListTile(
                           leading: const Icon(Icons.qr_code),
                           title: const Text('QR Code Scan'),
