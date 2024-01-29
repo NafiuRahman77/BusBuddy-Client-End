@@ -74,7 +74,7 @@ const getRealISODate = () => {
 dbclient.query(
     `select * from trip where is_live=true`
 ).then(qres2 => {
-    console.log(qres2.rows[0].start_location);
+    //console.log(qres2.rows[0].start_location);
     qres2.rows.forEach(td => {
         let newTrip = new tracking.RunningTrip 
             (td.id, td.start_timestamp, td.route, td.time_type, 
