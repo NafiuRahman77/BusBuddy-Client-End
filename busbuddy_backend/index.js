@@ -849,18 +849,20 @@ app.post('/api/getTripData', (req,res) => {
 app.post('/api/checkStaffRunningTrip', (req,res) => {
     //send a dummy response
     console.log(req.body);
-    let rt =  null;
-    tracking.runningTrips.forEach( async trip => {
-        if (trip.driver == req.session.userid) rt = trip;
-    });
-    if (rt) res.send({
-        success: true,
-        ...rt,
-    });
-    else res.send({
-        success: false,
-        ...rt,
-    });
+    if (req.session.userid && req.session.user_type=="bus_staff") {
+        let rt =  null;
+        tracking.runningTrips.forEach( async trip => {
+            if (trip.driver == req.session.userid) rt = trip;
+        });
+        if (rt) res.send({
+            success: true,
+            ...rt,
+        });
+        else res.send({
+            success: false,
+            ...rt,
+        });
+    };
 });
     
   
