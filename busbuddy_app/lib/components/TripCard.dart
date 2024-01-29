@@ -375,6 +375,7 @@ class _TripCardState extends State<TripCard>
                                   bool endTrip =
                                       await onTripEnd(globel.runningTripId);
                                   if (endTrip) {
+                                    globel.runningTripId = "";
                                     print("ebdbdbdbdbedbdbd");
                                     widget.parentTabController();
                                     await widget.parentReloadCallback();
