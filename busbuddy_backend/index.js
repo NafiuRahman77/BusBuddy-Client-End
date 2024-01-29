@@ -914,7 +914,7 @@ app.post('/api/startTrip', (req,res) => {
                     let newTrip = new tracking.RunningTrip 
                        (td.id, td.start_timestamp, td.route, td.time_type, 
                         td.travel_direction, td.bus, td.is_default,
-                        td.bus_staff, td.approved_by, td.end_timestamp,
+                        td.driver, td.helper, td.approved_by, td.end_timestamp,
                         {   
                             latitude: req.body.latitude, 
                             longitude: req.body.longitude
