@@ -872,12 +872,12 @@ app.post('/api/getStaffTrips', (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
         dbclient.query(
-            `select * from allocation where is_done=false and (driver=$1 or helper=$1)`, 
+            `select * from allocation where is_done=false and (driver=$1 or helper=$1) order by start_timestamp asc`, 
             [req.session.userid]
         ).then(qres => {
             console.log(qres);
             dbclient.query(
-                `select * from trip where (driver=$1 or helper=$1)`, 
+                `select * from trip where (driver=$1 or helper=$1) order by start_timestamp desc`, 
                 [req.session.userid]
             ).then(qres2 => {
                 console.log(qres2);
