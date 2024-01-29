@@ -311,7 +311,7 @@ class _TripCardState extends State<TripCard>
                 Text(
                   'The trip is running currently for $start_hours hours and $start_minutes minutes',
                   style: TextStyle(
-                    color: Color.fromARGB(255, 38, 194, 27),
+                    color: Color.fromARGB(255, 16, 9, 202),
                   ),
                 ),
               if (ended_trip)
