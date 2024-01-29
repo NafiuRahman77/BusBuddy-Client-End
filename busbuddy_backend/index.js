@@ -21,30 +21,23 @@ const imageToBase64 = require('image-to-base64');
 const tracking = require('./tracking.js');
 const pd = require('./path_dump.js');
 trip_t = pd.trip_t;
-
 dotenv.config();
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-
 app.enable('trust proxy');
 // app.use(cors());
 // app.use(cors({
 //    origin: 'http://localhost:5173',
 //    credentials: true
 // }));
-
 // const SSLCommerzPayment = require('sslcommerz-lts')
 // const store_id = process.env.SSLCZ_STORE_ID;
 // const store_passwd = process.env.SSLCZ_PASSWORD;
 // const is_live = false;
-
 const getSHA512 = (input) => {
     return crypto.createHash('sha512').update(JSON.stringify(input)).digest('hex');
 };
-
-
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -55,10 +48,7 @@ app.use(session({
         httpOnly: false
     }
 }));
-
-
 const { Pool, Client } = require('pg');
-
 const dbclient = new Client({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -66,13 +56,10 @@ const dbclient = new Client({
   password: process.env.DB_PASS,
   port: process.env.DB_PORT,
 });
-
 dbclient.connect();
-
 const getRealISODate = () => {
     return (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 10);
 };
-
 // const initiate_today = () => {
 //     dbclient.query("CALL initiate_occupancy_today()").then(res1 => {
 //         console.log(res1);
@@ -81,13 +68,11 @@ const getRealISODate = () => {
 //         });
 //     });
 // };
-
 // initiate_today();
-
 // const cron = setInterval (initiate_today, 1800000);
 
 dbclient.query(
-    `select * from trip where is_live=true`, 
+    `select * from trip where is_live=true`
 ).then(qres2 => {
     console.log(qres2);
     qres2.rows.forEach(td => {
@@ -146,10 +131,8 @@ app.post('/api/getSession',(req,res) => {
         });
     }
 });
-
 app.post('/api/login', (req, res) => {
     console.log(req.body);
-
     dbclient.query(
         `SELECT name FROM student WHERE id=$1 AND password=$2`,
         [req.body.id, req.body.password]
@@ -206,10 +189,8 @@ app.post('/api/login', (req, res) => {
         };
     }).catch(e => console.error(e.stack));
 });
-
 app.post('/api/adminLogin', (req, res) => {
     console.log(req.body);
-
     dbclient.query(
         `SELECT name FROM admin WHERE id=$1 AND password=$2`,
         [req.body.id, req.body.password]
@@ -230,8 +211,6 @@ app.post('/api/adminLogin', (req, res) => {
         };
     }).catch(e => console.error(e.stack));
 });
-
-
 app.post('/api/register', (req, res) => {
     if (req.body.mobile == req.session.userid) {
         console.log(req.body);
@@ -248,8 +227,6 @@ app.post('/api/register', (req, res) => {
         });
     } else res.send(false);
 });
-
-
 app.post('/api/correctUser', (req, res) => {
     if (req.body.mobile == req.session.userid) {
         console.log(req.body);
@@ -266,15 +243,12 @@ app.post('/api/correctUser', (req, res) => {
         });
     } else res.send(false);
 });
-
-
 app.post('/api/logout',(req,res) => {
     req.session.destroy();
     res.send({
         success: true
     });
 });
-
 app.post('/api/getProfile', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
@@ -330,7 +304,6 @@ app.post('/api/getProfile', (req, res) => {
         };
     };
 });
-
 app.post('/api/getProfileStatic', (req, res) => {
     // console.log(req);
     if (req.session.userid) {
@@ -352,7 +325,6 @@ app.post('/api/getProfileStatic', (req, res) => {
                         ...qres.rows[0],
                         success: true,
                         imageStr: response,
-
                     });
                 };
             }).catch(e => console.error(e.stack));
@@ -374,7 +346,6 @@ app.post('/api/getProfileStatic', (req, res) => {
                         ...qres.rows[0],
                         success: true,
                         imageStr: response,
-
                     });
                 };
             }).catch(e => console.error(e.stack));
@@ -396,17 +367,14 @@ app.post('/api/getProfileStatic', (req, res) => {
                         ...qres.rows[0],
                         success: true,
                         imageStr: response,
-
                     });
                 };
             }).catch(e => console.error(e.stack));
         };
     } else console.log("Session not recognised.")
 });
-
 app.post('/api/getDefaultRoute', (req, res) => {
     console.log(req.session);
-
     if (req.session.userid) {
         dbclient.query(
             `select default_route, r.terminal_point as default_route_name 
@@ -426,7 +394,6 @@ app.post('/api/getDefaultRoute', (req, res) => {
         }).catch(e => console.error(e.stack));
     };
 });     
-
 // app.post('/api/getSelfID', (req, res) => {
 //     console.log(req.session);
 //     if (req.session.userid) {
@@ -447,7 +414,6 @@ app.post('/api/getDefaultRoute', (req, res) => {
 //         }).catch(e => console.error(e.stack));
 //     };
 // });
-
 app.post('/api/updateProfile', (req,res) => {
     console.log(req.body);
     if (req.session.userid === req.body.id) {
@@ -467,7 +433,6 @@ app.post('/api/updateProfile', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
-
 // app.post('/api/updatePassword', (req,res) => {
 //     dbclient.query(
 //         `UPDATE customer SET password=$1 WHERE mobile=$2 AND password=$3`, 
@@ -484,22 +449,18 @@ app.post('/api/updateProfile', (req,res) => {
 //         };
 //     }).catch(e => console.error(e.stack));
 // });
-
 app.post('/api/getRoutes', (req,res) => {
     console.log("sending route data");
     dbclient.query("SELECT id, terminal_point FROM route").then(qres => {
         res.send(qres.rows);
     }).catch(e => console.error(e.stack));
 });
-
-
 app.post('/api/getStations', (req,res) => {
     console.log("sending station data");
     dbclient.query("SELECT id, name, coords FROM station").then(qres => {
         res.send(qres.rows);
     }).catch(e => console.error(e.stack));
 });
-
 app.post('/api/getRouteStations', (req,res) => {
     console.log("sending route station data");
     dbclient.query("SELECT id, name FROM station where id in (select unnest(points) from route where id = $1)",
@@ -507,7 +468,6 @@ app.post('/api/getRouteStations', (req,res) => {
         res.send(qres.rows);
     }).catch(e => console.error(e.stack));
 });
-
 app.post('/api/addFeedback', (req,res) => {
     console.log(req.body);
     if (req.session.userid) {
@@ -549,7 +509,6 @@ app.post('/api/addFeedback', (req,res) => {
         
     };
 });
-
 app.post('/api/addRequisition', (req,res) => {
     console.log(req.body);
     if (req.session.userid) {
@@ -570,7 +529,6 @@ app.post('/api/addRequisition', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
-
 app.post('/api/purchaseTickets', (req,res) => {
     if (req.session.userid) {
         dbclient.query(
@@ -595,12 +553,11 @@ app.post('/api/purchaseTickets', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
-
 app.post('/api/getTicketCount', (req,res) => {
     // console.log(req.body);
     if (req.session.userid) {
         dbclient.query(
-            `select count(*) from ticket where student_id=$1`, 
+            `select count(*) from ticket where student_id=$1 and is_used = false`, 
             [req.session.userid]
         ).then(qres => {
             console.log(qres);
@@ -616,7 +573,6 @@ app.post('/api/getTicketCount', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
-
 app.post('/api/getTicketQRData', (req,res) => {
     console.log(req.body);
     if (req.session.userid && req.session.user_type=="student") {
@@ -638,7 +594,6 @@ app.post('/api/getTicketQRData', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
-
 app.post('/api/getUserFeedback', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
@@ -673,7 +628,6 @@ app.post('/api/getUserFeedback', (req, res) => {
         } 
     };
 });
-
 app.post('/api/getUserRequisition', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
@@ -690,7 +644,6 @@ app.post('/api/getUserRequisition', (req, res) => {
         });
     };
 });
-
 app.post('/api/getUserPurchaseHistory', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
@@ -707,7 +660,6 @@ app.post('/api/getUserPurchaseHistory', (req, res) => {
         });
     };
 });
-
 app.post('/api/getRouteTimeData', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
@@ -729,7 +681,6 @@ app.post('/api/getRouteTimeData', (req, res) => {
         });
     };
 });
-
 app.post('/api/getTrackingData', async (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
@@ -749,9 +700,7 @@ app.post('/api/getTrackingData', async (req, res) => {
         res.send(list);
     };
 });
-
 //dummy
-
 app.post('/api/sendRepairRequest', (req,res) => {
     //send a dummy response
     console.log(req.body);
@@ -759,7 +708,6 @@ app.post('/api/sendRepairRequest', (req,res) => {
         success: true,
     });
 });
-
 app.post('/api/getRepairRequest', (req,res) => {
     //send a dummy response
     console.log(req.body);
@@ -807,7 +755,6 @@ app.post('/api/getRepairRequest', (req,res) => {
     });
 }
 );
-
 app.post('/api/getNotifications', (req,res) => {
     //send a dummy response
     console.log(req.body);
@@ -826,7 +773,6 @@ app.post('/api/getNotifications', (req,res) => {
         ]
     });
 });
-
 //send real time notification api
 app.post('/api/sendNotification', (req,res) => {
     //send a dummy response
@@ -835,7 +781,6 @@ app.post('/api/sendNotification', (req,res) => {
         success: true,
     });
 });
-
 // Teacher bill payment api
 app.post('/api/payBill', (req,res) => {
     //send a dummy response
@@ -845,7 +790,6 @@ app.post('/api/payBill', (req,res) => {
         payment_id: 1984983210
     });
 });
-
 // Teacher bill history api
 app.post('/api/getBillHistory', (req,res) => {
     //send a dummy response
@@ -867,9 +811,7 @@ app.post('/api/getBillHistory', (req,res) => {
         ]
     });
 });
-
 //get route details
-
 //get nearest station
 app.post('/api/getNearestStation', (req,res) => {
     //send a dummy response
@@ -888,7 +830,6 @@ app.post('/api/getNearestStation', (req,res) => {
         ]
     });
 });
-
 app.post('/api/getRouteFromStation', (req,res) => {
     //send a dummy response
     console.log(req.body);
@@ -896,7 +837,6 @@ app.post('/api/getRouteFromStation', (req,res) => {
     {"id":"00000451","start_timestamp":"2023-09-11T00:40:00.000Z","route":"3","array_to_json":[{"station":"17","time":"2023-09-11T06:40:00+06:00"},{"station":"18","time":"2023-09-11T06:42:00+06:00"},{"station":"19","time":"2023-09-11T06:44:00+06:00"},{"station":"20","time":"2023-09-11T06:46:00+06:00"},{"station":"21","time":"2023-09-11T06:48:00+06:00"},{"station":"22","time":"2023-09-11T06:50:00+06:00"},{"station":"23","time":"2023-09-11T06:52:00+06:00"},{"station":"24","time":"2023-09-11T06:54:00+06:00"},{"station":"25","time":"2023-09-11T06:57:00+06:00"},{"station":"26","time":"2023-09-11T07:00:00+06:00"},{"station":"70","time":"2023-09-11T07:15:00+06:00"}],"bus":"Ba-24-8518"},
     {"id":"00000452","start_timestamp":"2023-09-11T07:40:00.000Z","route":"3","array_to_json":[{"station":"70","time":"2023-09-11T13:40:00+06:00"},{"station":"26","time":"2023-09-11T13:55:00+06:00"},{"station":"25","time":"2023-09-11T13:58:00+06:00"},{"station":"24","time":"2023-09-11T14:00:00+06:00"},{"station":"23","time":"2023-09-11T14:02:00+06:00"},{"station":"22","time":"2023-09-11T14:04:00+06:00"},{"station":"21","time":"2023-09-11T14:06:00+06:00"},{"station":"20","time":"2023-09-11T14:08:00+06:00"},{"station":"19","time":"2023-09-11T14:10:00+06:00"},{"station":"18","time":"2023-09-11T14:12:00+06:00"},{"station":"17","time":"2023-09-11T14:14:00+06:00"}],"bus":"Ba-24-8518"},]);
 });
-
 //get trip data
 app.post('/api/getTripData', (req,res) => {
     //send a dummy response
@@ -906,7 +846,34 @@ app.post('/api/getTripData', (req,res) => {
         ...tracking.runningTrips.get(req.body.trip_id),
     });
 });
+app.post('/api/checkStaffRunningTrip', (req,res) => {
+    //send a dummy response
+    console.log(req.body);
+    let rt =  null;
+    tracking.runningTrips.forEach( async trip => {
+        if (trip.driver == req.session.userid) rt = trip;
+    });
+    if (rt) res.send({
+        success: true,
+        ...rt,
+    });
+    else res.send({
+        success: false,
+        ...rt,
+    });
+});
 
+
+    
+          
+            
+    
+
+          
+          Expand Down
+    
+    
+  
 //get trip data
 app.post('/api/getStaffTrips', (req,res) => {
     //send a dummy response
@@ -937,13 +904,12 @@ app.post('/api/getStaffTrips', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
-
 app.post('/api/startTrip', (req,res) => {
     console.log(req.body);
     if (req.session.userid && req.session.user_type=="bus_staff") {
         dbclient.query(
-            `call initiate_trip($1, $2)`, 
-            [req.body.trip_id, req.session.userid]
+            `call initiate_trip2($1, $2, $3)`, 
+            [req.body.trip_id, req.session.userid, ('('+req.body.latitude+','+req.body.longitude+')')]
         ).then(qres => {
             // console.log(qres);
             dbclient.query(
@@ -973,7 +939,6 @@ app.post('/api/startTrip', (req,res) => {
                     });
                 };
             }).catch(e => console.error(e.stack));
-
             // if (qres.command == 'CALL') res.send({ 
             //     success: true,
             // });
@@ -985,60 +950,76 @@ app.post('/api/startTrip', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
-
 app.post('/api/endTrip', async (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
         let trip = await tracking.runningTrips.get(req.body.trip_id);
-        let pathStr = "{";
-        for (let i=0; i<trip.path.length; i++) {
-            pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
-            if (i<trip.path.length-1) pathStr += ", ";
-        };
-        pathStr += "}";
-        console.log(pathStr);
-        let lt = await trip.start_location.latitude;
-        let lg = await trip.start_location.longitude;
-        dbclient.query(
-            `update trip set end_timestamp=current_timestamp, passenger_count=$1, start_location=$2, end_location=$3, 
-             is_live=false, path=$6 where id=$4 and (driver=$5 or helper=$5)`, 
-            [trip.passenger_count, ('('+lt+','+lg+')'),  
-             ('('+req.body.latitude+','+req.body.longitude+')'), 
-             req.body.trip_id, req.session.userid, pathStr]
-        ).then(qres => {
-            console.log(qres);
-            if (qres.rowCount === 1) res.send({ 
-                success: true,
-            });
-            else if (qres.rowCount === 0) {
-                res.send({
-                    success: false,
-                });
+        if (trip) {
+            let pathStr = "{";
+            for (let i=0; i<trip.path.length; i++) {
+                pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
+                if (i<trip.path.length-1) pathStr += ", ";
             };
-        }).catch(e => console.error(e.stack));
-        tracking.runningTrips.delete(req.body.trip_id);
+            pathStr += "}";
+            console.log(pathStr);
+            let lt = await trip.start_location.latitude;
+            let lg = await trip.start_location.longitude;
+            dbclient.query(
+                `update trip set end_timestamp=current_timestamp, passenger_count=$1, start_location=$2, end_location=$3, 
+                is_live=false, path=$6 where id=$4 and (driver=$5 or helper=$5)`, 
+                [trip.passenger_count, ('('+lt+','+lg+')'),  
+                ('('+req.body.latitude+','+req.body.longitude+')'), 
+                req.body.trip_id, req.session.userid, pathStr]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
+                });
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+            tracking.runningTrips.delete(req.body.trip_id);
+        } else {
+            dbclient.query(
+                `update trip set end_timestamp=current_timestamp, is_live=false where id=$1 and (driver=$2 or helper=$2)`, 
+                [req.body.trip_id, req.session.userid, pathStr]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
+                });
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        }
     };
 });
-
 app.post('/api/updateStaffLocation', (req,res) => {
     //send a dummy response
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
-        tracking.runningTrips.get(req.body.trip_id).path.push({
-            latitude: req.body.latitude, 
-            longitude: req.body.longitude
-        });
-        res.send({
-            success: true,
-            // new_path: [
-            //     { "latitude": 23.7651, "longitude": 90.3652 },
-            //     { "latitude": 23.7652, "longitude": 90.3650 },
-            //     { "latitude": 23.7650, "longitude": 90.3651 },
-            // ]
-        });
+        let trip = tracking.runningTrips.get(req.body.trip_id);
+        if (trip) {
+            trip.path.push({
+                latitude: req.body.latitude, 
+                longitude: req.body.longitude
+            });
+            res.send({
+                success: true,
+            });
+        } else {
+            res.send({
+                success: false,
+            });
+        }
     };
 });
-
 // app.post('/api/updateTripT', (req,res) => {
 //     //send a dummy response
 //     //console.log(pd.trip_t);
@@ -1065,14 +1046,13 @@ app.post('/api/updateStaffLocation', (req,res) => {
 //     }).catch(e => console.error(e.stack));
 //     tracking.runningTrips.delete(req.body.trip_id);
 // });
-
 app.post('/api/staffScanTicket', (req,res) => {
     //send a dummy response
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
         dbclient.query(
             `update ticket set trip_id=$1, is_used=true where id=$2 returning student_id`, 
-            [trip.passenger_count, trip.end_location.latitude, trip.end_location.longitude, req.body.trip_id, req.session.userid]
+            [req.body.trip_id, req.body.ticket_id]
         ).then(qres => {
             console.log(qres);
             if (qres.rowCount === 1) res.send({ 
@@ -1087,7 +1067,6 @@ app.post('/api/staffScanTicket', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
-
 app.listen(port, () => {
     console.log(`BudBuddy backend listening on port ${port}`);
 });
