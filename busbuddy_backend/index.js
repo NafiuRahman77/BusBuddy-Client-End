@@ -817,6 +817,7 @@ app.post('/api/startTrip', (req,res) => {
                 // console.log(qres2);
                 if (qres2.rows.length == 1) {
                     let td = {...qres2.rows[0]};
+                    console.log(td.list_time);
                     let newTrip = new tracking.RunningTrip 
                        (td.id, td.start_timestamp, td.route, td.time_type, 
                         td.travel_direction, td.bus, td.is_default,
@@ -825,7 +826,7 @@ app.post('/api/startTrip', (req,res) => {
                             latitude: req.body.latitude, 
                             longitude: req.body.longitude
                         }, 
-                        td.end_location, td.list_time);
+                        td.end_location);
                     tracking.runningTrips.set (newTrip.id, newTrip);
                     res.send({ 
                         success: true,
