@@ -90,6 +90,7 @@ dbclient.query(
 }).catch(e => console.error(e.stack));
 
 dbclient.query("SELECT id, name, coords FROM station").then(qres => {
+    console.log(qres.rows);
     qres.rows.forEach( (st)  =>  {
         tracking.stationCoords.set(st.id, {
             latitude: st.coords.x,
