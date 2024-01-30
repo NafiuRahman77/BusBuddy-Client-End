@@ -57,7 +57,6 @@ void clearAll() {
   serverIp = '$serverAddr/api/';
   runningTripId = "";
   trackingTripId = "";
-  wmg = false;
   userAvatar = userAvatarBackup;
   if (positionStream != null) positionStream!.cancel();
 }

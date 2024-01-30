@@ -89,48 +89,7 @@ dbclient.query(
     });
 }).catch(e => console.error(e.stack));
 
-app.post('/api/getSession',(req,res) => {
-    if (req.session.userid) {
-        dbclient.query(
-            `SELECT name FROM customer WHERE mobile=$1`,
-            [req.session.userid]
-        ).then(qres => {
-            res.send({
-                success: true,
-                name: qres.rows[0].name,
-                admin: false
-            });
-        }).catch(e => {
-            req.session.destroy();
-            res.send({
-                success: false,
-            });
-            console.error(e.stack)
-        });
-    }
-    else if ( req.session.adminid){
-        dbclient.query(
-            `SELECT name FROM admin WHERE id=$1`,
-            [req.session.adminid]
-        ).then(qres => {
-            res.send({
-                success: true,
-                name: qres.rows[0].name,
-                admin: true
-            });
-        }).catch(e => {
-            req.session.destroy();
-            res.send({
-                success: false,
-            });
-            console.error(e.stack)
-        });
-    } else {
-        res.send({
-            success: false,
-        });
-    }
-});
+
 app.post('/api/login', (req, res) => {
     console.log(req.body);
     dbclient.query(
@@ -211,38 +170,7 @@ app.post('/api/adminLogin', (req, res) => {
         };
     }).catch(e => console.error(e.stack));
 });
-app.post('/api/register', (req, res) => {
-    if (req.body.mobile == req.session.userid) {
-        console.log(req.body);
-        dbclient.query (
-            "INSERT INTO customer(mobile, password, nid, dob, name, address) values($1, $2, $3, $4, $5, $6)",
-            [req.body.mobile, req.body.password, req.body.nid, req.body.dob, req.body.name, req.body.address]
-        ).then(qres => {
-            console.log(qres);
-            if (qres.rowCount === 1) res.send(true);
-            else if (qres.rowCount === 0) res.send(false);
-        }).catch(e => {
-            console.error(e.stack);
-            res.send(false);
-        });
-    } else res.send(false);
-});
-app.post('/api/correctUser', (req, res) => {
-    if (req.body.mobile == req.session.userid) {
-        console.log(req.body);
-        dbclient.query (
-            "UPDATE customer SET name=$1, dob=$2 WHERE nid=$3",
-            [req.body.name, req.body.dob, req.body.nid]
-        ).then(qres => {
-            console.log(qres);
-            if (qres.rowCount === 1) res.send(true);
-            else if (qres.rowCount === 0) res.send(false);
-        }).catch(e => {
-            console.error(e.stack);
-            res.send(false);
-        });
-    } else res.send(false);
-});
+
 app.post('/api/logout',(req,res) => {
     req.session.destroy();
     res.send({
@@ -304,13 +232,14 @@ app.post('/api/getProfile', (req, res) => {
         };
     };
 });
+
 app.post('/api/getProfileStatic', (req, res) => {
     // console.log(req);
     if (req.session.userid) {
-        if (req.session.user_type == "student") {
+        if (req.session.user_type == "student" || req.session.user_type == "buet_staff" || req.session.user_type == "bus_staff") {
             dbclient.query(
-                `select id, name from student where id=$1`, 
-                [req.session.userid]
+                `select id, name from $1 where id=$2`, 
+                [req.session.user_type, req.session.userid]
             ).then(qres => {
                 console.log(qres);
                 if (qres.rows.length === 0) res.send({ 
@@ -328,51 +257,10 @@ app.post('/api/getProfileStatic', (req, res) => {
                     });
                 };
             }).catch(e => console.error(e.stack));
-        } else if (req.session.user_type == "buet_staff") {
-            dbclient.query(
-                `select id, name from buet_staff where id=$1`, 
-                [req.session.userid]
-            ).then(qres => {
-                console.log(qres);
-                if (qres.rows.length === 0) res.send({ 
-                    success: false,
-                });
-                else {
-                    let response;
-                    if (fs.existsSync("../../busbuddy_storage/"+req.session.userid))
-                        response = new Buffer(fs.readFileSync("../../busbuddy_storage/"+req.session.userid)).toString('base64');
-                    else response = "";
-                    res.send({
-                        ...qres.rows[0],
-                        success: true,
-                        imageStr: response,
-                    });
-                };
-            }).catch(e => console.error(e.stack));
-        } else if (req.session.user_type == "bus_staff") { 
-            dbclient.query(
-                `select id, name from bus_staff where id=$1`, 
-                [req.session.userid]
-            ).then(qres => {
-                console.log(qres);
-                if (qres.rows.length === 0) res.send({ 
-                    success: false,
-                });
-                else {
-                    let response;
-                    if (fs.existsSync("../../busbuddy_storage/"+req.session.userid))
-                        response = new Buffer(fs.readFileSync("../../busbuddy_storage/"+req.session.userid)).toString('base64');
-                    else response = "";
-                    res.send({
-                        ...qres.rows[0],
-                        success: true,
-                        imageStr: response,
-                    });
-                };
-            }).catch(e => console.error(e.stack));
-        };
-    } else console.log("Session not recognised.")
+        } else console.log("Session not recognised.")
+    };
 });
+
 app.post('/api/getDefaultRoute', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
@@ -394,26 +282,7 @@ app.post('/api/getDefaultRoute', (req, res) => {
         }).catch(e => console.error(e.stack));
     };
 });     
-// app.post('/api/getSelfID', (req, res) => {
-//     console.log(req.session);
-//     if (req.session.userid) {
-//         dbclient.query(
-//             "SELECT nid, name FROM customer WHERE mobile=$1", 
-//             [req.session.userid]
-//         ).then(qres => {
-//             //console.log(qres);
-//             if (qres.rows.length === 0) res.send({ 
-//                 success: false,
-//             });
-//             else {
-//                 res.send({
-//                     ...qres.rows[0],
-//                     success: true,
-//                 });
-//             };
-//         }).catch(e => console.error(e.stack));
-//     };
-// });
+
 app.post('/api/updateProfile', (req,res) => {
     console.log(req.body);
     if (req.session.userid === req.body.id) {
@@ -433,34 +302,21 @@ app.post('/api/updateProfile', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
-// app.post('/api/updatePassword', (req,res) => {
-//     dbclient.query(
-//         `UPDATE customer SET password=$1 WHERE mobile=$2 AND password=$3`, 
-//         [req.body.password, req.session.userid, req.body.password0]
-//     ).then(qres => {
-//         //console.log(qres);
-//         if (qres.rowCount === 1) res.send({ 
-//             success: true,
-//         });
-//         else if (qres.rowCount === 0) {
-//             res.send({
-//                 success: false,
-//             });
-//         };
-//     }).catch(e => console.error(e.stack));
-// });
+
 app.post('/api/getRoutes', (req,res) => {
     console.log("sending route data");
     dbclient.query("SELECT id, terminal_point FROM route").then(qres => {
         res.send(qres.rows);
     }).catch(e => console.error(e.stack));
 });
+
 app.post('/api/getStations', (req,res) => {
     console.log("sending station data");
     dbclient.query("SELECT id, name, coords FROM station").then(qres => {
         res.send(qres.rows);
     }).catch(e => console.error(e.stack));
 });
+
 app.post('/api/getRouteStations', (req,res) => {
     console.log("sending route station data");
     dbclient.query("SELECT id, name FROM station where id in (select unnest(points) from route where id = $1)",
@@ -468,6 +324,7 @@ app.post('/api/getRouteStations', (req,res) => {
         res.send(qres.rows);
     }).catch(e => console.error(e.stack));
 });
+
 app.post('/api/addFeedback', (req,res) => {
     console.log(req.body);
     if (req.session.userid) {
@@ -781,6 +638,7 @@ app.post('/api/sendNotification', (req,res) => {
         success: true,
     });
 });
+
 // Teacher bill payment api
 app.post('/api/payBill', (req,res) => {
     //send a dummy response
@@ -790,6 +648,7 @@ app.post('/api/payBill', (req,res) => {
         payment_id: 1984983210
     });
 });
+
 // Teacher bill history api
 app.post('/api/getBillHistory', (req,res) => {
     //send a dummy response
@@ -811,6 +670,7 @@ app.post('/api/getBillHistory', (req,res) => {
         ]
     });
 });
+
 //get route details
 //get nearest station
 app.post('/api/getNearestStation', (req,res) => {
@@ -830,6 +690,7 @@ app.post('/api/getNearestStation', (req,res) => {
         ]
     });
 });
+
 app.post('/api/getRouteFromStation', (req,res) => {
     //send a dummy response
     console.log(req.body);
@@ -837,6 +698,7 @@ app.post('/api/getRouteFromStation', (req,res) => {
     {"id":"00000451","start_timestamp":"2023-09-11T00:40:00.000Z","route":"3","array_to_json":[{"station":"17","time":"2023-09-11T06:40:00+06:00"},{"station":"18","time":"2023-09-11T06:42:00+06:00"},{"station":"19","time":"2023-09-11T06:44:00+06:00"},{"station":"20","time":"2023-09-11T06:46:00+06:00"},{"station":"21","time":"2023-09-11T06:48:00+06:00"},{"station":"22","time":"2023-09-11T06:50:00+06:00"},{"station":"23","time":"2023-09-11T06:52:00+06:00"},{"station":"24","time":"2023-09-11T06:54:00+06:00"},{"station":"25","time":"2023-09-11T06:57:00+06:00"},{"station":"26","time":"2023-09-11T07:00:00+06:00"},{"station":"70","time":"2023-09-11T07:15:00+06:00"}],"bus":"Ba-24-8518"},
     {"id":"00000452","start_timestamp":"2023-09-11T07:40:00.000Z","route":"3","array_to_json":[{"station":"70","time":"2023-09-11T13:40:00+06:00"},{"station":"26","time":"2023-09-11T13:55:00+06:00"},{"station":"25","time":"2023-09-11T13:58:00+06:00"},{"station":"24","time":"2023-09-11T14:00:00+06:00"},{"station":"23","time":"2023-09-11T14:02:00+06:00"},{"station":"22","time":"2023-09-11T14:04:00+06:00"},{"station":"21","time":"2023-09-11T14:06:00+06:00"},{"station":"20","time":"2023-09-11T14:08:00+06:00"},{"station":"19","time":"2023-09-11T14:10:00+06:00"},{"station":"18","time":"2023-09-11T14:12:00+06:00"},{"station":"17","time":"2023-09-11T14:14:00+06:00"}],"bus":"Ba-24-8518"},]);
 });
+
 //get trip data
 app.post('/api/getTripData', (req,res) => {
     //send a dummy response
@@ -846,6 +708,7 @@ app.post('/api/getTripData', (req,res) => {
         ...tracking.runningTrips.get(req.body.trip_id),
     });
 });
+
 app.post('/api/checkStaffRunningTrip', (req,res) => {
     //send a dummy response
     console.log(req.body);
@@ -896,6 +759,7 @@ app.post('/api/getStaffTrips', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
+
 app.post('/api/startTrip', (req,res) => {
     console.log(req.body);
     if (req.session.userid && req.session.user_type=="bus_staff") {
@@ -942,6 +806,7 @@ app.post('/api/startTrip', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
+
 app.post('/api/endTrip', async (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
@@ -992,6 +857,7 @@ app.post('/api/endTrip', async (req,res) => {
         }
     };
 });
+
 app.post('/api/updateStaffLocation', (req,res) => {
     //send a dummy response
     if (req.session.userid && req.session.user_type=="bus_staff") {
@@ -1012,32 +878,7 @@ app.post('/api/updateStaffLocation', (req,res) => {
         }
     };
 });
-// app.post('/api/updateTripT', (req,res) => {
-//     //send a dummy response
-//     //console.log(pd.trip_t);
-//     let pathStr = "{";
-//     for (let i=0; i<trip_t.path.length; i++) {
-//         pathStr += `"(${trip_t.path[i].latitude}, ${trip_t.path[i].longitude})"`;
-//         if (i<trip_t.path.length-1) pathStr += ", ";
-//     };
-//     pathStr += "}";
-//     console.log(pathStr);
-//     dbclient.query(
-//         `update trip set passenger_count=$1, is_live=false, path=$4 where id=$2 and (driver=$3 or helper=$3)`, 
-//         [trip_t.passenger_count, trip_t.id, 'altaf', pathStr]
-//     ).then(qres => {
-//         console.log(qres);
-//         if (qres.rowCount === 1) res.send({ 
-//             success: true,
-//         });
-//         else if (qres.rowCount === 0) {
-//             res.send({
-//                 success: false,
-//             });
-//         };
-//     }).catch(e => console.error(e.stack));
-//     tracking.runningTrips.delete(req.body.trip_id);
-// });
+
 app.post('/api/staffScanTicket', (req,res) => {
     //send a dummy response
     if (req.session.userid && req.session.user_type=="bus_staff") {
@@ -1059,6 +900,7 @@ app.post('/api/staffScanTicket', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
+
 app.listen(port, () => {
     console.log(`BudBuddy backend listening on port ${port}`);
 });
