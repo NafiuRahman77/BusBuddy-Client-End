@@ -811,7 +811,7 @@ app.post('/api/startTrip', (req,res) => {
         ).then(qres => {
             // console.log(qres);
             dbclient.query(
-                `select *, array_to_json(time_list) as time_list_ from trip where id=$1`, 
+                `select *, array_to_json(time_list) as list_time from trip where id=$1`, 
                 [req.body.trip_id]
             ).then(qres2 => {
                 // console.log(qres2);
@@ -825,7 +825,7 @@ app.post('/api/startTrip', (req,res) => {
                             latitude: req.body.latitude, 
                             longitude: req.body.longitude
                         }, 
-                        td.end_location, td.time_list_);
+                        td.end_location, td.list_time);
                     tracking.runningTrips.set (newTrip.id, newTrip);
                     res.send({ 
                         success: true,
