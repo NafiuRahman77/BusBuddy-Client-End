@@ -932,7 +932,7 @@ app.post('/api/updateStaffLocation', (req,res) => {
                 let dist = geolib.getDistance(p_coords, r_coord);
                 console.log(dist);
                 
-                if (dist <= 50) {
+                if (dist <= 100) {
                     console.log(tp.route);
                     tp.time = (new Date()).toISOString();
                 };
