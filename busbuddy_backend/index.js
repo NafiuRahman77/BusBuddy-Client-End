@@ -877,6 +877,13 @@ app.post('/api/endTrip', async (req,res) => {
             };
             pathStr += "}";
             console.log(pathStr);
+            let timeListStr = "{";
+            for (let i=0; i<time_list.length; i++) {
+                if (time_list[i].time) 
+                    timeListStr += `"(${time_list[i].station}, \\\"${time_list[i].time.toISOString()}\\\")"`;
+                else timeListStr += "null";
+                if (i<time_list.length-1) timeListStr += ",";
+            };
             let lt = await trip.start_location.latitude;
             let lg = await trip.start_location.longitude;
             dbclient.query(
@@ -928,13 +935,12 @@ app.post('/api/updateStaffLocation', (req,res) => {
             };
             trip.time_list.forEach( async tp => {
                 let p_coords = tracking.stationCoords.get(tp.station);
-                // let dist = Math.sqrt((p_coords.latitude - req.body.latitude)**2 + (p_coords.longitude - req.body.longitude)**2) * 111139;
                 let dist = geolib.getDistance(p_coords, r_coord);
                 console.log(dist);
                 
                 if (dist <= 180) {
                     console.log(tp.route);
-                    tp.time = (new Date()).toISOString();
+                    tp.time = new Date();
                 };
             });
             trip.path.push(r_coord);
