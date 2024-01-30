@@ -71,7 +71,7 @@ const getRealISODate = () => {
 // initiate_today();
 // const cron = setInterval (initiate_today, 1800000);
 
-await dbclient.query(
+dbclient.query(
     `select * from trip where is_live=true`
 ).then(qres2 => {
     //console.log(qres2.rows[0].start_location);
@@ -89,7 +89,7 @@ await dbclient.query(
     });
 }).catch(e => console.error(e.stack));
 
-await dbclient.query("SELECT id, name, coords FROM station").then(qres => {
+dbclient.query("SELECT id, name, coords FROM station").then(qres => {
     qres.rows.forEach( (st)  =>  {
         tracking.stationCoords.set(st.id, {
             latitude: st.coords.x,
