@@ -878,11 +878,11 @@ app.post('/api/endTrip', async (req,res) => {
             pathStr += "}";
             console.log(pathStr);
             let timeListStr = "{";
-            for (let i=0; i<time_list.length; i++) {
-                if (time_list[i].time) 
-                    timeListStr += `"(${time_list[i].station}, \\\"${time_list[i].time.toISOString()}\\\")"`;
+            for (let i=0; i<trip.time_list.length; i++) {
+                if (trip.time_list[i].time) 
+                    timeListStr += `"(${trip.time_list[i].station}, \\\"${trip.time_list[i].time.toISOString()}\\\")"`;
                 else timeListStr += "null";
-                if (i<time_list.length-1) timeListStr += ",";
+                if (i<trip.time_list.length-1) timeListStr += ",";
             };
             let lt = await trip.start_location.latitude;
             let lg = await trip.start_location.longitude;
