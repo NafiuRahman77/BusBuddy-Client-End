@@ -86,7 +86,11 @@ dbclient.query(
             }, 
             td.end_location);
         td.list_time.forEach (async tp =>  {
-            newTrip.time_list.push({...tp});
+            // newTrip.time_list.push({...tp});
+            newTrip.time_list.push({
+                station: tp.station,
+                time: null
+            });
         });
         tracking.runningTrips.set (newTrip.id, newTrip);
     });
@@ -831,7 +835,11 @@ app.post('/api/startTrip', (req,res) => {
                         }, 
                         td.end_location);
                     td.list_time.forEach (async tp =>  {
-                        newTrip.time_list.push({...tp});
+                        // newTrip.time_list.push({...tp});
+                        newTrip.time_list.push({
+                            station: tp.station,
+                            time: null
+                        });
                     });
                     tracking.runningTrips.set (newTrip.id, newTrip);
                     res.send({ 
@@ -913,6 +921,15 @@ app.post('/api/updateStaffLocation', (req,res) => {
         console.log(req.body);
         let trip = tracking.runningTrips.get(req.body.trip_id);
         if (trip) {
+            trip.time_list.forEach( async tp => {
+                p_coords = tracking.stationCoords.get(tp.station);
+                let dist = sqrt((p_coords.latitude - req.body.latitude)**2 + (p_coords.longitude - req.body.longitude)**2) * 111139;
+                console.log(dist);
+                if (dist <= 50) {
+                    console.log(tp.route);
+                    tp.time = (new Date()).toISOString();
+                };
+            });
             trip.path.push({
                 latitude: req.body.latitude, 
                 longitude: req.body.longitude
