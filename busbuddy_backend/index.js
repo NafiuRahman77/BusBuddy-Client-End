@@ -16,7 +16,7 @@ const multer = require('multer');
 // const html = fs.readFileSync("src/ticket.html", "utf8");
 const { Readable } = require('stream');
 const imageToBase64 = require('image-to-base64');
-const geo = require('node-geo-distance');
+const geolib = require('geolib');
 const tracking = require('./tracking.js');
 const pd = require('./path_dump.js');
 
@@ -929,7 +929,7 @@ app.post('/api/updateStaffLocation', (req,res) => {
             trip.time_list.forEach( async tp => {
                 let p_coords = tracking.stationCoords.get(tp.station);
                 // let dist = Math.sqrt((p_coords.latitude - req.body.latitude)**2 + (p_coords.longitude - req.body.longitude)**2) * 111139;
-                let dist = geo.vincentySync(p_coords, r_coord);
+                let dist = geolib.getDistance(p_coords, r_coord);
                 console.log(dist);
                 
                 if (dist <= 50) {
