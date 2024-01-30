@@ -238,7 +238,7 @@ app.post('/api/getProfileStatic', (req, res) => {
     if (req.session.userid) {
         if (req.session.user_type == "student" || req.session.user_type == "buet_staff" || req.session.user_type == "bus_staff") {
             dbclient.query(
-                `select id, name from ${db.escapeIdentifier(req.session.user_type)} where id=$1`, 
+                `select id, name from ${dbclient.escapeIdentifier(req.session.user_type)} where id=$1`, 
                 [req.session.userid]
             ).then(qres => {
                 console.log(qres);
