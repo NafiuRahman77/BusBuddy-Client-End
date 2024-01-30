@@ -86,7 +86,7 @@ dbclient.query(
             }, 
             td.end_location);
         td.list_time.forEach (async tp =>  {
-            newTrip.time_list.push(...tp);
+            newTrip.time_list.push({...tp});
         });
         tracking.runningTrips.set (newTrip.id, newTrip);
     });
@@ -831,7 +831,7 @@ app.post('/api/startTrip', (req,res) => {
                         }, 
                         td.end_location);
                     td.list_time.forEach (async tp =>  {
-                        newTrip.time_list.push(...tp);
+                        newTrip.time_list.push({...tp});
                     });
                     tracking.runningTrips.set (newTrip.id, newTrip);
                     res.send({ 
