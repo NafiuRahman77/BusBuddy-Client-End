@@ -923,7 +923,7 @@ app.post('/api/updateStaffLocation', (req,res) => {
         if (trip) {
             trip.time_list.forEach( async tp => {
                 p_coords = tracking.stationCoords.get(tp.station);
-                let dist = sqrt((p_coords.latitude - req.body.latitude)**2 + (p_coords.longitude - req.body.longitude)**2) * 111139;
+                let dist = Math.sqrt((p_coords.latitude - req.body.latitude)**2 + (p_coords.longitude - req.body.longitude)**2) * 111139;
                 console.log(dist);
                 if (dist <= 50) {
                     console.log(tp.route);
