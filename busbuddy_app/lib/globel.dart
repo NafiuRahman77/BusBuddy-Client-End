@@ -8,6 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+const int distanceFilter = 50;
+
 String userId = "";
 String userName = "";
 String userEmail = "";

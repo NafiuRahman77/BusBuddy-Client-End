@@ -31,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
 
     locationSettings = AndroidSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 100,
+        distanceFilter: globel.distanceFilter,
         forceLocationManager: true,
         intervalDuration: const Duration(seconds: 10),
         //(Optional) Set foreground notification config to keep the app alive

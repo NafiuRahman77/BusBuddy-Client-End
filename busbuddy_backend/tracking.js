@@ -1,5 +1,6 @@
 
 const runningTrips = new Map();
+const stationCoords = new Map();
 
 class RunningTrip {
     id;
@@ -41,4 +42,4 @@ class RunningTrip {
     };
 };
 
-module.exports = {RunningTrip, runningTrips}
+module.exports = {RunningTrip, runningTrips, stationCoords}

@@ -71,7 +71,7 @@ const getRealISODate = () => {
 // initiate_today();
 // const cron = setInterval (initiate_today, 1800000);
 
-dbclient.query(
+await dbclient.query(
     `select * from trip where is_live=true`
 ).then(qres2 => {
     //console.log(qres2.rows[0].start_location);
@@ -87,6 +87,16 @@ dbclient.query(
             td.end_location);
         tracking.runningTrips.set (newTrip.id, newTrip);
     });
+}).catch(e => console.error(e.stack));
+
+await dbclient.query("SELECT id, name, coords FROM station").then(qres => {
+    qres.rows.forEach( (st)  =>  {
+        tracking.stationCoords.set(st.id, {
+            latitude: st.coords.x,
+            longitude: st.coords.y,
+        });
+    });
+    console.log(tracking.stationCoords);
 }).catch(e => console.error(e.stack));
 
 
@@ -286,20 +296,52 @@ app.post('/api/getDefaultRoute', (req, res) => {
 app.post('/api/updateProfile', (req,res) => {
     console.log(req.body);
     if (req.session.userid === req.body.id) {
-        dbclient.query(
-            `UPDATE student SET phone=$1, email=$2, default_route=$3, default_station=$4 WHERE id=$5`, 
-            [req.body.phone, req.body.email, req.body.default_route, req.body.default_station, req.body.id]
-        ).then(qres => {
-            console.log(qres);
-            if (qres.rowCount === 1) res.send({ 
-                success: true,
-            });
-            else if (qres.rowCount === 0) {
-                res.send({
-                    success: false,
+        if (req.session.user_type == "student") {
+            dbclient.query(
+                `UPDATE student SET phone=$1, email=$2, default_route=$3, default_station=$4 WHERE id=$5`, 
+                [req.body.phone, req.body.email, req.body.default_route, req.body.default_station, req.body.id]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
                 });
-            };
-        }).catch(e => console.error(e.stack));
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        } else if (req.session.user_type == "buet_staff") {
+            dbclient.query(
+                `UPDATE buet_staff SET phone=$1, residence=$2 WHERE id=$3`, 
+                [req.body.phone, req.body.residence, req.body.id]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
+                });
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        } else if (req.session.user_type == "bus_staff") {
+            dbclient.query(
+                `UPDATE bus_staff SET phone=$1 WHERE id=$2`, 
+                [req.body.phone, req.body.id]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
+                });
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        } 
     };
 });
 
