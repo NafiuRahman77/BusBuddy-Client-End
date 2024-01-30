@@ -97,9 +97,8 @@ dbclient.query("SELECT id, name, coords FROM station").then(qres => {
             longitude: st.coords.y,
         });
     });
-    console.log(tracking.stationCoords);
+    // console.log(tracking.stationCoords);
 }).catch(e => console.error(e.stack));
-
 
 app.post('/api/login', (req, res) => {
     console.log(req.body);
@@ -826,7 +825,7 @@ app.post('/api/startTrip', (req,res) => {
                             latitude: req.body.latitude, 
                             longitude: req.body.longitude
                         }, 
-                        td.end_location);
+                        td.end_location, td.time_list_);
                     tracking.runningTrips.set (newTrip.id, newTrip);
                     res.send({ 
                         success: true,
