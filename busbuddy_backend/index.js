@@ -884,6 +884,7 @@ app.post('/api/endTrip', async (req,res) => {
                 else timeListStr += "null";
                 if (i<trip.time_list.length-1) timeListStr += ",";
             };
+            timeListStr += "}";
             let lt = await trip.start_location.latitude;
             let lg = await trip.start_location.longitude;
             dbclient.query(
