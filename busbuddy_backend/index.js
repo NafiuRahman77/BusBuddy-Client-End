@@ -85,6 +85,9 @@ dbclient.query(
                 longitude: td.start_location.y
             }, 
             td.end_location);
+        td.list_time.forEach (async tp =>  {
+            newTrip.time_list.push(...tp);
+        });
         tracking.runningTrips.set (newTrip.id, newTrip);
     });
 }).catch(e => console.error(e.stack));
@@ -827,6 +830,9 @@ app.post('/api/startTrip', (req,res) => {
                             longitude: req.body.longitude
                         }, 
                         td.end_location);
+                    td.list_time.forEach (async tp =>  {
+                        newTrip.time_list.push(...tp);
+                    });
                     tracking.runningTrips.set (newTrip.id, newTrip);
                     res.send({ 
                         success: true,
