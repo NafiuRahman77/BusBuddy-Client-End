@@ -18,14 +18,17 @@ const multer = require('multer');
 // const html = fs.readFileSync("src/ticket.html", "utf8");
 const { Readable } = require('stream');
 const imageToBase64 = require('image-to-base64');
+const geo = require('node-geo-distance');
 const tracking = require('./tracking.js');
 const pd = require('./path_dump.js');
+
 trip_t = pd.trip_t;
 dotenv.config();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.enable('trust proxy');
+
 // app.use(cors());
 // app.use(cors({
 //    origin: 'http://localhost:5173',
@@ -921,19 +924,22 @@ app.post('/api/updateStaffLocation', (req,res) => {
         console.log(req.body);
         let trip = tracking.runningTrips.get(req.body.trip_id);
         if (trip) {
+            let r_coord = {
+                latitude: req.body.latitude, 
+                longitude: req.body.longitude
+            };
             trip.time_list.forEach( async tp => {
-                p_coords = tracking.stationCoords.get(tp.station);
-                let dist = Math.sqrt((p_coords.latitude - req.body.latitude)**2 + (p_coords.longitude - req.body.longitude)**2) * 111139;
+                let p_coords = tracking.stationCoords.get(tp.station);
+                // let dist = Math.sqrt((p_coords.latitude - req.body.latitude)**2 + (p_coords.longitude - req.body.longitude)**2) * 111139;
+                let dist = geo.vincentySync(p_coords, r_coord);
                 console.log(dist);
+                
                 if (dist <= 50) {
                     console.log(tp.route);
                     tp.time = (new Date()).toISOString();
                 };
             });
-            trip.path.push({
-                latitude: req.body.latitude, 
-                longitude: req.body.longitude
-            });
+            trip.path.push(r_coord);
             res.send({
                 success: true,
             });
