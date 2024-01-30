@@ -72,7 +72,7 @@ const getRealISODate = () => {
 // const cron = setInterval (initiate_today, 1800000);
 
 dbclient.query(
-    `select * from trip where is_live=true`
+    `select *, array_to_json(time_list) as list_time from trip where is_live=true`
 ).then(qres2 => {
     //console.log(qres2.rows[0].start_location);
     qres2.rows.forEach(td => {
