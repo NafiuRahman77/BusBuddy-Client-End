@@ -110,7 +110,7 @@ dbclient.query("SELECT id, name, coords FROM station").then(qres => {
 app.post('/api/login', (req, res) => {
     console.log(req.body);
     req.sessionStore.all((err, sessions)=>{ 
-        console.log(sessions.userid)
+        console.log(sessions)
     });
     dbclient.query(
         `SELECT name FROM student WHERE id=$1 AND password=$2`,
