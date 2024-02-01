@@ -109,6 +109,9 @@ dbclient.query("SELECT id, name, coords FROM station").then(qres => {
 
 app.post('/api/login', (req, res) => {
     console.log(req.body);
+    req.sessionStore.all((err, sessions)=>{ 
+        console.log(sessions.userid)
+    });
     dbclient.query(
         `SELECT name FROM student WHERE id=$1 AND password=$2`,
         [req.body.id, req.body.password]
@@ -133,9 +136,6 @@ app.post('/api/login', (req, res) => {
                                 relogin: false
                             });
                         } else {
-                            // req.sessionStore.all((err, sessions)=>{ 
-                                
-                            // });
                             req.session.userid = req.body.id;
                             req.session.user_type = "bus_staff";
                             res.send({
