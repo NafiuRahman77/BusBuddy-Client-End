@@ -155,7 +155,7 @@ app.post('/api/login', (req, res) => {
                                     success: true,
                                     name: qres3.rows[0].name,
                                     user_type: "bus_staff",
-                                    relogin: true,
+                                    relogin: relogin,
                                 });
                                 console.log(req.session);
                             }).catch(e => console.error(e.stack));
