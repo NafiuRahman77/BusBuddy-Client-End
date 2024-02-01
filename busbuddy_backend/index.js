@@ -144,7 +144,7 @@ app.post('/api/login', (req, res) => {
                                 [req.body.id]
                             ).then(qres4 => {
                                 console.log(qres4);
-                                if (qres.rows.length > 0) {
+                                if (qres4.rows.length > 0) {
                                     req.sessionStore.destroy(qres4.rows[0].sid);
                                     res.send({ 
                                         success: false,
@@ -156,7 +156,7 @@ app.post('/api/login', (req, res) => {
                                     req.session.user_type = "bus_staff";
                                     res.send({
                                         success: true,
-                                        name: qres.rows[0].name,
+                                        name: qres4.rows[0].name,
                                         user_type: "bus_staff"
                                     });
                                     console.log(req.session);
