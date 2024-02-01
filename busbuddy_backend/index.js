@@ -144,20 +144,18 @@ app.post('/api/login', (req, res) => {
                                 [req.body.id]
                             ).then(qres4 => {
                                 console.log(qres4);
+                                let relogin = false;
                                 if (qres4.rows.length > 0) {
                                     req.sessionStore.destroy(qres4.rows[0].sid);
-                                    res.send({ 
-                                        success: false,
-                                        name: null,
-                                        relogin: true
-                                    });
+                                    relogin = true;
                                 } else {
                                     req.session.userid = req.body.id;
                                     req.session.user_type = "bus_staff";
                                     res.send({
                                         success: true,
                                         name: qres3.rows[0].name,
-                                        user_type: "bus_staff"
+                                        user_type: "bus_staff",
+                                        relogin: true,
                                     });
                                     console.log(req.session);
                                 };
