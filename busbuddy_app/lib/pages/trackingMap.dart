@@ -7,6 +7,7 @@ import 'package:requests/requests.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../globel.dart' as globel;
 
 class trackingMap extends StatefulWidget {
@@ -28,6 +29,23 @@ class _trackingMapUIState extends State<trackingMap> {
   List<dynamic> station_coords = [];
   bool loadedRouteTimeData = false;
   List<LatLng> x = List.empty();
+  // a variable to store the current position
+  Position? _currentPosition;
+
+  // get current location
+  _getCurrentLocation() async {
+    await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.bestForNavigation,
+            forceAndroidLocationManager: true)
+        .then((Position position) async {
+      setState(() {
+        _currentPosition = position;
+      });
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
   Future<void> getlocationupdate(String TripID) async {
     var r = await Requests.post(globel.serverIp + 'getTripData',
         body: {
@@ -38,7 +56,9 @@ class _trackingMapUIState extends State<trackingMap> {
     r.raiseForStatus();
     setState(() {
       var zz = r.json();
-      widget.pathCoords = zz['path'] ; 
+      widget.pathCoords = zz['path'];
+      // get current location
+      _getCurrentLocation();
     });
   }
 
@@ -47,7 +67,8 @@ class _trackingMapUIState extends State<trackingMap> {
     super.initState();
     //getPoints(widget.RouteID) ;
     x = cnv(widget.pathCoords);
-    locationUpdateTimer = Timer.periodic(Duration(seconds: 10), (Timer timer) async{  
+    locationUpdateTimer =
+        Timer.periodic(Duration(seconds: 10), (Timer timer) async {
       await getlocationupdate(widget.TripID);
       x = cnv(widget.pathCoords);
     });
@@ -69,21 +90,45 @@ class _trackingMapUIState extends State<trackingMap> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-         
-        ),
+        appBar: AppBar(),
         body: GoogleMap(
           initialCameraPosition: CameraPosition(
-            target: LatLng(23.7623975, 90.3646323), 
+            target: LatLng(23.7623975, 90.3646323),
             zoom: 12, // Zoom level
           ),
-          polylines: Set<Polyline>.of([
-            Polyline(
-              polylineId: PolylineId('fsef'),
-              color: Colors.red, 
-              points: x, 
+          // set marker on first position of path and current location
+          markers: {
+            Marker(
+              markerId: MarkerId('first'),
+              position: x[0],
+              icon: BitmapDescriptor.defaultMarker,
             ),
-          ]),
+            Marker(
+              markerId: MarkerId('last'),
+              position: x[x.length - 1],
+              icon: BitmapDescriptor.defaultMarker,
+            ),
+            // Marker(
+            //   markerId: MarkerId('last'),
+            //   // set marker on current location if current location is not null
+            //   position: _currentPosition != null
+            //       ? LatLng(
+            //           _currentPosition!.latitude, _currentPosition!.longitude)
+            //       : x[0],
+            //   icon: BitmapDescriptor.defaultMarker,
+            // )
+          },
+          polylines: Set<Polyline>.of(
+            [
+              Polyline(
+                polylineId: PolylineId('fsef'),
+                //hex color code use Colors
+                color: Colors.redAccent,
+                points: x,
+                width: 5,
+              ),
+            ],
+          ),
         ),
       ),
     );

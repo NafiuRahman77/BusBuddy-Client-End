@@ -122,22 +122,24 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
   }
 
   void setDateInit() {
-    rejectedData.forEach((element) {
-      routeTimeData.add(element);
+    setState(() {
+      rejectedData.forEach((element) {
+        routeTimeData.add(element);
+      });
+      List<dynamic> acceptedList = [];
+      rejectedData.clear();
+      routeTimeData.forEach((bus) {
+        print(bus['array_to_json'][0]['time']);
+        print(selectedDate!);
+        if (isSameDate(
+            DateTime.parse(bus['array_to_json'][0]['time']), selectedDate!)) {
+          print('match');
+          acceptedList.add(bus);
+        } else
+          rejectedData.add(bus);
+      });
+      routeTimeData = acceptedList;
     });
-    List<dynamic> acceptedList = [];
-    rejectedData.clear();
-    routeTimeData.forEach((bus) {
-      print(bus['array_to_json'][0]['time']);
-      print(selectedDate!);
-      if (isSameDate(
-          DateTime.parse(bus['array_to_json'][0]['time']), selectedDate!)) {
-        print('match');
-        acceptedList.add(bus);
-      } else
-        rejectedData.add(bus);
-    });
-    routeTimeData = acceptedList;
 
     print(routeTimeData.length);
   }
@@ -182,6 +184,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       setState(() {
         selectedDate = pickedDate;
         setDateInit();
+        onRouteSelect(route_ids[route_names.indexOf(selectedRouteName)]);
       });
     }
   }
