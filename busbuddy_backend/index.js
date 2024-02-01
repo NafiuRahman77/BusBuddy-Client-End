@@ -110,62 +110,71 @@ dbclient.query("SELECT id, name, coords FROM station").then(qres => {
 
 app.post('/api/login', (req, res) => {
     console.log(req.body);
-    dbclient.query(
-        `SELECT name FROM student WHERE id=$1 AND password=$2`,
-        [req.body.id, req.body.password]
-    ).then(qres => {
-        console.log(qres);
-        if (qres.rows.length === 0) {
-            dbclient.query(
-                `SELECT name FROM buet_staff WHERE id=$1 AND password=$2`,
-                [req.body.id, req.body.password]
-            ).then(qres => {
-                console.log(qres);
-                if (qres.rows.length === 0) {
-                    dbclient.query(
-                        `SELECT name FROM bus_staff WHERE id=$1 AND password=$2`,
-                        [req.body.id, req.body.password]
-                    ).then(qres => {
-                        console.log(qres);
-                        if (qres.rows.length === 0) {
-                            res.send({ 
-                                success: false,
-                                name: null
-                            });
-                        } else {
-                            req.session.userid = req.body.id;
-                            req.session.user_type = "bus_staff";
-                            res.send({
-                                success: true,
-                                name: qres.rows[0].name,
-                                user_type: "bus_staff"
-                            });
-                            console.log(req.session);
-                        };
-                    }).catch(e => console.error(e.stack));
-                } else {
-                    req.session.userid = req.body.id;
-                    req.session.user_type = "buet_staff";
-                    res.send({
-                        success: true,
-                        name: qres.rows[0].name,
-                        user_type: "buet_staff"
-                    });
-                    console.log(req.session);
-                };
-            }).catch(e => console.error(e.stack));
-        } else {
-            req.session.userid = req.body.id;
-            req.session.user_type = "student";
-            res.send({
-                success: true,
-                name: qres.rows[0].name,
-                user_type: "student"
-            });
-            console.log(req.session);
-        };
-    }).catch(e => console.error(e.stack));
+    if (req.session.userid && req.session.user_type == "bus_staff") {
+        res.send({ 
+            success: false,
+            name: null,
+            relogin: true
+        });
+    } else {
+        dbclient.query(
+            `SELECT name FROM student WHERE id=$1 AND password=$2`,
+            [req.body.id, req.body.password]
+        ).then(qres => {
+            console.log(qres);
+            if (qres.rows.length === 0) {
+                dbclient.query(
+                    `SELECT name FROM buet_staff WHERE id=$1 AND password=$2`,
+                    [req.body.id, req.body.password]
+                ).then(qres => {
+                    console.log(qres);
+                    if (qres.rows.length === 0) {
+                        dbclient.query(
+                            `SELECT name FROM bus_staff WHERE id=$1 AND password=$2`,
+                            [req.body.id, req.body.password]
+                        ).then(qres => {
+                            console.log(qres);
+                            if (qres.rows.length === 0) {
+                                res.send({ 
+                                    success: false,
+                                    name: null
+                                });
+                            } else {
+                                req.session.userid = req.body.id;
+                                req.session.user_type = "bus_staff";
+                                res.send({
+                                    success: true,
+                                    name: qres.rows[0].name,
+                                    user_type: "bus_staff"
+                                });
+                                console.log(req.session);
+                            };
+                        }).catch(e => console.error(e.stack));
+                    } else {
+                        req.session.userid = req.body.id;
+                        req.session.user_type = "buet_staff";
+                        res.send({
+                            success: true,
+                            name: qres.rows[0].name,
+                            user_type: "buet_staff"
+                        });
+                        console.log(req.session);
+                    };
+                }).catch(e => console.error(e.stack));
+            } else {
+                req.session.userid = req.body.id;
+                req.session.user_type = "student";
+                res.send({
+                    success: true,
+                    name: qres.rows[0].name,
+                    user_type: "student"
+                });
+                console.log(req.session);
+            };
+        }).catch(e => console.error(e.stack));
+    };
 });
+
 app.post('/api/adminLogin', (req, res) => {
     console.log(req.body);
     dbclient.query(
@@ -195,6 +204,7 @@ app.post('/api/logout',(req,res) => {
         success: true
     });
 });
+
 app.post('/api/getProfile', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
@@ -416,6 +426,7 @@ app.post('/api/addFeedback', (req,res) => {
         
     };
 });
+
 app.post('/api/addRequisition', (req,res) => {
     console.log(req.body);
     if (req.session.userid) {
@@ -436,6 +447,7 @@ app.post('/api/addRequisition', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
+
 app.post('/api/purchaseTickets', (req,res) => {
     if (req.session.userid) {
         dbclient.query(
@@ -460,6 +472,7 @@ app.post('/api/purchaseTickets', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
+
 app.post('/api/getTicketCount', (req,res) => {
     // console.log(req.body);
     if (req.session.userid) {
@@ -480,6 +493,7 @@ app.post('/api/getTicketCount', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
+
 app.post('/api/getTicketQRData', (req,res) => {
     console.log(req.body);
     if (req.session.userid && req.session.user_type=="student") {
@@ -501,6 +515,7 @@ app.post('/api/getTicketQRData', (req,res) => {
         }).catch(e => console.error(e.stack));
     };
 });
+
 app.post('/api/getUserFeedback', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
@@ -535,6 +550,7 @@ app.post('/api/getUserFeedback', (req, res) => {
         } 
     };
 });
+
 app.post('/api/getUserRequisition', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
@@ -551,6 +567,7 @@ app.post('/api/getUserRequisition', (req, res) => {
         });
     };
 });
+
 app.post('/api/getUserPurchaseHistory', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
@@ -567,6 +584,7 @@ app.post('/api/getUserPurchaseHistory', (req, res) => {
         });
     };
 });
+
 app.post('/api/getRouteTimeData', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
@@ -588,6 +606,7 @@ app.post('/api/getRouteTimeData', (req, res) => {
         });
     };
 });
+
 app.post('/api/getTrackingData', async (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
@@ -607,6 +626,7 @@ app.post('/api/getTrackingData', async (req, res) => {
         res.send(list);
     };
 });
+
 //dummy
 app.post('/api/sendRepairRequest', (req,res) => {
     //send a dummy response
@@ -615,6 +635,7 @@ app.post('/api/sendRepairRequest', (req,res) => {
         success: true,
     });
 });
+
 app.post('/api/getRepairRequest', (req,res) => {
     //send a dummy response
     console.log(req.body);
@@ -853,14 +874,6 @@ app.post('/api/startTrip', (req,res) => {
                     });
                 };
             }).catch(e => console.error(e.stack));
-            // if (qres.command == 'CALL') res.send({ 
-            //     success: true,
-            // });
-            // else {
-            //     res.send({
-            //         success: false,
-            //     });
-            // };
         }).catch(e => console.error(e.stack));
     };
 });
@@ -952,7 +965,7 @@ app.post('/api/updateStaffLocation', (req,res) => {
             res.send({
                 success: false,
             });
-        }
+        };
     };
 });
 
