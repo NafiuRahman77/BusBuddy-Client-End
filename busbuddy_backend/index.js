@@ -108,7 +108,7 @@ dbclient.query("SELECT id, name, coords FROM station").then(qres => {
 }).catch(e => console.error(e.stack));
 
 app.post('/api/login', (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
     req.sessionStore.all((err, sessions)=>{ 
         console.log(sessions)
     });
@@ -116,13 +116,13 @@ app.post('/api/login', (req, res) => {
         `SELECT name FROM student WHERE id=$1 AND password=$2`,
         [req.body.id, req.body.password]
     ).then(qres => {
-        console.log(qres);
+        // console.log(qres);
         if (qres.rows.length === 0) {
             dbclient.query(
                 `SELECT name FROM buet_staff WHERE id=$1 AND password=$2`,
                 [req.body.id, req.body.password]
             ).then(qres => {
-                console.log(qres);
+                // console.log(qres);
                 if (qres.rows.length === 0) {
                     dbclient.query(
                         `SELECT name FROM bus_staff WHERE id=$1 AND password=$2`,
