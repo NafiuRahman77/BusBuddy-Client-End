@@ -48,6 +48,9 @@ const getSHA512 = (input) => {
     return crypto.createHash('sha512').update(JSON.stringify(input)).digest('hex');
 };
 app.use(session({
+    store: new (require('connect-pg-simple')(session))({
+        // Insert connect-pg-simple options here
+    }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
@@ -109,9 +112,6 @@ dbclient.query("SELECT id, name, coords FROM station").then(qres => {
 
 app.post('/api/login', (req, res) => {
     // console.log(req.body);
-    req.sessionStore.all((err, sessions)=>{ 
-        console.log(sessions)
-    });
     dbclient.query(
         `SELECT name FROM student WHERE id=$1 AND password=$2`,
         [req.body.id, req.body.password]
