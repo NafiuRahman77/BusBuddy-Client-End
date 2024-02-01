@@ -63,6 +63,14 @@ class _trackingMapUIState extends State<trackingMap> {
   }
 
   @override
+  void dispose() {
+    if (locationUpdateTimer != null && locationUpdateTimer!.isActive) {
+      locationUpdateTimer!.cancel();
+    }
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     //getPoints(widget.RouteID) ;
