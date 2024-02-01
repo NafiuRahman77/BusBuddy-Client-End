@@ -132,7 +132,7 @@ app.post('/api/login', (req, res) => {
                         [req.body.id, req.body.password]
                     ).then(qres3 => {
                         console.log(qres3);
-                        if (qres.rows.length === 0) {
+                        if (qres3.rows.length === 0) {
                             res.send({ 
                                 success: false,
                                 name: null,
