@@ -7,44 +7,38 @@ const port = 6969;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const otpGenerator = require('otp-generator');
-const axios = require('axios');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
 const url = require('url')
-const { v4: uuidv4 } = require('uuid');
 // const pdf = require("pdf-creator-node");
 const fs = require("fs");
 const multer = require('multer');
 // const html = fs.readFileSync("src/ticket.html", "utf8");
 const { Readable } = require('stream');
 const imageToBase64 = require('image-to-base64');
+const geolib = require('geolib');
 const tracking = require('./tracking.js');
 const pd = require('./path_dump.js');
+
 trip_t = pd.trip_t;
-
 dotenv.config();
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-
 app.enable('trust proxy');
+
 // app.use(cors());
 // app.use(cors({
 //    origin: 'http://localhost:5173',
 //    credentials: true
 // }));
-
 // const SSLCommerzPayment = require('sslcommerz-lts')
 // const store_id = process.env.SSLCZ_STORE_ID;
 // const store_passwd = process.env.SSLCZ_PASSWORD;
 // const is_live = false;
-
 const getSHA512 = (input) => {
     return crypto.createHash('sha512').update(JSON.stringify(input)).digest('hex');
 };
-
-
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -55,10 +49,7 @@ app.use(session({
         httpOnly: false
     }
 }));
-
-
 const { Pool, Client } = require('pg');
-
 const dbclient = new Client({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -66,13 +57,10 @@ const dbclient = new Client({
   password: process.env.DB_PASS,
   port: process.env.DB_PORT,
 });
-
 dbclient.connect();
-
 const getRealISODate = () => {
     return (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 10);
 };
-
 // const initiate_today = () => {
 //     dbclient.query("CALL initiate_occupancy_today()").then(res1 => {
 //         console.log(res1);
@@ -81,117 +69,114 @@ const getRealISODate = () => {
 //         });
 //     });
 // };
-
 // initiate_today();
-
 // const cron = setInterval (initiate_today, 1800000);
 
-app.post('/api/getSession',(req,res) => {
-    if (req.session.userid) {
-        dbclient.query(
-            `SELECT name FROM customer WHERE mobile=$1`,
-            [req.session.userid]
-        ).then(qres => {
-            res.send({
-                success: true,
-                name: qres.rows[0].name,
-                admin: false
+dbclient.query(
+    `select *, array_to_json(time_list) as list_time from trip where is_live=true`
+).then(qres2 => {
+    //console.log(qres2.rows[0].start_location);
+    qres2.rows.forEach(td => {
+        let newTrip = new tracking.RunningTrip 
+            (td.id, td.start_timestamp, td.route, td.time_type, 
+            td.travel_direction, td.bus, td.is_default,
+            td.driver, td.helper, td.approved_by, td.end_timestamp,
+            {   
+                latitude: td.start_location.x, 
+                longitude: td.start_location.y
+            }, 
+            td.end_location);
+        td.list_time.forEach (async tp =>  {
+            // newTrip.time_list.push({...tp});
+            newTrip.time_list.push({
+                station: tp.station,
+                time: null
             });
-        }).catch(e => {
-            req.session.destroy();
-            res.send({
-                success: false,
-            });
-            console.error(e.stack)
         });
-    }
-    else if ( req.session.adminid){
-        dbclient.query(
-            `SELECT name FROM admin WHERE id=$1`,
-            [req.session.adminid]
-        ).then(qres => {
-            res.send({
-                success: true,
-                name: qres.rows[0].name,
-                admin: true
-            });
-        }).catch(e => {
-            req.session.destroy();
-            res.send({
-                success: false,
-            });
-            console.error(e.stack)
+        tracking.runningTrips.set (newTrip.id, newTrip);
+    });
+}).catch(e => console.error(e.stack));
+
+dbclient.query("SELECT id, name, coords FROM station").then(qres => {
+    // console.log(qres.rows);
+    qres.rows.forEach( (st)  =>  {
+        tracking.stationCoords.set(st.id, {
+            latitude: st.coords.x,
+            longitude: st.coords.y,
         });
-    } else {
-        res.send({
-            success: false,
-        });
-    }
-});
+    });
+    // console.log(tracking.stationCoords);
+}).catch(e => console.error(e.stack));
 
 app.post('/api/login', (req, res) => {
     console.log(req.body);
-
-    dbclient.query(
-        `SELECT name FROM student WHERE id=$1 AND password=$2`,
-        [req.body.id, req.body.password]
-    ).then(qres => {
-        console.log(qres);
-        if (qres.rows.length === 0) {
-            dbclient.query(
-                `SELECT name FROM buet_staff WHERE id=$1 AND password=$2`,
-                [req.body.id, req.body.password]
-            ).then(qres => {
-                console.log(qres);
-                if (qres.rows.length === 0) {
-                    dbclient.query(
-                        `SELECT name FROM bus_staff WHERE id=$1 AND password=$2`,
-                        [req.body.id, req.body.password]
-                    ).then(qres => {
-                        console.log(qres);
-                        if (qres.rows.length === 0) {
-                            res.send({ 
-                                success: false,
-                                name: null
-                            });
-                        } else {
-                            req.session.userid = req.body.id;
-                            req.session.user_type = "bus_staff";
-                            res.send({
-                                success: true,
-                                name: qres.rows[0].name,
-                                user_type: "bus_staff"
-                            });
-                            console.log(req.session);
-                        };
-                    }).catch(e => console.error(e.stack));
-                } else {
-                    req.session.userid = req.body.id;
-                    req.session.user_type = "buet_staff";
-                    res.send({
-                        success: true,
-                        name: qres.rows[0].name,
-                        user_type: "buet_staff"
-                    });
-                    console.log(req.session);
-                };
-            }).catch(e => console.error(e.stack));
-        } else {
-            req.session.userid = req.body.id;
-            req.session.user_type = "student";
-            res.send({
-                success: true,
-                name: qres.rows[0].name,
-                user_type: "student"
-            });
-            console.log(req.session);
-        };
-    }).catch(e => console.error(e.stack));
+    if (req.session.userid && req.session.user_type == "bus_staff") {
+        res.send({ 
+            success: false,
+            name: null,
+            relogin: true
+        });
+    } else {
+        dbclient.query(
+            `SELECT name FROM student WHERE id=$1 AND password=$2`,
+            [req.body.id, req.body.password]
+        ).then(qres => {
+            console.log(qres);
+            if (qres.rows.length === 0) {
+                dbclient.query(
+                    `SELECT name FROM buet_staff WHERE id=$1 AND password=$2`,
+                    [req.body.id, req.body.password]
+                ).then(qres => {
+                    console.log(qres);
+                    if (qres.rows.length === 0) {
+                        dbclient.query(
+                            `SELECT name FROM bus_staff WHERE id=$1 AND password=$2`,
+                            [req.body.id, req.body.password]
+                        ).then(qres => {
+                            console.log(qres);
+                            if (qres.rows.length === 0) {
+                                res.send({ 
+                                    success: false,
+                                    name: null
+                                });
+                            } else {
+                                req.session.userid = req.body.id;
+                                req.session.user_type = "bus_staff";
+                                res.send({
+                                    success: true,
+                                    name: qres.rows[0].name,
+                                    user_type: "bus_staff"
+                                });
+                                console.log(req.session);
+                            };
+                        }).catch(e => console.error(e.stack));
+                    } else {
+                        req.session.userid = req.body.id;
+                        req.session.user_type = "buet_staff";
+                        res.send({
+                            success: true,
+                            name: qres.rows[0].name,
+                            user_type: "buet_staff"
+                        });
+                        console.log(req.session);
+                    };
+                }).catch(e => console.error(e.stack));
+            } else {
+                req.session.userid = req.body.id;
+                req.session.user_type = "student";
+                res.send({
+                    success: true,
+                    name: qres.rows[0].name,
+                    user_type: "student"
+                });
+                console.log(req.session);
+            };
+        }).catch(e => console.error(e.stack));
+    };
 });
 
 app.post('/api/adminLogin', (req, res) => {
     console.log(req.body);
-
     dbclient.query(
         `SELECT name FROM admin WHERE id=$1 AND password=$2`,
         [req.body.id, req.body.password]
@@ -212,43 +197,6 @@ app.post('/api/adminLogin', (req, res) => {
         };
     }).catch(e => console.error(e.stack));
 });
-
-
-app.post('/api/register', (req, res) => {
-    if (req.body.mobile == req.session.userid) {
-        console.log(req.body);
-        dbclient.query (
-            "INSERT INTO customer(mobile, password, nid, dob, name, address) values($1, $2, $3, $4, $5, $6)",
-            [req.body.mobile, req.body.password, req.body.nid, req.body.dob, req.body.name, req.body.address]
-        ).then(qres => {
-            console.log(qres);
-            if (qres.rowCount === 1) res.send(true);
-            else if (qres.rowCount === 0) res.send(false);
-        }).catch(e => {
-            console.error(e.stack);
-            res.send(false);
-        });
-    } else res.send(false);
-});
-
-
-app.post('/api/correctUser', (req, res) => {
-    if (req.body.mobile == req.session.userid) {
-        console.log(req.body);
-        dbclient.query (
-            "UPDATE customer SET name=$1, dob=$2 WHERE nid=$3",
-            [req.body.name, req.body.dob, req.body.nid]
-        ).then(qres => {
-            console.log(qres);
-            if (qres.rowCount === 1) res.send(true);
-            else if (qres.rowCount === 0) res.send(false);
-        }).catch(e => {
-            console.error(e.stack);
-            res.send(false);
-        });
-    } else res.send(false);
-});
-
 
 app.post('/api/logout',(req,res) => {
     req.session.destroy();
@@ -316,9 +264,9 @@ app.post('/api/getProfile', (req, res) => {
 app.post('/api/getProfileStatic', (req, res) => {
     // console.log(req);
     if (req.session.userid) {
-        if (req.session.user_type == "student") {
+        if (req.session.user_type == "student" || req.session.user_type == "buet_staff" || req.session.user_type == "bus_staff") {
             dbclient.query(
-                `select id, name from student where id=$1`, 
+                `select id, name from ${dbclient.escapeIdentifier(req.session.user_type)} where id=$1`, 
                 [req.session.userid]
             ).then(qres => {
                 console.log(qres);
@@ -334,61 +282,15 @@ app.post('/api/getProfileStatic', (req, res) => {
                         ...qres.rows[0],
                         success: true,
                         imageStr: response,
-
                     });
                 };
             }).catch(e => console.error(e.stack));
-        } else if (req.session.user_type == "buet_staff") {
-            dbclient.query(
-                `select id, name from buet_staff where id=$1`, 
-                [req.session.userid]
-            ).then(qres => {
-                console.log(qres);
-                if (qres.rows.length === 0) res.send({ 
-                    success: false,
-                });
-                else {
-                    let response;
-                    if (fs.existsSync("../../busbuddy_storage/"+req.session.userid))
-                        response = new Buffer(fs.readFileSync("../../busbuddy_storage/"+req.session.userid)).toString('base64');
-                    else response = "";
-                    res.send({
-                        ...qres.rows[0],
-                        success: true,
-                        imageStr: response,
-
-                    });
-                };
-            }).catch(e => console.error(e.stack));
-        } else if (req.session.user_type == "bus_staff") { 
-            dbclient.query(
-                `select id, name from bus_staff where id=$1`, 
-                [req.session.userid]
-            ).then(qres => {
-                console.log(qres);
-                if (qres.rows.length === 0) res.send({ 
-                    success: false,
-                });
-                else {
-                    let response;
-                    if (fs.existsSync("../../busbuddy_storage/"+req.session.userid))
-                        response = new Buffer(fs.readFileSync("../../busbuddy_storage/"+req.session.userid)).toString('base64');
-                    else response = "";
-                    res.send({
-                        ...qres.rows[0],
-                        success: true,
-                        imageStr: response,
-
-                    });
-                };
-            }).catch(e => console.error(e.stack));
-        };
-    } else console.log("Session not recognised.")
+        } else console.log("Session not recognised.")
+    };
 });
 
 app.post('/api/getDefaultRoute', (req, res) => {
     console.log(req.session);
-
     if (req.session.userid) {
         dbclient.query(
             `select default_route, r.terminal_point as default_route_name 
@@ -409,63 +311,57 @@ app.post('/api/getDefaultRoute', (req, res) => {
     };
 });     
 
-// app.post('/api/getSelfID', (req, res) => {
-//     console.log(req.session);
-//     if (req.session.userid) {
-//         dbclient.query(
-//             "SELECT nid, name FROM customer WHERE mobile=$1", 
-//             [req.session.userid]
-//         ).then(qres => {
-//             //console.log(qres);
-//             if (qres.rows.length === 0) res.send({ 
-//                 success: false,
-//             });
-//             else {
-//                 res.send({
-//                     ...qres.rows[0],
-//                     success: true,
-//                 });
-//             };
-//         }).catch(e => console.error(e.stack));
-//     };
-// });
-
 app.post('/api/updateProfile', (req,res) => {
     console.log(req.body);
     if (req.session.userid === req.body.id) {
-        dbclient.query(
-            `UPDATE student SET phone=$1, email=$2, default_route=$3, default_station=$4 WHERE id=$5`, 
-            [req.body.phone, req.body.email, req.body.default_route, req.body.default_station, req.body.id]
-        ).then(qres => {
-            console.log(qres);
-            if (qres.rowCount === 1) res.send({ 
-                success: true,
-            });
-            else if (qres.rowCount === 0) {
-                res.send({
-                    success: false,
+        if (req.session.user_type == "student") {
+            dbclient.query(
+                `UPDATE student SET phone=$1, email=$2, default_route=$3, default_station=$4 WHERE id=$5`, 
+                [req.body.phone, req.body.email, req.body.default_route, req.body.default_station, req.body.id]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
                 });
-            };
-        }).catch(e => console.error(e.stack));
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        } else if (req.session.user_type == "buet_staff") {
+            dbclient.query(
+                `UPDATE buet_staff SET phone=$1, residence=$2 WHERE id=$3`, 
+                [req.body.phone, req.body.residence, req.body.id]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
+                });
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        } else if (req.session.user_type == "bus_staff") {
+            dbclient.query(
+                `UPDATE bus_staff SET phone=$1 WHERE id=$2`, 
+                [req.body.phone, req.body.id]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
+                });
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        } 
     };
 });
-
-// app.post('/api/updatePassword', (req,res) => {
-//     dbclient.query(
-//         `UPDATE customer SET password=$1 WHERE mobile=$2 AND password=$3`, 
-//         [req.body.password, req.session.userid, req.body.password0]
-//     ).then(qres => {
-//         //console.log(qres);
-//         if (qres.rowCount === 1) res.send({ 
-//             success: true,
-//         });
-//         else if (qres.rowCount === 0) {
-//             res.send({
-//                 success: false,
-//             });
-//         };
-//     }).catch(e => console.error(e.stack));
-// });
 
 app.post('/api/getRoutes', (req,res) => {
     console.log("sending route data");
@@ -473,7 +369,6 @@ app.post('/api/getRoutes', (req,res) => {
         res.send(qres.rows);
     }).catch(e => console.error(e.stack));
 });
-
 
 app.post('/api/getStations', (req,res) => {
     console.log("sending station data");
@@ -733,7 +628,6 @@ app.post('/api/getTrackingData', async (req, res) => {
 });
 
 //dummy
-
 app.post('/api/sendRepairRequest', (req,res) => {
     //send a dummy response
     console.log(req.body);
@@ -789,7 +683,6 @@ app.post('/api/getRepairRequest', (req,res) => {
     });
 }
 );
-
 app.post('/api/getNotifications', (req,res) => {
     //send a dummy response
     console.log(req.body);
@@ -808,7 +701,6 @@ app.post('/api/getNotifications', (req,res) => {
         ]
     });
 });
-
 //send real time notification api
 app.post('/api/sendNotification', (req,res) => {
     //send a dummy response
@@ -851,7 +743,6 @@ app.post('/api/getBillHistory', (req,res) => {
 });
 
 //get route details
-
 //get nearest station
 app.post('/api/getNearestStation', (req,res) => {
     //send a dummy response
@@ -889,18 +780,38 @@ app.post('/api/getTripData', (req,res) => {
     });
 });
 
+app.post('/api/checkStaffRunningTrip', (req,res) => {
+    //send a dummy response
+    console.log(req.body);
+    if (req.session.userid && req.session.user_type=="bus_staff") {
+        let rt =  null;
+        tracking.runningTrips.forEach( async trip => {
+            if (trip.driver == req.session.userid) rt = trip;
+        });
+        if (rt) res.send({
+            success: true,
+            ...rt,
+        });
+        else res.send({
+            success: false,
+            ...rt,
+        });
+    };
+});
+    
+  
 //get trip data
 app.post('/api/getStaffTrips', (req,res) => {
     //send a dummy response
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
         dbclient.query(
-            `select * from allocation where is_done=false and (driver=$1 or helper=$1)`, 
+            `select * from allocation where is_done=false and (driver=$1 or helper=$1) order by start_timestamp asc`, 
             [req.session.userid]
         ).then(qres => {
             console.log(qres);
             dbclient.query(
-                `select * from trip where (driver=$1 or helper=$1)`, 
+                `select * from trip where (driver=$1 or helper=$1) order by start_timestamp desc`, 
                 [req.session.userid]
             ).then(qres2 => {
                 console.log(qres2);
@@ -924,26 +835,34 @@ app.post('/api/startTrip', (req,res) => {
     console.log(req.body);
     if (req.session.userid && req.session.user_type=="bus_staff") {
         dbclient.query(
-            `call initiate_trip($1, $2)`, 
-            [req.body.trip_id, req.session.userid]
+            `call initiate_trip2($1, $2, $3)`, 
+            [req.body.trip_id, req.session.userid, ('('+req.body.latitude+','+req.body.longitude+')')]
         ).then(qres => {
             // console.log(qres);
             dbclient.query(
-                `select *, array_to_json(time_list) as time_list_ from trip where id=$1`, 
+                `select *, array_to_json(time_list) as list_time from trip where id=$1`, 
                 [req.body.trip_id]
             ).then(qres2 => {
                 // console.log(qres2);
                 if (qres2.rows.length == 1) {
                     let td = {...qres2.rows[0]};
+                    console.log(td.list_time);
                     let newTrip = new tracking.RunningTrip 
                        (td.id, td.start_timestamp, td.route, td.time_type, 
                         td.travel_direction, td.bus, td.is_default,
-                        td.bus_staff, td.approved_by, td.end_timestamp,
+                        td.driver, td.helper, td.approved_by, td.end_timestamp,
                         {   
                             latitude: req.body.latitude, 
                             longitude: req.body.longitude
                         }, 
                         td.end_location);
+                    td.list_time.forEach (async tp =>  {
+                        // newTrip.time_list.push({...tp});
+                        newTrip.time_list.push({
+                            station: tp.station,
+                            time: null
+                        });
+                    });
                     tracking.runningTrips.set (newTrip.id, newTrip);
                     res.send({ 
                         success: true,
@@ -955,15 +874,6 @@ app.post('/api/startTrip', (req,res) => {
                     });
                 };
             }).catch(e => console.error(e.stack));
-
-            // if (qres.command == 'CALL') res.send({ 
-            //     success: true,
-            // });
-            // else {
-            //     res.send({
-            //         success: false,
-            //     });
-            // };
         }).catch(e => console.error(e.stack));
     };
 });
@@ -972,33 +882,58 @@ app.post('/api/endTrip', async (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
         let trip = await tracking.runningTrips.get(req.body.trip_id);
-        let pathStr = "{";
-        for (let i=0; i<trip.path.length; i++) {
-            pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
-            if (i<trip.path.length-1) pathStr += ", ";
-        };
-        pathStr += "}";
-        console.log(pathStr);
-        let lt = await trip.start_location.latitude;
-        let lg = await trip.start_location.longitude;
-        dbclient.query(
-            `update trip set end_timestamp=current_timestamp, passenger_count=$1, start_location=$2, end_location=$3, 
-             is_live=false, path=$6 where id=$4 and (driver=$5 or helper=$5)`, 
-            [trip.passenger_count, ('('+lt+','+lg+')'),  
-             ('('+req.body.latitude+','+req.body.longitude+')'), 
-             req.body.trip_id, req.session.userid, pathStr]
-        ).then(qres => {
-            console.log(qres);
-            if (qres.rowCount === 1) res.send({ 
-                success: true,
-            });
-            else if (qres.rowCount === 0) {
-                res.send({
-                    success: false,
-                });
+        if (trip) {
+            let pathStr = "{";
+            for (let i=0; i<trip.path.length; i++) {
+                pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
+                if (i<trip.path.length-1) pathStr += ", ";
             };
-        }).catch(e => console.error(e.stack));
-        tracking.runningTrips.delete(req.body.trip_id);
+            pathStr += "}";
+            console.log(pathStr);
+            let timeListStr = "{";
+            for (let i=0; i<trip.time_list.length; i++) {
+                if (trip.time_list[i].time) 
+                    timeListStr += `"(${trip.time_list[i].station}, \\\"${trip.time_list[i].time.toISOString()}\\\")"`;
+                else timeListStr += "null";
+                if (i<trip.time_list.length-1) timeListStr += ",";
+            };
+            timeListStr += "}";
+            let lt = await trip.start_location.latitude;
+            let lg = await trip.start_location.longitude;
+            dbclient.query(
+                `update trip set end_timestamp=current_timestamp, passenger_count=$1, start_location=$2, end_location=$3, 
+                is_live=false, path=$6, time_list=$7 where id=$4 and (driver=$5 or helper=$5)`, 
+                [trip.passenger_count, ('('+lt+','+lg+')'),  
+                ('('+req.body.latitude+','+req.body.longitude+')'), 
+                req.body.trip_id, req.session.userid, pathStr, timeListStr]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
+                });
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+            tracking.runningTrips.delete(req.body.trip_id);
+        } else {
+            dbclient.query(
+                `update trip set end_timestamp=current_timestamp, is_live=false where id=$1 and (driver=$2 or helper=$2)`, 
+                [req.body.trip_id, req.session.userid, pathStr]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rowCount === 1) res.send({ 
+                    success: true,
+                });
+                else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
+                    });
+                };
+            }).catch(e => console.error(e.stack));
+        }
     };
 });
 
@@ -1006,47 +941,33 @@ app.post('/api/updateStaffLocation', (req,res) => {
     //send a dummy response
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
-        tracking.runningTrips.get(req.body.trip_id).path.push({
-            latitude: req.body.latitude, 
-            longitude: req.body.longitude
-        });
-        res.send({
-            success: true,
-            // new_path: [
-            //     { "latitude": 23.7651, "longitude": 90.3652 },
-            //     { "latitude": 23.7652, "longitude": 90.3650 },
-            //     { "latitude": 23.7650, "longitude": 90.3651 },
-            // ]
-        });
+        let trip = tracking.runningTrips.get(req.body.trip_id);
+        if (trip) {
+            let r_coord = {
+                latitude: req.body.latitude, 
+                longitude: req.body.longitude
+            };
+            trip.time_list.forEach( async tp => {
+                let p_coords = tracking.stationCoords.get(tp.station);
+                let dist = geolib.getDistance(p_coords, r_coord);
+                console.log(dist);
+                
+                if (dist <= 180) {
+                    console.log(tp.route);
+                    tp.time = new Date();
+                };
+            });
+            trip.path.push(r_coord);
+            res.send({
+                success: true,
+            });
+        } else {
+            res.send({
+                success: false,
+            });
+        };
     };
 });
-
-// app.post('/api/updateTripT', (req,res) => {
-//     //send a dummy response
-//     //console.log(pd.trip_t);
-//     let pathStr = "{";
-//     for (let i=0; i<trip_t.path.length; i++) {
-//         pathStr += `"(${trip_t.path[i].latitude}, ${trip_t.path[i].longitude})"`;
-//         if (i<trip_t.path.length-1) pathStr += ", ";
-//     };
-//     pathStr += "}";
-//     console.log(pathStr);
-//     dbclient.query(
-//         `update trip set passenger_count=$1, is_live=false, path=$4 where id=$2 and (driver=$3 or helper=$3)`, 
-//         [trip_t.passenger_count, trip_t.id, 'altaf', pathStr]
-//     ).then(qres => {
-//         console.log(qres);
-//         if (qres.rowCount === 1) res.send({ 
-//             success: true,
-//         });
-//         else if (qres.rowCount === 0) {
-//             res.send({
-//                 success: false,
-//             });
-//         };
-//     }).catch(e => console.error(e.stack));
-//     tracking.runningTrips.delete(req.body.trip_id);
-// });
 
 app.post('/api/staffScanTicket', (req,res) => {
     //send a dummy response

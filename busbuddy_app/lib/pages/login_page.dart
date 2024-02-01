@@ -1,3 +1,5 @@
+import 'package:geolocator/geolocator.dart';
+
 import 'show_profile.dart';
 import '../components/my_button.dart';
 import 'package:go_router/go_router.dart';
@@ -24,14 +26,45 @@ class _LoginPageState extends State<LoginPage> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
 
+  Future<void> startLocationStream() async {
+    late LocationSettings locationSettings;
+
+    locationSettings = AndroidSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: globel.distanceFilter,
+        forceLocationManager: true,
+        intervalDuration: const Duration(seconds: 10),
+        //(Optional) Set foreground notification config to keep the app alive
+        //when going to the background
+        foregroundNotificationConfig: const ForegroundNotificationConfig(
+          notificationText:
+              "Example app will continue to receive your location even when you aren't using it",
+          notificationTitle: "Running in Background",
+          enableWakeLock: true,
+        ));
+
+    globel.positionStream =
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((Position? position) async {
+      print(position == null
+          ? 'Unknown'
+          : '${position.latitude.toString()}, ${position.longitude.toString()}');
+
+      if (position != null) {
+        var r2 = await Requests.post(globel.serverIp + 'updateStaffLocation',
+            body: {
+              'trip_id': globel.runningTripId,
+              'latitude': position.latitude.toString(),
+              'longitude': position.longitude.toString(),
+            },
+            bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+
+        r2.raiseForStatus();
+      }
+    });
+  }
+
   Future<bool> onLogin(String id, String password) async {
-    // final response = await http.post(
-    //   Uri.parse(globel.serverIp + 'login'),
-    //   headers: <String, String>{
-    //     'Content-Type': 'application/json; charset=UTF-8',
-    //   },
-    //   body: jsonEncode(<String, String>{'id': id, 'password': password}),
-    // );
     var r = await Requests.post(globel.serverIp + 'login',
         body: {
           'id': id,
@@ -52,6 +85,56 @@ class _LoginPageState extends State<LoginPage> {
 
     if (json['success'] == true) {
       globel.userType = json['user_type'];
+
+      if (globel.userType == 'bus_staff') {
+        var r4 = await Requests.post(globel.serverIp + 'checkStaffRunningTrip');
+        print("hello bus stff");
+        r4.raiseForStatus();
+        dynamic rt = r4.json();
+        if (rt['success']) {
+          globel.runningTripId = rt['id'];
+          bool isLocationServiceEnabled =
+              await Geolocator.isLocationServiceEnabled();
+
+          // Workmanager()
+          //     .registerOneOffTask("bus", "sojib")
+          if (!isLocationServiceEnabled) {
+            // Handle the case where location services are not enabled
+            // You may want to show a toast or display a message
+            print('Location services are not enabled.');
+            Fluttertoast.showToast(
+              msg: "Please enable location services.",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+            return false;
+          }
+
+          // Check if the app has location permission
+          LocationPermission permission = await Geolocator.checkPermission();
+          if (permission == LocationPermission.denied) {
+            // Request location permission
+            permission = await Geolocator.requestPermission();
+            if (permission != LocationPermission.whileInUse &&
+                permission != LocationPermission.always) {
+              // Handle the case where the user denied location permission
+              print('User denied location permission.');
+              return false;
+            }
+          }
+          try {
+            await startLocationStream();
+            return true;
+          } catch (e) {
+            print("Error getting location: $e");
+            return false;
+          }
+        }
+      }
       print(globel.userType);
       Fluttertoast.showToast(
           msg: 'Welcome, ${json['name']}',

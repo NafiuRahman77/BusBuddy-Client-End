@@ -122,12 +122,14 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
   }
 
   void setDateInit() {
+    List<dynamic> acceptedList = [];
     setState(() {
       rejectedData.forEach((element) {
         routeTimeData.add(element);
       });
-      List<dynamic> acceptedList = [];
       rejectedData.clear();
+      acceptedList.clear();
+
       routeTimeData.forEach((bus) {
         print(bus['array_to_json'][0]['time']);
         print(selectedDate!);
@@ -138,10 +140,11 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
         } else
           rejectedData.add(bus);
       });
+
       routeTimeData = acceptedList;
     });
 
-    print(routeTimeData.length);
+    print("ok" + routeTimeData.length.toString());
   }
 
   Future<void> onRouteSelect(String route) async {
@@ -157,7 +160,6 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       routeTimeData = r.json();
       loadedRouteTimeData = true;
 
-      // routeCoords.clear();
       routeTimeData.forEach((j) {
         j["array_to_json"].forEach((stop) {
           // routeCoords.add(station_coords[int.parse(stop['station']) - 1]);
@@ -183,9 +185,9 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       // Handle the selected date here, e.g., update a variable.
       setState(() {
         selectedDate = pickedDate;
-        setDateInit();
-        onRouteSelect(route_ids[route_names.indexOf(selectedRouteName)]);
       });
+      onRouteSelect(route_ids[route_names.indexOf(selectedRouteName)]);
+      setDateInit();
     }
   }
 

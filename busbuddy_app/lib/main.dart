@@ -677,36 +677,37 @@ class HomeViewState extends State<HomeView> {
                               });
                             },
                           ),
-                        ListTile(
-                          leading: const Icon(Icons.qr_code),
-                          title: const Text('QR Code Scan'),
-                          selected: _selectedIndex == 13,
-                          onTap: () {
-                            if (_selectedIndex == 13) return;
-                            if (globel.runningTripId == "") {
-                              Fluttertoast.showToast(
-                                  msg: 'Please start a trip first.',
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.CENTER,
-                                  timeInSecForIosWeb: 1,
-                                  backgroundColor:
-                                      Color.fromARGB(118, 185, 26, 5),
-                                  textColor: Colors.white,
-                                  fontSize: 16.0);
-                              return;
-                            }
-                            // Update the state of the app
-                            // _onItemTapped(2);
-                            // Then close the drawer
+                        if (globel.userType == "bus_staff")
+                          ListTile(
+                            leading: const Icon(Icons.qr_code),
+                            title: const Text('QR Code Scan'),
+                            selected: _selectedIndex == 13,
+                            onTap: () {
+                              if (_selectedIndex == 13) return;
+                              if (globel.runningTripId == "") {
+                                Fluttertoast.showToast(
+                                    msg: 'Please start a trip first.',
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    timeInSecForIosWeb: 1,
+                                    backgroundColor:
+                                        Color.fromARGB(118, 185, 26, 5),
+                                    textColor: Colors.white,
+                                    fontSize: 16.0);
+                                return;
+                              }
+                              // Update the state of the app
+                              // _onItemTapped(2);
+                              // Then close the drawer
 
-                            GoRouter.of(context).pop();
-                            GoRouter.of(context).push("/scan_qr_code");
+                              GoRouter.of(context).pop();
+                              GoRouter.of(context).push("/scan_qr_code");
 
-                            setState(() {
-                              _selectedIndex = 13;
-                            });
-                          },
-                        ),
+                              setState(() {
+                                _selectedIndex = 13;
+                              });
+                            },
+                          ),
                         ListTile(
                           visualDensity: const VisualDensity(vertical: 4),
                           leading: const Icon(Icons.logout),
@@ -720,7 +721,8 @@ class HomeViewState extends State<HomeView> {
                             dynamic json1 = r1.json();
                             if (json1['success']) {
                               await Requests.clearStoredCookies(
-                                  "18.117.93.134:6969");
+                                  globel.serverAddr);
+                              globel.clearAll();
                               Fluttertoast.showToast(
                                   msg: 'Logged out.',
                                   toastLength: Toast.LENGTH_SHORT,
