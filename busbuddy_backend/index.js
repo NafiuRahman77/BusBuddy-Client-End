@@ -142,7 +142,7 @@ app.post('/api/login', (req, res) => {
                             dbclient.query(
                                 `select sid from session where sess->>'userid'= $1`,
                                 [req.body.id]
-                            ).then(qres => {
+                            ).then(qres4 => {
                                 console.log(qres4);
                                 if (qres.rows.length > 0) {
                                     req.sessionStore.destroy(qres4.rows[0].sid);
