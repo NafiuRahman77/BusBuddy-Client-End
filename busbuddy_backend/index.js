@@ -18,10 +18,18 @@ const { Readable } = require('stream');
 const imageToBase64 = require('image-to-base64');
 const geolib = require('geolib');
 const tracking = require('./tracking.js');
-const pd = require('./path_dump.js');
 
-trip_t = pd.trip_t;
 dotenv.config();
+const { Pool, Client } = require('pg');
+const dbclient = new Client({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASS,
+  port: process.env.DB_PORT,
+});
+dbclient.connect();
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -49,15 +57,6 @@ app.use(session({
         httpOnly: false
     }
 }));
-const { Pool, Client } = require('pg');
-const dbclient = new Client({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASS,
-  port: process.env.DB_PORT,
-});
-dbclient.connect();
 const getRealISODate = () => {
     return (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 10);
 };
@@ -110,70 +109,65 @@ dbclient.query("SELECT id, name, coords FROM station").then(qres => {
 
 app.post('/api/login', (req, res) => {
     console.log(req.body);
-    if (req.session.userid && req.session.user_type == "bus_staff") {
-        res.send({ 
-            success: false,
-            name: null,
-            relogin: true
-        });
-    } else {
-        dbclient.query(
-            `SELECT name FROM student WHERE id=$1 AND password=$2`,
-            [req.body.id, req.body.password]
-        ).then(qres => {
-            console.log(qres);
-            if (qres.rows.length === 0) {
-                dbclient.query(
-                    `SELECT name FROM buet_staff WHERE id=$1 AND password=$2`,
-                    [req.body.id, req.body.password]
-                ).then(qres => {
-                    console.log(qres);
-                    if (qres.rows.length === 0) {
-                        dbclient.query(
-                            `SELECT name FROM bus_staff WHERE id=$1 AND password=$2`,
-                            [req.body.id, req.body.password]
-                        ).then(qres => {
-                            console.log(qres);
-                            if (qres.rows.length === 0) {
-                                res.send({ 
-                                    success: false,
-                                    name: null,
-                                    relogin: false
-                                });
-                            } else {
-                                req.session.userid = req.body.id;
-                                req.session.user_type = "bus_staff";
-                                res.send({
-                                    success: true,
-                                    name: qres.rows[0].name,
-                                    user_type: "bus_staff"
-                                });
-                                console.log(req.session);
-                            };
-                        }).catch(e => console.error(e.stack));
-                    } else {
-                        req.session.userid = req.body.id;
-                        req.session.user_type = "buet_staff";
-                        res.send({
-                            success: true,
-                            name: qres.rows[0].name,
-                            user_type: "buet_staff"
-                        });
-                        console.log(req.session);
-                    };
-                }).catch(e => console.error(e.stack));
-            } else {
-                req.session.userid = req.body.id;
-                req.session.user_type = "student";
-                res.send({
-                    success: true,
-                    name: qres.rows[0].name,
-                    user_type: "student"
-                });
-                console.log(req.session);
-            };
-        }).catch(e => console.error(e.stack));
-    };
+    dbclient.query(
+        `SELECT name FROM student WHERE id=$1 AND password=$2`,
+        [req.body.id, req.body.password]
+    ).then(qres => {
+        console.log(qres);
+        if (qres.rows.length === 0) {
+            dbclient.query(
+                `SELECT name FROM buet_staff WHERE id=$1 AND password=$2`,
+                [req.body.id, req.body.password]
+            ).then(qres => {
+                console.log(qres);
+                if (qres.rows.length === 0) {
+                    dbclient.query(
+                        `SELECT name FROM bus_staff WHERE id=$1 AND password=$2`,
+                        [req.body.id, req.body.password]
+                    ).then(qres => {
+                        console.log(qres);
+                        if (qres.rows.length === 0) {
+                            res.send({ 
+                                success: false,
+                                name: null,
+                                relogin: false
+                            });
+                        } else {
+                            // req.sessionStore.all((err, sessions)=>{ 
+                                
+                            // });
+                            req.session.userid = req.body.id;
+                            req.session.user_type = "bus_staff";
+                            res.send({
+                                success: true,
+                                name: qres.rows[0].name,
+                                user_type: "bus_staff"
+                            });
+                            console.log(req.session);
+                        };
+                    }).catch(e => console.error(e.stack));
+                } else {
+                    req.session.userid = req.body.id;
+                    req.session.user_type = "buet_staff";
+                    res.send({
+                        success: true,
+                        name: qres.rows[0].name,
+                        user_type: "buet_staff"
+                    });
+                    console.log(req.session);
+                };
+            }).catch(e => console.error(e.stack));
+        } else {
+            req.session.userid = req.body.id;
+            req.session.user_type = "student";
+            res.send({
+                success: true,
+                name: qres.rows[0].name,
+                user_type: "student"
+            });
+            console.log(req.session);
+        };
+    }).catch(e => console.error(e.stack));
 });
 
 app.post('/api/adminLogin', (req, res) => {
