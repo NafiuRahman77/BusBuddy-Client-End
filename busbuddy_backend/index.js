@@ -21,13 +21,15 @@ const tracking = require('./tracking.js');
 
 dotenv.config();
 const { Pool, Client } = require('pg');
-const dbclient = new Client({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASS,
-  port: process.env.DB_PORT,
-});
+
+const dbconnObj = {
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASS,
+    port: process.env.DB_PORT,
+};
+const dbclient = new Client(dbconnObj);
 dbclient.connect();
 
 app.use(bodyParser.json());
@@ -50,6 +52,7 @@ const getSHA512 = (input) => {
 app.use(session({
     store: new (require('connect-pg-simple')(session))({
         // Insert connect-pg-simple options here
+        conObject: dbconnObj
     }),
     secret: process.env.SESSION_SECRET,
     resave: false,
