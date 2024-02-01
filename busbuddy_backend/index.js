@@ -797,7 +797,7 @@ app.post('/api/checkStaffRunningTrip', (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         let rt =  null;
         tracking.runningTrips.forEach( async trip => {
-            if (trip.driver == req.session.userid) rt = trip;
+            if (trip.driver == req.session.userid || trip.helper == req.session.userid) rt = trip;
         });
         if (rt) res.send({
             success: true,
