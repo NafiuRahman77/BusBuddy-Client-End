@@ -130,7 +130,7 @@ app.post('/api/login', (req, res) => {
                     dbclient.query(
                         `SELECT name FROM bus_staff WHERE id=$1 AND password=$2`,
                         [req.body.id, req.body.password]
-                    ).then(qres => {
+                    ).then(qres3 => {
                         console.log(qres);
                         if (qres.rows.length === 0) {
                             res.send({ 
@@ -156,7 +156,7 @@ app.post('/api/login', (req, res) => {
                                     req.session.user_type = "bus_staff";
                                     res.send({
                                         success: true,
-                                        name: qres4.rows[0].name,
+                                        name: qres3.rows[0].name,
                                         user_type: "bus_staff"
                                     });
                                     console.log(req.session);
