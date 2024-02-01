@@ -131,7 +131,7 @@ app.post('/api/login', (req, res) => {
                         `SELECT name FROM bus_staff WHERE id=$1 AND password=$2`,
                         [req.body.id, req.body.password]
                     ).then(qres3 => {
-                        console.log(qres);
+                        console.log(qres3);
                         if (qres.rows.length === 0) {
                             res.send({ 
                                 success: false,
@@ -148,17 +148,16 @@ app.post('/api/login', (req, res) => {
                                 if (qres4.rows.length > 0) {
                                     req.sessionStore.destroy(qres4.rows[0].sid);
                                     relogin = true;
-                                } else {
-                                    req.session.userid = req.body.id;
-                                    req.session.user_type = "bus_staff";
-                                    res.send({
-                                        success: true,
-                                        name: qres3.rows[0].name,
-                                        user_type: "bus_staff",
-                                        relogin: true,
-                                    });
-                                    console.log(req.session);
                                 };
+                                req.session.userid = req.body.id;
+                                req.session.user_type = "bus_staff";
+                                res.send({
+                                    success: true,
+                                    name: qres3.rows[0].name,
+                                    user_type: "bus_staff",
+                                    relogin: true,
+                                });
+                                console.log(req.session);
                             }).catch(e => console.error(e.stack));
 
                         };
