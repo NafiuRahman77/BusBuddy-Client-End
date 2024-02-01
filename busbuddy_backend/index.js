@@ -139,14 +139,30 @@ app.post('/api/login', (req, res) => {
                                 relogin: false
                             });
                         } else {
-                            req.session.userid = req.body.id;
-                            req.session.user_type = "bus_staff";
-                            res.send({
-                                success: true,
-                                name: qres.rows[0].name,
-                                user_type: "bus_staff"
-                            });
-                            console.log(req.session);
+                            dbclient.query(
+                                `select sid from session where sess->>'userid'= $1`,
+                                [req.body.id]
+                            ).then(qres => {
+                                console.log(qres4);
+                                if (qres.rows.length > 0) {
+                                    req.sessionStore.destroy(qres4.rows[0].sid);
+                                    res.send({ 
+                                        success: false,
+                                        name: null,
+                                        relogin: true
+                                    });
+                                } else {
+                                    req.session.userid = req.body.id;
+                                    req.session.user_type = "bus_staff";
+                                    res.send({
+                                        success: true,
+                                        name: qres.rows[0].name,
+                                        user_type: "bus_staff"
+                                    });
+                                    console.log(req.session);
+                                };
+                            }).catch(e => console.error(e.stack));
+
                         };
                     }).catch(e => console.error(e.stack));
                 } else {
