@@ -146,14 +146,25 @@ class _LoginPageState extends State<LoginPage> {
           fontSize: 16.0);
       return true;
     } else {
-      Fluttertoast.showToast(
-          msg: 'Invalid credentiels',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(131, 244, 67, 54),
-          textColor: Colors.white,
-          fontSize: 16.0);
+      if (json['relogin'] == true) {
+        Fluttertoast.showToast(
+            msg: 'Bus staff can login from only one device at once',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(131, 244, 67, 54),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Invalid credentiels',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(131, 244, 67, 54),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
     }
     return false;
   }

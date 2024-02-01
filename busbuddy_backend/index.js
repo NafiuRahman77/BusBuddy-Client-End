@@ -137,7 +137,8 @@ app.post('/api/login', (req, res) => {
                             if (qres.rows.length === 0) {
                                 res.send({ 
                                     success: false,
-                                    name: null
+                                    name: null,
+                                    relogin: false
                                 });
                             } else {
                                 req.session.userid = req.body.id;
