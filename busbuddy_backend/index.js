@@ -1042,42 +1042,34 @@ process.stdin.on('keypress', async (chunk, key) => {
         await httpTerminator.terminate();
         console.log("Connections closed, creating backups");
 
-        try {
-            tracking.runningTrips.forEach (async (trip) => {
-                console.log("backing up " + trip.id);
-
-                // Convert trip.path to a string representation using string concatenation
-                let pathStr = "{";
-                for (let i=0; i<trip.path.length; i++) {
-                    pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
-                    if (i<trip.path.length-1) pathStr += ", ";
-                };
-                pathStr += "}";
-                console.log(pathStr);
-                
-                let timeListStr = "{";
-                for (let i=0; i<trip.time_list.length; i++) {
-                    if (trip.time_list[i].time) 
-                        timeListStr += `"(${trip.time_list[i].station}, \\\"${trip.time_list[i].time.toISOString()}\\\")"`;
-                    else timeListStr += `"(${trip.time_list[i].station}, \\\"${(new Date(0)).toISOString()}\\\")"`;
-                    if (i<trip.time_list.length-1) timeListStr += ",";
-                };
-                timeListStr += "}";
-
-                await dbclient.query(
-                    `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`,
-                    [trip.passenger_count, pathStr, timeListStr, trip.id]
-                );
-
+        tracking.runningTrips.forEach (async (trip) => {
+            console.log("backing up " + trip.id);
+            let pathStr = "{";
+            for (let i=0; i<trip.path.length; i++) {
+                pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
+                if (i<trip.path.length-1) pathStr += ", ";
+            };
+            pathStr += "}";
+            console.log(pathStr);
+            let timeListStr = "{";
+            for (let i=0; i<trip.time_list.length; i++) {
+                if (trip.time_list[i].time) 
+                    timeListStr += `"(${trip.time_list[i].station}, \\\"${trip.time_list[i].time.toISOString()}\\\")"`;
+                else timeListStr += `"(${trip.time_list[i].station}, \\\"${(new Date(0)).toISOString()}\\\")"`;
+                if (i<trip.time_list.length-1) timeListStr += ",";
+            };
+            timeListStr += "}";
+            await dbclient.query(
+                `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`, 
+                [trip.passenger_count, pathStr, timeListStr, trip.id]
+            ).then(qres => {
+                console.log(qres);
                 console.log("backed up " + trip.id);
                 tracking.runningTrips.delete(trip.id);
-            });
-
+            }).catch(e => console.error(e.stack));
+        }).then(result => {
             console.log("bye");
             process.exit();
-        } catch (error) {
-            console.error(error.stack);
-            process.exit(1); // Exit with an error code
-        }
-    }
+        });
+    };
 });
