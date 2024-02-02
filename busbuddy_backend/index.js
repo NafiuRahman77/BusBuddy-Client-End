@@ -18,21 +18,13 @@ const { Readable } = require('stream');
 const imageToBase64 = require('image-to-base64');
 const geolib = require('geolib');
 const tracking = require('./tracking.js');
+const { createHttpTerminator } = require('http-terminator');
+
 
 dotenv.config();
 const { Pool, Client } = require('pg');
 
 const readline = require('readline');
-
-readline.emitKeypressEvents(process.stdin);
-
-if (process.stdin.isTTY)
-    process.stdin.setRawMode(true);
-
-process.stdin.on('keypress', (chunk, key) => {
-  if (key && key.name == 'b')
-  process.exit();
-});
 
 const dbconnObj = {
     user: process.env.DB_USER,
@@ -1033,6 +1025,48 @@ app.post('/api/staffScanTicket', (req,res) => {
     };
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`BudBuddy backend listening on port ${port}`);
+});
+
+const httpTerminator = createHttpTerminator({ server });
+
+readline.emitKeypressEvents(process.stdin);
+
+if (process.stdin.isTTY) process.stdin.setRawMode(true);
+
+process.stdin.on('keypress', async (chunk, key) => {
+  if (key && key.name == 'b') {
+    console.log("\n\n Initiating Server Shutdown\n");
+    await httpTerminator.terminate();
+    console.log("Connections closed, creating backups");
+
+    tracking.runningTrips.forEach(async (trip_id, trip) => {
+        let pathStr = "{";
+        for (let i=0; i<trip.path.length; i++) {
+            pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
+            if (i<trip.path.length-1) pathStr += ", ";
+        };
+        pathStr += "}";
+        console.log(pathStr);
+        let timeListStr = "{";
+        for (let i=0; i<trip.time_list.length; i++) {
+            if (trip.time_list[i].time) 
+                timeListStr += `"(${trip.time_list[i].station}, \\\"${trip.time_list[i].time.toISOString()}\\\")"`;
+            else timeListStr += `"(${trip.time_list[i].station}, \\\"${(new Date(0)).toISOString()}\\\")"`;
+            if (i<trip.time_list.length-1) timeListStr += ",";
+        };
+        timeListStr += "}";
+        dbclient.query(
+            `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`, 
+            [trip.passenger_count, pathStr, timeListStr, trip_id]
+        ).then(qres => {
+            console.log(qres);
+        }).catch(e => console.error(e.stack));
+        console.log("backed up " + trip_id);
+        tracking.runningTrips.delete(trip_id);
+    });
+    console.log("bye");
+    process.exit();
+  };
 });
