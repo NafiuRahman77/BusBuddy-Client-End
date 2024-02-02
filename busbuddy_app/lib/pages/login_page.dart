@@ -12,6 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:requests/requests.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import '../../globel.dart' as globel;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -64,6 +65,21 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  @override
+  void initState() {
+    super.initState();
+    onLoginMount();
+  }
+
+  Future<void> onLoginMount() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? c = await prefs.getString('connect.sid');
+    if (c != null) {
+      await Requests.addCookie(
+          Requests.getHostname(globel.serverIp), 'connect.sid', c);
+    }
+  }
+
   Future<bool> onLogin(String id, String password) async {
     var r = await Requests.post(globel.serverIp + 'login',
         body: {
@@ -84,9 +100,30 @@ class _LoginPageState extends State<LoginPage> {
     // print(r2.content());
 
     if (json['success'] == true) {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      print("..........");
+      CookieJar cj = await Requests.getStoredCookies(
+          Requests.getHostname(globel.serverIp));
+      cj.forEach((key, value) async {
+        print(key);
+        print(value);
+        await (prefs.setString(key, value.value));
+      });
       globel.userType = json['user_type'];
 
       if (globel.userType == 'bus_staff') {
+        if (json['relogin'] == true) {
+          Fluttertoast.showToast(
+              msg:
+                  'Bus staff can login from only one device at once. Your previous sessions have been deactivated',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(131, 244, 67, 54),
+              textColor: Colors.white,
+              fontSize: 16.0);
+        }
+
         var r4 = await Requests.post(globel.serverIp + 'checkStaffRunningTrip');
         print("hello bus stff");
         r4.raiseForStatus();
@@ -146,25 +183,14 @@ class _LoginPageState extends State<LoginPage> {
           fontSize: 16.0);
       return true;
     } else {
-      if (json['relogin'] == true) {
-        Fluttertoast.showToast(
-            msg: 'Bus staff can login from only one device at once',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Color.fromARGB(131, 244, 67, 54),
-            textColor: Colors.white,
-            fontSize: 16.0);
-      } else {
-        Fluttertoast.showToast(
-            msg: 'Invalid credentiels',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Color.fromARGB(131, 244, 67, 54),
-            textColor: Colors.white,
-            fontSize: 16.0);
-      }
+      Fluttertoast.showToast(
+          msg: 'Invalid credentiels',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(131, 244, 67, 54),
+          textColor: Colors.white,
+          fontSize: 16.0);
     }
     return false;
   }

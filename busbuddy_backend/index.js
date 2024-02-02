@@ -186,6 +186,20 @@ app.post('/api/login', (req, res) => {
     }).catch(e => console.error(e.stack));
 });
 
+app.post('/api/sessionCheck', (req, res) => {
+    console.log(req.body);
+    if (req.session.userid) {
+        res.send({
+            recognized: true,
+            user_id: req.session.userid,
+        });
+    } else {
+        res.send({
+            recognized: false,
+        });
+    };
+});
+
 app.post('/api/adminLogin', (req, res) => {
     console.log(req.body);
     dbclient.query(

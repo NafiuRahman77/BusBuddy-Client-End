@@ -40,14 +40,17 @@ dependencies:
   fluttertoast: ^8.2.2
   requests: ^4.7.0
   shurjopay: ^2.0.3
-  intl: ^0.18.0
-  loader_overlay: ^3.0.4
+  intl: ^0.19.0
+  loader_overlay: ^4.0.0
   qr_flutter: ^4.1.0
   qr_code_scanner: ^1.0.1
   url_launcher: ^6.2.4
   google_maps_flutter: ^2.5.3
   geolocator: ^10.1.0
   workmanager: ^0.5.2
+  cookie_jar: ^4.0.8
+  path_provider: ^2.1.2
+  shared_preferences: ^2.2.2
 
 
 dev_dependencies:

@@ -3,9 +3,10 @@ library busbuddy_app.globel;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:requests/requests.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 const int distanceFilter = 50;
@@ -39,6 +40,8 @@ MemoryImage userAvatarBackup = MemoryImage(base64Decode(
 
 double p_longitude = 0.0;
 double p_latitude = 0.0;
+
+CookieJar cookieJar = CookieJar();
 
 void clearAll() {
   userId = "";
