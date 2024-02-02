@@ -105,7 +105,7 @@ dbclient.query(
                 time: null
             });
         });
-        console.log(td.j_path);
+        console.log(td.path);
         td.j_path.forEach (async p =>  {
             // newTrip.time_list.push({...tp});
             newTrip.path.push({
