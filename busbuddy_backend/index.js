@@ -1043,7 +1043,7 @@ process.stdin.on('keypress', async (chunk, key) => {
         console.log("Connections closed, creating backups");
 
         try {
-            await map(tracking.runningTrips, async (trip_id, trip) => {
+            tracking.runningTrips.forEach (async (trip_id, trip) => {
                 console.log("backing up " + trip_id);
 
                 // Convert trip.path to a string representation using string concatenation
