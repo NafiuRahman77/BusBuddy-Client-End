@@ -1045,31 +1045,33 @@ process.stdin.on('keypress', async (chunk, key) => {
         await map(tracking.runningTrips, async (trip_id, trip) => {
             console.log("backing up " + trip_id);
             let pathStr = "{";
-            for (let i=0; i<trip.path.length; i++) {
+            for (let i = 0; i < trip.path.length; i++) {
                 pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
-                if (i<trip.path.length-1) pathStr += ", ";
-            };
+                if (i < trip.path.length - 1) pathStr += ", ";
+            }
             pathStr += "}";
             console.log(pathStr);
+
             let timeListStr = "{";
-            for (let i=0; i<trip.time_list.length; i++) {
-                if (trip.time_list[i].time) 
+            for (let i = 0; i < trip.time_list.length; i++) {
+                if (trip.time_list[i].time)
                     timeListStr += `"(${trip.time_list[i].station}, \\\"${trip.time_list[i].time.toISOString()}\\\")"`;
                 else timeListStr += `"(${trip.time_list[i].station}, \\\"${(new Date(0)).toISOString()}\\\")"`;
-                if (i<trip.time_list.length-1) timeListStr += ",";
-            };
+                if (i < trip.time_list.length - 1) timeListStr += ",";
+            }
             timeListStr += "}";
+
             await dbclient.query(
-                `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`, 
+                `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`,
                 [trip.passenger_count, pathStr, timeListStr, trip_id]
             ).then(qres => {
                 console.log(qres);
                 console.log("backed up " + trip_id);
                 tracking.runningTrips.delete(trip_id);
             }).catch(e => console.error(e.stack));
-        }).then(result => {
-            console.log("bye");
-            process.exit();
-        })
-    };
+        });
+
+        console.log("bye");
+        process.exit();
+    }
 });
