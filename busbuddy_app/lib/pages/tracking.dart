@@ -22,6 +22,7 @@ class _trackingState extends State<Tracking> {
   List<String> route_ids = [], route_names = [];
   String selectedRouteName = "";
   String selectedRouteId = "";
+  String choice = "0";
 
   @override
   void initState() {
@@ -85,16 +86,71 @@ class _trackingState extends State<Tracking> {
     context.loaderOverlay.hide();
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(children: [
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Align(
+          alignment: Alignment.center,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Row(
+                  children: [
+                    Text(
+                      'Track By ',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: const Color.fromARGB(39, 158, 158, 158)
+                            .withOpacity(0.9),
+                      ),
+                    ),
+                    Radio(
+                      value: "0",
+                      groupValue: choice,
+                      onChanged: (value) {
+                        setState(() {
+                          choice = value as String;
+                        });
+                      },
+                    ),
+                    Text(
+                      'Route and Bus',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: const Color.fromARGB(39, 158, 158, 158)
+                            .withOpacity(0.9),
+                      ),
+                    ),
+                    Radio(
+                      value: "1",
+                      groupValue: choice,
+                      onChanged: (value) {
+                        setState(() {
+                          choice = value as String;
+                        });
+                      },
+                    ),
+                    Text(
+                      ' Location',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: const Color.fromARGB(39, 158, 158, 158)
+                            .withOpacity(0.9),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10),
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: Alignment.topLeft,
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 12.0, bottom: 6.0),
+                  padding: const EdgeInsets.all(12.0),
                   child: Text(
                     'Select Route',
                     style: TextStyle(
@@ -119,7 +175,52 @@ class _trackingState extends State<Tracking> {
                       setState(() {
                         // Handle dropdown selection
                         selectedRouteName = value!;
-                        // print(selectedOption);
+                        int idx = route_names.indexOf(selectedRouteName);
+                        selectedRouteId = route_ids[idx];
+                      });
+                      onRouteSelect(selectedRouteId);
+                    },
+                    items: route_names
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    'Select Bus',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.withOpacity(0.9),
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: DropdownButtonFormField<String>(
+                    value: selectedRouteName,
+                    onChanged: (value) {
+                      setState(() {
+                        // Handle dropdown selection
+                        selectedRouteName = value!;
                         int idx = route_names.indexOf(selectedRouteName);
                         selectedRouteId = route_ids[idx];
                       });
@@ -151,8 +252,10 @@ class _trackingState extends State<Tracking> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF781B1B),
                     ),
-                    child: Text("Trip #${trackingData[i]['id']} (View on Map)",
-                        style: TextStyle(color: Colors.white)),
+                    child: Text(
+                      "Trip #${trackingData[i]['id']} (View on Map)",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
               if (trackingData.isEmpty)
                 Align(
@@ -177,13 +280,19 @@ class _trackingState extends State<Tracking> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF781B1B),
                           ),
-                          child: Text("View Default Route Schedule",
-                              style: TextStyle(color: Colors.white)),
+                          child: Text(
+                            "View Schedule",
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
-            ])));
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
