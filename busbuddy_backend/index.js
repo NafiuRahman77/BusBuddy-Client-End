@@ -102,7 +102,7 @@ dbclient.query(
             // newTrip.time_list.push({...tp});
             newTrip.time_list.push({
                 station: tp.station,
-                time: null
+                time: (new Date(tp.time) == new Date(0))? null : tp.time,
             });
         });
         if (td.path) td.path.forEach (async p =>  {
