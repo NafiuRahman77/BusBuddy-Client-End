@@ -102,7 +102,7 @@ dbclient.query(
             // newTrip.time_list.push({...tp});
             newTrip.time_list.push({
                 station: tp.station,
-                time: (new Date(tp.time) == new Date(0))? null : tp.time,
+                time: (tp.time == "1970-01-01T06:00:00+06:00")? null : new Date(tp.time),
             });
         });
         if (td.path) td.path.forEach (async p =>  {
