@@ -19,7 +19,7 @@ const imageToBase64 = require('image-to-base64');
 const geolib = require('geolib');
 const tracking = require('./tracking.js');
 const { createHttpTerminator } = require('http-terminator');
-const { forEach } = require('p-iteration');
+const { map } = require('p-iteration');
 
 
 dotenv.config();
@@ -1037,38 +1037,38 @@ readline.emitKeypressEvents(process.stdin);
 if (process.stdin.isTTY) process.stdin.setRawMode(true);
 
 process.stdin.on('keypress', async (chunk, key) => {
-  if (key && key.name == 'b') {
-    console.log("\n\nInitiating Server Shutdown\n");
-    await httpTerminator.terminate();
-    console.log("Connections closed, creating backups");
+    if (key && key.name == 'b') {
+        console.log("\n\nInitiating Server Shutdown\n");
+        await httpTerminator.terminate();
+        console.log("Connections closed, creating backups");
 
-    await forEach(tracking.runningTrips, async (trip_id, trip) => {
-        console.log("backing up " + trip_id);
-        let pathStr = "{";
-        for (let i=0; i<trip.path.length; i++) {
-            pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
-            if (i<trip.path.length-1) pathStr += ", ";
-        };
-        pathStr += "}";
-        console.log(pathStr);
-        let timeListStr = "{";
-        for (let i=0; i<trip.time_list.length; i++) {
-            if (trip.time_list[i].time) 
-                timeListStr += `"(${trip.time_list[i].station}, \\\"${trip.time_list[i].time.toISOString()}\\\")"`;
-            else timeListStr += `"(${trip.time_list[i].station}, \\\"${(new Date(0)).toISOString()}\\\")"`;
-            if (i<trip.time_list.length-1) timeListStr += ",";
-        };
-        timeListStr += "}";
-        await dbclient.query(
-            `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`, 
-            [trip.passenger_count, pathStr, timeListStr, trip_id]
-        ).then(qres => {
-            console.log(qres);
-        }).catch(e => console.error(e.stack));
-        console.log("backed up " + trip_id);
-        tracking.runningTrips.delete(trip_id);
-    });
-    console.log("bye");
-    process.exit();
-  };
+        await map(tracking.runningTrips, async (trip_id, trip) => {
+            console.log("backing up " + trip_id);
+            let pathStr = "{";
+            for (let i=0; i<trip.path.length; i++) {
+                pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
+                if (i<trip.path.length-1) pathStr += ", ";
+            };
+            pathStr += "}";
+            console.log(pathStr);
+            let timeListStr = "{";
+            for (let i=0; i<trip.time_list.length; i++) {
+                if (trip.time_list[i].time) 
+                    timeListStr += `"(${trip.time_list[i].station}, \\\"${trip.time_list[i].time.toISOString()}\\\")"`;
+                else timeListStr += `"(${trip.time_list[i].station}, \\\"${(new Date(0)).toISOString()}\\\")"`;
+                if (i<trip.time_list.length-1) timeListStr += ",";
+            };
+            timeListStr += "}";
+            await dbclient.query(
+                `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`, 
+                [trip.passenger_count, pathStr, timeListStr, trip_id]
+            ).then(qres => {
+                console.log(qres);
+            }).catch(e => console.error(e.stack));
+            console.log("backed up " + trip_id);
+            tracking.runningTrips.delete(trip_id);
+        });
+        console.log("bye");
+        process.exit();
+    };
 });
