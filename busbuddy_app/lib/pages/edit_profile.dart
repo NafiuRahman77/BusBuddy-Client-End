@@ -24,6 +24,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   TextEditingController routeController = TextEditingController();
   TextEditingController phoneNoController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  TextEditingController residenceController = TextEditingController();
 
   String defaultRoute = "";
   String defaultStation = "";
@@ -31,6 +32,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String email = "";
   String phoneNo = "";
   String id = "";
+  String residence = "";
   List<String> route_ids = [];
   List<String> route_names = [];
   List<String> station_ids = [];
@@ -80,12 +82,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     if (json['success'] == true) {
       setState(() {
-        email = json['email'];
-        phoneNo = json['phone'];
-        defaultRoute = json['default_route'];
-        defaultRouteName = json['default_route_name'];
-        defaultStation = json['default_station'];
-        id = json['id'].toString().trim();
+        if (globel.userType == "student") {
+          email = json['email'];
+          phoneNo = json['phone'];
+          defaultRoute = json['default_route'];
+          defaultRouteName = json['default_route_name'];
+          defaultStation = json['default_station'];
+          id = json['id'].toString().trim();
+        } else if (globel.userType == "bus_staff") {
+          phoneNo = json['phone'];
+          id = json['id'].toString().trim();
+        } else if (globel.userType == "buet_staff") {
+          phoneNo = json['phone'];
+          id = json['id'].toString().trim();
+          residence = json['residence'];
+        }
       });
     } else {
       Fluttertoast.showToast(
@@ -117,69 +128,142 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
     });
 
-    // route_names.forEach((element) {
-    //   print(element);
-    // });
-
-    //print(r.content());
-    // If the server did return a 201 CREATED response,
-    // then parse the JSON.
-    //print('bb: ${jsonDecode(response.body)['email']}');
     context.loaderOverlay.hide();
     onRouteSelect(defaultRoute);
   }
 
-  Future<void> editProfile(
-      String def_route, String mail, String phn_no, String stn) async {
+  Future<void> editProfile(String def_route, String mail, String phn_no,
+      String stn, String resdnc) async {
     context.loaderOverlay.show();
     print("hello");
     if (def_route.isEmpty) def_route = defaultRoute;
     if (stn.isEmpty) stn = defaultStation;
     if (mail.isEmpty) mail = email;
     if (phn_no.isEmpty) phn_no = phoneNo;
-    var r = await Requests.post(globel.serverIp + 'updateProfile',
-        body: {
-          'phone': phn_no,
-          'email': mail,
-          'default_route': def_route,
-          'default_station': stn,
-          'id': id,
-        },
-        bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+    if (resdnc.isEmpty) resdnc = residence;
 
-    r.raiseForStatus();
-    dynamic json = r.json();
+    if (globel.userType == "student") {
+      dynamic json;
+      print("as stdnt");
+      print(phn_no + " " + mail + " " + def_route + " " + stn + " " + id);
+      var r = await Requests.post(globel.serverIp + 'updateProfile',
+          body: {
+            'phone': phn_no,
+            'email': mail,
+            'default_route': def_route,
+            'default_station': stn,
+            'id': id,
+          },
+          bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
-    print(r.content());
+      r.raiseForStatus();
+      json = r.json();
 
-    // If the server did return a 201 CREATED response,
-    // then parse the JSON.
-    //print('bb: ${jsonDecode(response.body)['email']}');
-    if (json['success'] == true) {
-      Fluttertoast.showToast(
-          msg: 'Saved changes successfully.',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(131, 71, 62, 62),
-          textColor: Colors.white,
-          fontSize: 16.0);
-    } else {
-      Fluttertoast.showToast(
-          msg: 'Failed to load data.',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(97, 212, 33, 21),
-          textColor: Colors.white,
-          fontSize: 16.0);
+      print(r.content());
+
+      if (json['success'] == true) {
+        Fluttertoast.showToast(
+            msg: 'Saved changes successfully.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(131, 71, 62, 62),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Failed to load data.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(97, 212, 33, 21),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
     }
-    globel.userEmail = mail;
-    globel.userPhone = phn_no;
-    globel.userDefaultRouteId = def_route;
-    globel.userDefaultStationId = stn;
-    globel.userDefaultRouteName = route_names[route_ids.indexOf(def_route)];
-    globel.userDefaultStationName = station_names[station_ids.indexOf(stn)];
+    if (globel.userType == "bus_staff") {
+      print("as staff");
+      print(phn_no + " " + id);
+      dynamic json;
+      var r = await Requests.post(globel.serverIp + 'updateProfile',
+          body: {
+            'phone': phn_no,
+            'id': id,
+          },
+          bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+      r.raiseForStatus();
+      json = r.json();
+      if (json['success'] == true) {
+        Fluttertoast.showToast(
+            msg: 'Saved changes successfully.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(131, 71, 62, 62),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Failed to load data.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(97, 212, 33, 21),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    }
+    if (globel.userType == "buet_staff") {
+      print("as fclty");
+      dynamic json;
+      var r = await Requests.post(globel.serverIp + 'updateProfile',
+          body: {
+            'phone': phn_no,
+            'residence': resdnc,
+            'id': id,
+          },
+          bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+
+      r.raiseForStatus();
+      json = r.json();
+      if (json['success'] == true) {
+        Fluttertoast.showToast(
+            msg: 'Saved changes successfully.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(131, 71, 62, 62),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Failed to load data.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(97, 212, 33, 21),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    }
+
+    print("in the end of edit profile");
+    if (globel.userType == "student") {
+      globel.userEmail = mail;
+      globel.userPhone = phn_no;
+      globel.userDefaultRouteId = def_route;
+      globel.userDefaultStationId = stn;
+      globel.userDefaultRouteName = route_names[route_ids.indexOf(def_route)];
+      globel.userDefaultStationName = station_names[station_ids.indexOf(stn)];
+    }
+    if (globel.userType == "bus_staff") {
+      globel.userPhone = phn_no;
+    }
+    if (globel.userType == "buet_staff") {
+      globel.userPhone = phn_no;
+      globel.teacherResidence = resdnc;
+    }
+
     context.loaderOverlay.hide();
   }
 
@@ -194,11 +278,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             children: [
               buildProfilePicture(),
               SizedBox(height: 16.0),
-              CustomInputWidget(
-                controller: emailController,
-                hintText: email,
-                heading: 'Email',
-              ),
+              if (globel.userType == "student")
+                CustomInputWidget(
+                  controller: emailController,
+                  hintText: email,
+                  heading: 'Email',
+                ),
               SizedBox(height: 16.0),
               CustomInputWidget(
                 controller: phoneNoController,
@@ -206,121 +291,152 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 heading: 'Phone no.',
               ),
               SizedBox(height: 16.0),
-              Padding(
-                padding: EdgeInsets.only(left: 8.0),
-                child: Text(
-                  "Default route",
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.withOpacity(0.9)),
-                ),
-              ),
-              SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Color.fromARGB(255, 236, 237, 237)),
-                  borderRadius: BorderRadius.circular(10.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color.fromARGB(255, 252, 252, 252)
-                          .withOpacity(0.5), // Shadow color
-                      spreadRadius: 5, // Spread radius
-                      blurRadius: 7, // Blur radius
-                      offset: Offset(0, 3), // Offset
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 0),
-                  child: DropdownButtonFormField<String>(
-                    value: selectedOption,
-                    onChanged: (value) async {
-                      setState(() {
-                        selectedOption = value!;
-                        // print(selectedOption);
-                        int idx = route_names.indexOf(selectedOption);
-                        selectedId = route_ids[idx];
-                        station_ids.clear();
-                        station_names.clear();
-                      });
-                      // Handle dropdown selection
-                      await onRouteSelect(selectedId);
-                      setState(() {
-                        selectedStationId = station_ids[0];
-                        selectedStationOption = station_names[0];
-                      });
-                    },
-                    items: route_names
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
+              if (globel.userType == "student")
+                Padding(
+                  padding: EdgeInsets.only(left: 8.0),
+                  child: Text(
+                    "Default route",
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.withOpacity(0.9)),
                   ),
                 ),
-              ),
-              SizedBox(height: 16.0),
-              Padding(
-                padding: EdgeInsets.only(left: 8.0),
-                child: Text(
-                  "Default station",
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.withOpacity(0.9)),
-                ),
-              ),
               SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Color.fromARGB(255, 236, 237, 237)),
-                  borderRadius: BorderRadius.circular(10.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color.fromARGB(255, 252, 252, 252)
-                          .withOpacity(0.5), // Shadow color
-                      spreadRadius: 5, // Spread radius
-                      blurRadius: 7, // Blur radius
-                      offset: Offset(0, 3), // Offset
+              if (globel.userType == "student")
+                Container(
+                  padding: const EdgeInsets.all(12.0),
+                  decoration: BoxDecoration(
+                    border:
+                        Border.all(color: Color.fromARGB(255, 236, 237, 237)),
+                    borderRadius: BorderRadius.circular(10.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color.fromARGB(255, 252, 252, 252)
+                            .withOpacity(0.5), // Shadow color
+                        spreadRadius: 5, // Spread radius
+                        blurRadius: 7, // Blur radius
+                        offset: Offset(0, 3), // Offset
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 0),
+                    child: DropdownButtonFormField<String>(
+                      value: selectedOption,
+                      onChanged: (value) async {
+                        setState(() {
+                          selectedOption = value!;
+                          // print(selectedOption);
+                          int idx = route_names.indexOf(selectedOption);
+                          selectedId = route_ids[idx];
+                          station_ids.clear();
+                          station_names.clear();
+                        });
+                        // Handle dropdown selection
+                        await onRouteSelect(selectedId);
+                        setState(() {
+                          selectedStationId = station_ids[0];
+                          selectedStationOption = station_names[0];
+                        });
+                      },
+                      items: route_names
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
                     ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 0),
-                  child: DropdownButtonFormField<String>(
-                    value: selectedStationOption,
-                    onChanged: (value) {
-                      // Handle dropdown selection
-                      setState(() {
-                        selectedStationOption = value!;
-                        // print(selectedOption);
-                        int idx = station_names.indexOf(selectedStationOption);
-                        selectedStationId = station_ids[idx];
-                      });
-                    },
-                    items: station_names
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
                   ),
                 ),
-              ),
               SizedBox(height: 16.0),
+              if (globel.userType == "student")
+                Padding(
+                  padding: EdgeInsets.only(left: 8.0),
+                  child: Text(
+                    "Default station",
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.withOpacity(0.9)),
+                  ),
+                ),
+              SizedBox(height: 8),
+              if (globel.userType == "student")
+                Container(
+                  padding: const EdgeInsets.all(12.0),
+                  decoration: BoxDecoration(
+                    border:
+                        Border.all(color: Color.fromARGB(255, 236, 237, 237)),
+                    borderRadius: BorderRadius.circular(10.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color.fromARGB(255, 252, 252, 252)
+                            .withOpacity(0.5), // Shadow color
+                        spreadRadius: 5, // Spread radius
+                        blurRadius: 7, // Blur radius
+                        offset: Offset(0, 3), // Offset
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 0),
+                    child: DropdownButtonFormField<String>(
+                      value: selectedStationOption,
+                      onChanged: (value) {
+                        // Handle dropdown selection
+                        setState(() {
+                          selectedStationOption = value!;
+                          // print(selectedOption);
+                          int idx =
+                              station_names.indexOf(selectedStationOption);
+                          selectedStationId = station_ids[idx];
+                        });
+                      },
+                      items: station_names
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              SizedBox(height: 16.0),
+              if (globel.userType == "buet_staff")
+                //set residence
+                CustomInputWidget(
+                  controller: residenceController,
+                  hintText: residence,
+                  heading: 'Residence',
+                ),
               Center(
                 child: ElevatedButton(
                   onPressed: () async {
                     // Handle saving changes here
                     // You can access the entered values using the controller.text
                     // For example, nameController.text will give you the name entered by the user
-                    await editProfile(selectedId, emailController.text,
-                        phoneNoController.text, selectedStationId);
+                    if (!(phoneNoController.text.length == 11)) {
+                      // Show toast for invalid phone number
+                      Fluttertoast.showToast(
+                          msg: "Invalid phone number",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0);
+                      return; // Don't proceed further
+                    } else {
+                      await editProfile(
+                          selectedId,
+                          emailController.text,
+                          phoneNoController.text,
+                          selectedStationId,
+                          residenceController.text);
+                    }
+
                     GoRouter.of(context).replace("/show_profile");
                     // GoRouter.of(context).refresh();
                   },

@@ -1,2 +1,2 @@
-# Busbuddy 🫰
-BusBuddy: Automating bus services with BPMN, mock UI, ERD, class diagrams, state/sequence diagrams, collaboration diagram, and a module implementation.
+# Busbuddy 
+BusBuddy: Automating the bus service facility for BUET students , teachers and related stuffs. 

@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:busbuddy_app/pages/scan_ticket_qr.dart';
 import 'package:busbuddy_app/pages/ticket_qr.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:path_provider/path_provider.dart';
 import 'pages/tracking.dart';
 import 'pages/trackingMap.dart';
 import 'pages/ticket_choose.dart';
@@ -32,59 +34,10 @@ import 'globel.dart' as globel;
 
 @pragma(
     'vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
-final LocationSettings locationSettings = LocationSettings(
-  accuracy: LocationAccuracy.high,
-  distanceFilter: 100,
-);
-Future<bool> _getCurrentLocation() async {
-  bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
-  // print(isLocationServiceEnabled);
-
-  if (!isLocationServiceEnabled) {
-    // Handle the case where location services are not enabled
-    // You may want to show a toast or display a message
-    print('Location services are not enabled.');
-    Fluttertoast.showToast(
-      msg: "Please enable location services.",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-    return false;
-  }
-
-  // Check if the app has location permission
-  LocationPermission permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    // Request location permission
-    permission = await Geolocator.requestPermission();
-    if (permission != LocationPermission.whileInUse &&
-        permission != LocationPermission.always) {
-      // Handle the case where the user denied location permission
-      print('User denied location permission.');
-      return false;
-    }
-  }
-  try {
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.best,
-    );
-
-    globel.p_latitude = position.latitude;
-    globel.p_longitude = position.longitude;
-
-    return true;
-  } catch (e) {
-    print("Error getting location: $e");
-    return false;
-  }
-}
-
 void main() async {
   initializeShurjopay(environment: "sandbox");
+
+  Requests.setStoredCookies(globel.serverAddr, globel.cookieJar);
   WidgetsFlutterBinding.ensureInitialized();
   runApp(BusBuddyApp());
 }
@@ -678,36 +631,36 @@ class HomeViewState extends State<HomeView> {
                             },
                           ),
                         if (globel.userType == "bus_staff")
-                        ListTile(
-                          leading: const Icon(Icons.qr_code),
-                          title: const Text('QR Code Scan'),
-                          selected: _selectedIndex == 13,
-                          onTap: () {
-                            if (_selectedIndex == 13) return;
-                            if (globel.runningTripId == "") {
-                              Fluttertoast.showToast(
-                                  msg: 'Please start a trip first.',
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.CENTER,
-                                  timeInSecForIosWeb: 1,
-                                  backgroundColor:
-                                      Color.fromARGB(118, 185, 26, 5),
-                                  textColor: Colors.white,
-                                  fontSize: 16.0);
-                              return;
-                            }
-                            // Update the state of the app
-                            // _onItemTapped(2);
-                            // Then close the drawer
+                          ListTile(
+                            leading: const Icon(Icons.qr_code),
+                            title: const Text('QR Code Scan'),
+                            selected: _selectedIndex == 13,
+                            onTap: () {
+                              if (_selectedIndex == 13) return;
+                              if (globel.runningTripId == "") {
+                                Fluttertoast.showToast(
+                                    msg: 'Please start a trip first.',
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    timeInSecForIosWeb: 1,
+                                    backgroundColor:
+                                        Color.fromARGB(118, 185, 26, 5),
+                                    textColor: Colors.white,
+                                    fontSize: 16.0);
+                                return;
+                              }
+                              // Update the state of the app
+                              // _onItemTapped(2);
+                              // Then close the drawer
 
-                            GoRouter.of(context).pop();
-                            GoRouter.of(context).push("/scan_qr_code");
+                              GoRouter.of(context).pop();
+                              GoRouter.of(context).push("/scan_qr_code");
 
-                            setState(() {
-                              _selectedIndex = 13;
-                            });
-                          },
-                        ),
+                              setState(() {
+                                _selectedIndex = 13;
+                              });
+                            },
+                          ),
                         ListTile(
                           visualDensity: const VisualDensity(vertical: 4),
                           leading: const Icon(Icons.logout),
@@ -721,7 +674,8 @@ class HomeViewState extends State<HomeView> {
                             dynamic json1 = r1.json();
                             if (json1['success']) {
                               await Requests.clearStoredCookies(
-                                  "18.117.93.134:6969");
+                                  globel.serverAddr);
+                              globel.clearAll();
                               Fluttertoast.showToast(
                                   msg: 'Logged out.',
                                   toastLength: Toast.LENGTH_SHORT,
