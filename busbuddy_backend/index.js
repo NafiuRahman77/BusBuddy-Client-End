@@ -19,6 +19,7 @@ const imageToBase64 = require('image-to-base64');
 const geolib = require('geolib');
 const tracking = require('./tracking.js');
 const { createHttpTerminator } = require('http-terminator');
+const { forEach } = require('p-iteration');
 
 
 dotenv.config();
@@ -1037,11 +1038,12 @@ if (process.stdin.isTTY) process.stdin.setRawMode(true);
 
 process.stdin.on('keypress', async (chunk, key) => {
   if (key && key.name == 'b') {
-    console.log("\n\n Initiating Server Shutdown\n");
+    console.log("\n\nInitiating Server Shutdown\n");
     await httpTerminator.terminate();
     console.log("Connections closed, creating backups");
 
-    tracking.runningTrips.forEach(async (trip_id, trip) => {
+    await forEach(tracking.runningTrips, async (trip_id, trip) => {
+        console.log("backing up " + trip_id);
         let pathStr = "{";
         for (let i=0; i<trip.path.length; i++) {
             pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;

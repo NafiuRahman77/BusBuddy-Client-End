@@ -23,6 +23,7 @@
     "node-fetch": "^2.6.7",
     "node-geo-distance": "^1.2.0",
     "otp-generator": "^4.0.0",
+    "p-iteration": "^1.1.8",
     "pg": "^8.7.3",
     "uuid": "^8.3.2"
   }
