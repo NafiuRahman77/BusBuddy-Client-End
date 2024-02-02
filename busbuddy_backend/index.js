@@ -85,7 +85,7 @@ const getRealISODate = () => {
 // const cron = setInterval (initiate_today, 1800000);
 
 dbclient.query(
-    `select *, array_to_json(time_list) as list_time, array_to_json(path) as j_path from trip where is_live=true`
+    `select *, array_to_json(time_list) as list_time from trip where is_live=true`
 ).then(qres2 => {
     //console.log(qres2.rows[0].start_location);
     qres2.rows.forEach(td => {
@@ -105,8 +105,7 @@ dbclient.query(
                 time: null
             });
         });
-        console.log(td.path);
-        td.j_path.forEach (async p =>  {
+        td.path.forEach (async p =>  {
             // newTrip.time_list.push({...tp});
             newTrip.path.push({
                 latitude: p.x,
