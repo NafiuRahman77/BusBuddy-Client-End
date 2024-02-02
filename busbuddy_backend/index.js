@@ -22,6 +22,18 @@ const tracking = require('./tracking.js');
 dotenv.config();
 const { Pool, Client } = require('pg');
 
+const readline = require('readline');
+
+readline.emitKeypressEvents(process.stdin);
+
+if (process.stdin.isTTY)
+    process.stdin.setRawMode(true);
+
+process.stdin.on('keypress', (chunk, key) => {
+  if (key && key.name == 'b')
+  process.exit();
+});
+
 const dbconnObj = {
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -63,6 +75,8 @@ app.use(session({
         httpOnly: false
     }
 }));
+
+
 const getRealISODate = () => {
     return (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 10);
 };
