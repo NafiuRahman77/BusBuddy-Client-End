@@ -8,6 +8,7 @@ import 'package:loader_overlay/loader_overlay.dart';
 import '../../globel.dart' as globel;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import './trackingMap.dart';
+import './routeTimeCalendar.dart';
 
 class Tracking extends StatefulWidget {
   @override
@@ -158,13 +159,28 @@ class _trackingState extends State<Tracking> {
                   alignment: Alignment.center,
                   child: Padding(
                     padding: EdgeInsets.only(left: 12.0, bottom: 20.0, top: 50),
-                    child: Text(
-                      'No runninng trips found on $selectedRouteName route!',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.withOpacity(0.9),
-                      ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'No running trips found on $selectedRouteName route!',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.withOpacity(0.9),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            print("clicked");
+                            GoRouter.of(context).push("/route_calendar");
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF781B1B),
+                          ),
+                          child: Text("View Default Route Schedule",
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                      ],
                     ),
                   ),
                 ),

@@ -66,7 +66,7 @@ class BusBuddyApp extends StatelessWidget {
         builder: ((context, state) => const HomeView(page: "Confirm Payment"))),
     GoRoute(
         path: "/route_calendar",
-        builder: ((context, state) => const HomeView(page: "Route Calendar"))),
+        builder: ((context, state) => HomeView(page: "Route Calendar"))),
     GoRoute(
         path: "/routetimemap",
         builder: ((context, state) =>

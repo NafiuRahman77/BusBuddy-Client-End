@@ -43,6 +43,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
 
   Future<void> onCalendarMount() async {
     context.loaderOverlay.show();
+
     var r = await Requests.post(globel.serverIp + 'getDefaultRoute');
 
     r.raiseForStatus();
