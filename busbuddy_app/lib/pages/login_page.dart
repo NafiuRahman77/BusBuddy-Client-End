@@ -1,3 +1,6 @@
+import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
+
 import 'show_profile.dart';
 import '../components/my_button.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:requests/requests.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import '../../globel.dart' as globel;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -24,14 +28,137 @@ class _LoginPageState extends State<LoginPage> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
 
+  Future<void> startLocationStream() async {
+    late LocationSettings locationSettings;
+
+    locationSettings = AndroidSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: globel.distanceFilter,
+        forceLocationManager: true,
+        intervalDuration: const Duration(seconds: 10),
+        //(Optional) Set foreground notification config to keep the app alive
+        //when going to the background
+        foregroundNotificationConfig: const ForegroundNotificationConfig(
+          notificationText:
+              "Example app will continue to receive your location even when you aren't using it",
+          notificationTitle: "Running in Background",
+          enableWakeLock: true,
+        ));
+
+    globel.positionStream =
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((Position? position) async {
+      print(position == null
+          ? 'Unknown'
+          : '${position.latitude.toString()}, ${position.longitude.toString()}');
+
+      if (position != null) {
+        var r2 = await Requests.post(globel.serverIp + 'updateStaffLocation',
+            body: {
+              'trip_id': globel.runningTripId,
+              'latitude': position.latitude.toString(),
+              'longitude': position.longitude.toString(),
+            },
+            bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+
+        r2.raiseForStatus();
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    onLoginMount();
+  }
+
+  Future<void> onLoginMount() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? c = await prefs.getString('connect.sid');
+    if (c != null) {
+      await Requests.addCookie(
+          Requests.getHostname(globel.serverIp), 'connect.sid', c);
+
+      context.loaderOverlay.show();
+      var r = await Requests.post(globel.serverIp + 'sessionCheck');
+
+      r.raiseForStatus();
+      dynamic json = r.json();
+      print(json);
+      if (json['recognized'] == true) {
+        globel.userType = json['user_type'];
+        if (globel.userType == 'bus_staff') {
+          if (json['relogin'] == true) {
+            Fluttertoast.showToast(
+                msg:
+                    'Bus staff can login from only one device at once. Your previous sessions have been deactivated',
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Color.fromARGB(131, 244, 67, 54),
+                textColor: Colors.white,
+                fontSize: 16.0);
+          }
+
+          var r4 =
+              await Requests.post(globel.serverIp + 'checkStaffRunningTrip');
+          print("hello bus stff");
+          r4.raiseForStatus();
+          dynamic rt = r4.json();
+          if (rt['success']) {
+            globel.runningTripId = rt['id'];
+            bool isLocationServiceEnabled =
+                await Geolocator.isLocationServiceEnabled();
+
+            // Workmanager()
+            //     .registerOneOffTask("bus", "sojib")
+            if (!isLocationServiceEnabled) {
+              // Handle the case where location services are not enabled
+              // You may want to show a toast or display a message
+              print('Location services are not enabled.');
+              Fluttertoast.showToast(
+                msg: "Please enable location services.",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
+              SystemNavigator.pop();
+            }
+
+            // Check if the app has location permission
+            LocationPermission permission = await Geolocator.checkPermission();
+            if (permission == LocationPermission.denied) {
+              // Request location permission
+              permission = await Geolocator.requestPermission();
+              if (permission != LocationPermission.whileInUse &&
+                  permission != LocationPermission.always) {
+                // Handle the case where the user denied location permission
+                print('User denied location permission.');
+                SystemNavigator.pop();
+              }
+            }
+            try {
+              await startLocationStream();
+              // return true;
+            } catch (e) {
+              print("Error getting location: $e");
+              SystemNavigator.pop();
+            }
+          }
+        }
+
+        await onProfileReady();
+        await onProfileMount();
+        GoRouter.of(context).go("/show_profile");
+      }
+      context.loaderOverlay.hide();
+    }
+  }
+
   Future<bool> onLogin(String id, String password) async {
-    // final response = await http.post(
-    //   Uri.parse(globel.serverIp + 'login'),
-    //   headers: <String, String>{
-    //     'Content-Type': 'application/json; charset=UTF-8',
-    //   },
-    //   body: jsonEncode(<String, String>{'id': id, 'password': password}),
-    // );
     var r = await Requests.post(globel.serverIp + 'login',
         body: {
           'id': id,
@@ -51,8 +178,79 @@ class _LoginPageState extends State<LoginPage> {
     // print(r2.content());
 
     if (json['success'] == true) {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      print("..........");
+      CookieJar cj = await Requests.getStoredCookies(
+          Requests.getHostname(globel.serverIp));
+      cj.forEach((key, value) async {
+        print(key);
+        print(value);
+        await (prefs.setString(key, value.value));
+      });
       globel.userType = json['user_type'];
-      print(globel.userType);
+
+      if (globel.userType == 'bus_staff') {
+        if (json['relogin'] == true) {
+          Fluttertoast.showToast(
+              msg:
+                  'Bus staff can login from only one device at once. Your previous sessions have been deactivated',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(131, 244, 67, 54),
+              textColor: Colors.white,
+              fontSize: 16.0);
+        }
+
+        var r4 = await Requests.post(globel.serverIp + 'checkStaffRunningTrip');
+        print("hello bus stff");
+        r4.raiseForStatus();
+        dynamic rt = r4.json();
+        if (rt['success']) {
+          globel.runningTripId = rt['id'];
+          bool isLocationServiceEnabled =
+              await Geolocator.isLocationServiceEnabled();
+
+          // Workmanager()
+          //     .registerOneOffTask("bus", "sojib")
+          if (!isLocationServiceEnabled) {
+            // Handle the case where location services are not enabled
+            // You may want to show a toast or display a message
+            print('Location services are not enabled.');
+            Fluttertoast.showToast(
+              msg: "Please enable location services.",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+            return false;
+          }
+
+          // Check if the app has location permission
+          LocationPermission permission = await Geolocator.checkPermission();
+          if (permission == LocationPermission.denied) {
+            // Request location permission
+            permission = await Geolocator.requestPermission();
+            if (permission != LocationPermission.whileInUse &&
+                permission != LocationPermission.always) {
+              // Handle the case where the user denied location permission
+              print('User denied location permission.');
+              return false;
+            }
+          }
+          try {
+            await startLocationStream();
+            return true;
+          } catch (e) {
+            print("Error getting location: $e");
+            return false;
+          }
+        }
+      }
+      // print(globel.userType);
       Fluttertoast.showToast(
           msg: 'Welcome, ${json['name']}',
           toastLength: Toast.LENGTH_SHORT,

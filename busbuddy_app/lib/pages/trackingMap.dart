@@ -38,7 +38,7 @@ class _trackingMapUIState extends State<trackingMap> {
     r.raiseForStatus();
     setState(() {
       var zz = r.json();
-      widget.pathCoords = zz['path'] ; 
+      widget.pathCoords = zz['path'];
     });
   }
 
@@ -47,10 +47,19 @@ class _trackingMapUIState extends State<trackingMap> {
     super.initState();
     //getPoints(widget.RouteID) ;
     x = cnv(widget.pathCoords);
-    locationUpdateTimer = Timer.periodic(Duration(seconds: 10), (Timer timer) async{  
+    locationUpdateTimer =
+        Timer.periodic(Duration(seconds: 10), (Timer timer) async {
       await getlocationupdate(widget.TripID);
       x = cnv(widget.pathCoords);
     });
+  }
+
+  @override
+  void dispose() {
+    if (locationUpdateTimer != null && locationUpdateTimer!.isActive) {
+      locationUpdateTimer!.cancel();
+    }
+    super.dispose();
   }
 
   List<LatLng> cnv(List<dynamic> pathCoords) {
@@ -69,19 +78,17 @@ class _trackingMapUIState extends State<trackingMap> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-         
-        ),
+        appBar: AppBar(),
         body: GoogleMap(
           initialCameraPosition: CameraPosition(
-            target: LatLng(23.7623975, 90.3646323), 
+            target: LatLng(23.7623975, 90.3646323),
             zoom: 12, // Zoom level
           ),
           polylines: Set<Polyline>.of([
             Polyline(
               polylineId: PolylineId('fsef'),
-              color: Colors.red, 
-              points: x, 
+              color: Colors.red,
+              points: x,
             ),
           ]),
         ),

@@ -1,5 +1,6 @@
 
 const runningTrips = new Map();
+const stationCoords = new Map();
 
 class RunningTrip {
     id;
@@ -10,7 +11,8 @@ class RunningTrip {
     travel_direction;
     bus;
     is_default;
-    bus_staff;
+    driver;
+    helper;
     approved_by;
     end_timestamp;
     start_location;
@@ -20,7 +22,7 @@ class RunningTrip {
 
     constructor (id, start_timestamp, route, time_type, 
                  travel_direction, bus, is_default,
-                 bus_staff, approved_by, end_timestamp,
+                 driver, helper, approved_by, end_timestamp,
                  start_location, end_location, is_live) {
         this.id = id;
         this.start_timestamp = start_timestamp;
@@ -29,7 +31,8 @@ class RunningTrip {
         this.travel_direction = travel_direction;
         this.bus = bus;
         this.is_default = is_default;
-        this.bus_staff = bus_staff;
+        this.driver = driver;
+        this.helper = helper;
         this.approved_by = approved_by;
         this.end_timestamp = end_timestamp;
         this.start_location = start_location;
@@ -39,4 +42,4 @@ class RunningTrip {
     };
 };
 
-module.exports = {RunningTrip, runningTrips}
+module.exports = {RunningTrip, runningTrips, stationCoords}

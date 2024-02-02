@@ -1,0 +1,5 @@
+-- select *, array_to_json(time_list) as time_list_ from allocation where is_done=false and bus_staff='altaf';
+-- select *, array_to_json(time_list) as time_list_ from trip where ybus_staff='altaf';
+-- delete from trip where bus_staff='altaf'; update allocation set is_done = false where bus_staff='altaf';
+-- update trip set end_timestamp=current_timestamp, passenger_count=34, end_location[0]=23.5456546, end_location[1]=19.43545436, is_live=false where id=509 and bus_staff='altaf';
+update ticket set trip_id=509, is_used=true where id='33dbe35f-2d62-47d3-9ad2-a65708e85fb8' returning student_id
