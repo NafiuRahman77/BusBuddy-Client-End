@@ -1067,8 +1067,9 @@ process.stdin.on('keypress', async (chunk, key) => {
             }).catch(e => console.error(e.stack));
             console.log("backed up " + trip_id);
             tracking.runningTrips.delete(trip_id);
-        });
-        console.log("bye");
-        process.exit();
+        }).then(result => {
+            console.log("bye");
+            process.exit();
+        })
     };
 });
