@@ -78,6 +78,8 @@ class _LoginPageState extends State<LoginPage> {
     if (c != null) {
       await Requests.addCookie(
           Requests.getHostname(globel.serverIp), 'connect.sid', c);
+
+      context.loaderOverlay.show();
       var r = await Requests.post(globel.serverIp + 'sessionCheck');
 
       r.raiseForStatus();
@@ -152,6 +154,7 @@ class _LoginPageState extends State<LoginPage> {
         await onProfileMount();
         GoRouter.of(context).go("/show_profile");
       }
+      context.loaderOverlay.hide();
     }
   }
 
