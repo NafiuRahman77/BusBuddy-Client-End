@@ -9,12 +9,41 @@ import '../../globel.dart' as globel;
 class CircleWidget extends StatelessWidget {
   final String text1;
   final String text2;
-  int x = 0;
+  final bool fromtrack;
 
-  CircleWidget({required this.text1, required this.text2, this.x = 0});
+  CircleWidget({
+    required this.text1,
+    required this.text2,
+    this.fromtrack = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    Color textColor;
+    Color circColor = Colors.grey;
+    if (fromtrack) {
+      DateTime? entryTime;
+      DateTime currentTime = DateTime.now();
+
+      if (text2 != "--") {
+        entryTime = DateFormat.jm().parse(text2);
+        int entryMinutes = entryTime.hour * 60 + entryTime.minute;
+        int currentMinutes = currentTime.hour * 60 + currentTime.minute;
+
+        // Calculate the difference in minutes
+        int differenceInMinutes = currentMinutes - entryMinutes;
+        print(differenceInMinutes);
+        if (differenceInMinutes <= 68) {
+          circColor = Colors.red;
+        }
+      }
+      textColor = entryTime != null && entryTime.isBefore(currentTime)
+          ? Colors.yellow
+          : Colors.green;
+    } else {
+      textColor = Colors.white;
+    }
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -23,7 +52,7 @@ class CircleWidget extends StatelessWidget {
           height: 10.0,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.grey, // Circle color
+            color: circColor, // Circle color
           ),
         ),
         SizedBox(width: 12.0), // Space between circle and text
@@ -36,7 +65,7 @@ class CircleWidget extends StatelessWidget {
                 text1,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: x == 0 ? Colors.white : Colors.black,
+                  color: textColor,
                   fontSize: 12.0,
                 ),
               ),

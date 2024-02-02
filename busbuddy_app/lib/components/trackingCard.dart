@@ -17,7 +17,9 @@ class TrackingCard extends StatefulWidget {
   final String time2;
   final String location3;
   final String time3;
-
+  final List<dynamic> completeInfo;
+  final List<String> stationIds;
+  final List<String> stationNames;
   TrackingCard({
     required this.title,
     required this.TripID,
@@ -28,6 +30,9 @@ class TrackingCard extends StatefulWidget {
     required this.time2,
     required this.location3,
     required this.time3,
+    required this.completeInfo,
+    required this.stationIds,
+    required this.stationNames,
   });
 
   @override
@@ -87,7 +92,28 @@ class _TrackingCardState extends State<TrackingCard> {
                         // Show extended information if isExtended is true
                         Column(
                           children: [
-                            // Add your extended information widgets here
+                            for (int i = 0; i < widget.completeInfo.length; i++)
+                              Column(
+                                children: [
+                                  CircleWidget(
+                                    text1: widget.stationNames[widget.stationIds
+                                        .indexOf(
+                                            widget.completeInfo[i]['station'])],
+                                    text2:
+                                        widget.completeInfo[i]['time'] != null
+                                            ? DateFormat('jm').format(
+                                                DateTime.parse(
+                                                        widget.completeInfo[i]
+                                                            ['time'])
+                                                    .toLocal())
+                                            : "--",
+                                    fromtrack: true,
+                                  ),
+                                  SizedBox(
+                                      height:
+                                          10), // Add spacing between CircleWidgets
+                                ],
+                              ),
                           ],
                         ),
                       ] else ...[
@@ -106,51 +132,62 @@ class _TrackingCardState extends State<TrackingCard> {
                       Center(
                         child: Column(
                           children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  isExtended = !isExtended;
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                side: const BorderSide(
-                                  width: 1.0,
-                                  color: Color.fromARGB(150, 255, 255, 255),
-                                ),
-                                backgroundColor:
-                                    Color.fromARGB(255, 160, 88, 88),
-                                foregroundColor: Colors.white,
-                              ),
-                              child: isExtended
-                                  ? Icon(Icons.keyboard_arrow_up)
-                                  : Icon(Icons.keyboard_arrow_down),
-                            ),
-                            Visibility(
-                              visible: isExtended,
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  GoRouter.of(context)
-                                      .push("/trackingmap", extra: {
-                                    'TripID': widget.TripID,
-                                    'pathCoords': widget.pathCoords,
-                                  });
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  side: const BorderSide(
-                                    width: 1.0,
-                                    color: Color.fromARGB(150, 255, 255, 255),
+                            Row(
+                              mainAxisAlignment: isExtended
+                                  ? MainAxisAlignment.center
+                                  : MainAxisAlignment.start,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      isExtended = !isExtended;
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    side: const BorderSide(
+                                      width: 1.0,
+                                      color: Color.fromARGB(150, 255, 255, 255),
+                                    ),
+                                    backgroundColor:
+                                        Color.fromARGB(255, 160, 88, 88),
+                                    foregroundColor: Colors.white,
                                   ),
-                                  backgroundColor:
-                                      Color.fromARGB(255, 160, 88, 88),
-                                  foregroundColor: Colors.white,
+                                  child: isExtended
+                                      ? Icon(Icons.keyboard_arrow_up)
+                                      : Icon(Icons.keyboard_arrow_down),
                                 ),
-                                icon: Icon(Icons.map),
-                                label: Text("Track on Map"),
-                              ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Visibility(
+                                  visible: isExtended,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      GoRouter.of(context)
+                                          .push("/trackingmap", extra: {
+                                        'TripID': widget.TripID,
+                                        'pathCoords': widget.pathCoords,
+                                      });
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      side: const BorderSide(
+                                        width: 1.0,
+                                        color:
+                                            Color.fromARGB(150, 255, 255, 255),
+                                      ),
+                                      backgroundColor:
+                                          Color.fromARGB(255, 160, 88, 88),
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    icon: Icon(Icons.map),
+                                    label: Text("Track on Map"),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ),

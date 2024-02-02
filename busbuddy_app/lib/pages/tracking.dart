@@ -296,6 +296,9 @@ class _trackingState extends State<Tracking> {
                                 ['time'])
                             .toLocal())
                         : "--",
+                    completeInfo: trackingData[i]["time_list"],
+                    stationIds: station_ids,
+                    stationNames: station_names,
                   ),
               if (trackingData.isEmpty)
                 Align(
