@@ -159,6 +159,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
     r.raiseForStatus();
     setState(() {
       routeTimeData = r.json();
+      print(routeTimeData);
       loadedRouteTimeData = true;
 
       routeTimeData.forEach((j) {

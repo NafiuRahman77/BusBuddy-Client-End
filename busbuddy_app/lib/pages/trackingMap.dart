@@ -84,9 +84,6 @@ class _trackingMapUIState extends State<trackingMap> {
 
   List<LatLng> cnv(List<dynamic> pathCoords) {
     return pathCoords.map((coord) {
-      // final ltlng = coord.substring(1,coord.length-1).split(',') ;
-      // final lat = double.parse(ltlng[0]) ;
-      // final lng = double.parse(ltlng[1]) ;
       return LatLng(
           double.parse(coord['latitude']), double.parse(coord['longitude']));
     }).toList();

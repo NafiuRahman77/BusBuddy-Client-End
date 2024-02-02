@@ -7,44 +7,35 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../globel.dart' as globel;
 import './circlewidget.dart';
 
-class CustomCard extends StatefulWidget {
+class TrackingCard extends StatefulWidget {
   final String title;
+  String TripID = "";
+  List<dynamic> pathCoords = List.empty();
   final String location1;
   final String time1;
   final String location2;
   final String time2;
   final String location3;
   final String time3;
-  final List<dynamic> extendedInfo; // List of additional information
-  final List<String> stationIds;
-  final List<String> stationNames;
-  final List<dynamic> stationCoords;
-  CustomCard({
+
+  TrackingCard({
     required this.title,
+    required this.TripID,
+    required this.pathCoords,
     required this.location1,
     required this.time1,
     required this.location2,
     required this.time2,
     required this.location3,
     required this.time3,
-    required this.extendedInfo,
-    required this.stationIds,
-    required this.stationNames,
-    required this.stationCoords,
   });
 
   @override
-  _CustomCardState createState() => _CustomCardState();
+  _TrackingCardState createState() => _TrackingCardState();
 }
 
-class _CustomCardState extends State<CustomCard> {
-  bool isExtended = false; // Track whether the card is extended or not
-  List<dynamic> routeCoords = [];
-
-  @override
-  void initState() {
-    super.initState();
-  }
+class _TrackingCardState extends State<TrackingCard> {
+  bool isExtended = false;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +52,6 @@ class _CustomCardState extends State<CustomCard> {
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Row(
-              // Changed from Column to Row
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 // Icon and Title Section
@@ -84,37 +74,23 @@ class _CustomCardState extends State<CustomCard> {
                   ],
                 ),
                 SizedBox(
-                    width: 8), // Add spacing between Icon/Title and Stations
+                  width: 8,
+                ), // Add spacing between Icon/Title and Stations
+
                 // Stations Section
                 Expanded(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
+                      // Extended Information Section
                       if (isExtended) ...[
                         // Show extended information if isExtended is true
                         Column(
                           children: [
-                            for (int i = 0; i < widget.extendedInfo.length; i++)
-                              Column(
-                                children: [
-                                  CircleWidget(
-                                    text1: widget.stationNames[widget.stationIds
-                                        .indexOf(
-                                            widget.extendedInfo[i]['station'])],
-                                    text2: DateFormat('jm').format(
-                                        DateTime.parse(
-                                                widget.extendedInfo[i]['time'])
-                                            .toLocal()),
-                                  ),
-                                  SizedBox(
-                                      height:
-                                          10), // Add spacing between CircleWidgets
-                                ],
-                              ),
+                            // Add your extended information widgets here
                           ],
                         ),
                       ] else ...[
-                        // Show original content if isExtended is false
                         CircleWidget(
                             text1: widget.location1, text2: widget.time1),
                         SizedBox(height: 10),
@@ -125,63 +101,51 @@ class _CustomCardState extends State<CustomCard> {
                             text1: widget.location3, text2: widget.time3),
                         SizedBox(height: 10),
                       ],
-                      // Toggle button
+
+                      // Toggle button and Map button
                       Center(
-                        child: Row(
+                        child: Column(
                           children: [
                             ElevatedButton(
                               onPressed: () {
                                 setState(() {
-                                  isExtended =
-                                      !isExtended; // Toggle the card state
-                                  print(widget.extendedInfo);
+                                  isExtended = !isExtended;
                                 });
                               },
                               style: ElevatedButton.styleFrom(
                                 side: const BorderSide(
-                                    width: 1.0,
-                                    color: Color.fromARGB(150, 255, 255, 255)),
-                                backgroundColor: Color.fromARGB(255, 160, 88,
-                                    88), // Set the background color
-                                foregroundColor:
-                                    Colors.white, // Set the icon color to white
+                                  width: 1.0,
+                                  color: Color.fromARGB(150, 255, 255, 255),
+                                ),
+                                backgroundColor:
+                                    Color.fromARGB(255, 160, 88, 88),
+                                foregroundColor: Colors.white,
                               ),
                               child: isExtended
-                                  ? Icon(Icons
-                                      .keyboard_arrow_up) // Show "Expand Less" icon
-                                  : Icon(Icons
-                                      .keyboard_arrow_down), // Show "Expand More" icon
+                                  ? Icon(Icons.keyboard_arrow_up)
+                                  : Icon(Icons.keyboard_arrow_down),
                             ),
-                            Spacer(),
                             Visibility(
-                              visible:
-                                  isExtended, // Show the button when isExtended is true
+                              visible: isExtended,
                               child: ElevatedButton.icon(
                                 onPressed: () {
-                                  Set<Marker> jMarkerSet = Set<Marker>();
-                                  widget.extendedInfo.forEach((stop) {
-                                    if (stop['coord'] != null)
-                                      jMarkerSet.add(Marker(
-                                        markerId: MarkerId("value"),
-                                        position: LatLng(stop['coord']['x'],
-                                            stop['coord']['y']),
-                                      ));
-                                  });
                                   GoRouter.of(context)
-                                      .push("/routetimemap", extra: jMarkerSet);
+                                      .push("/trackingmap", extra: {
+                                    'TripID': widget.TripID,
+                                    'pathCoords': widget.pathCoords,
+                                  });
                                 },
                                 style: ElevatedButton.styleFrom(
                                   side: const BorderSide(
-                                      width: 1.0,
-                                      color:
-                                          Color.fromARGB(150, 255, 255, 255)),
-                                  backgroundColor: Color.fromARGB(255, 160, 88,
-                                      88), // Set the background color
-                                  foregroundColor: Colors
-                                      .white, // Set the icon color to white
+                                    width: 1.0,
+                                    color: Color.fromARGB(150, 255, 255, 255),
+                                  ),
+                                  backgroundColor:
+                                      Color.fromARGB(255, 160, 88, 88),
+                                  foregroundColor: Colors.white,
                                 ),
                                 icon: Icon(Icons.map),
-                                label: Text("Show map"),
+                                label: Text("Track on Map"),
                               ),
                             ),
                           ],

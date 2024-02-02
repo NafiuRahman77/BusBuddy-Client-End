@@ -9,6 +9,7 @@ import '../../globel.dart' as globel;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import './trackingMap.dart';
 import './routeTimeCalendar.dart';
+import '../components/trackingCard.dart';
 
 class Tracking extends StatefulWidget {
   @override
@@ -23,7 +24,7 @@ class _trackingState extends State<Tracking> {
   String selectedRouteName = "";
   String selectedRouteId = "";
   String choice = "0";
-
+  List<String> station_ids = [], station_names = [];
   @override
   void initState() {
     super.initState();
@@ -53,6 +54,23 @@ class _trackingState extends State<Tracking> {
     });
     route_names.forEach((element) {
       print(element);
+    });
+
+    var r2 = await Requests.post(globel.serverIp + 'getStations');
+    r2.raiseForStatus();
+    List<dynamic> json2 = r2.json();
+    setState(() {
+      //clear the lists
+      station_ids.clear();
+      station_names.clear();
+      station_coords.clear();
+      for (int i = 0; i < json2.length; i++) {
+        // List<dynamic> arr2j = json2[i]['array_to_json'];
+        station_ids.add(json2[i]['id']);
+        station_names.add(json2[i]['name']);
+        station_coords.add(json2[i]['coords']);
+        // route_st_cnt.add(arr2j.length);
+      }
     });
 
     await getPoints(globel.userDefaultRouteId);
@@ -236,26 +254,48 @@ class _trackingState extends State<Tracking> {
                   ),
                 ),
               ),
+              SizedBox(
+                height: 15,
+              ),
               if (loadedRouteTimeData && trackingData.isNotEmpty)
                 for (int i = 0; i < trackingData.length; i++)
-                  ElevatedButton(
-                    onPressed: () async {
-                      print("clicked");
-
-                      List<dynamic> pathCoords = trackingData[i]['path'];
-
-                      GoRouter.of(context).push("/trackingmap", extra: {
-                        'TripID': trackingData[i]['id'],
-                        'pathCoords': pathCoords
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF781B1B),
-                    ),
-                    child: Text(
-                      "Trip #${trackingData[i]['id']} (View on Map)",
-                      style: TextStyle(color: Colors.white),
-                    ),
+                  TrackingCard(
+                    title: trackingData[i]['bus'],
+                    TripID: trackingData[i]['id'],
+                    pathCoords: trackingData[i]['path'],
+                    location1: station_names[station_ids
+                        .indexOf(trackingData[i]["time_list"][0]['station'])],
+                    time1: trackingData[i]["time_list"][0]['time'] != null
+                        ? DateFormat('jm').format(DateTime.parse(
+                                trackingData[i]["time_list"][0]['time'])
+                            .toLocal())
+                        : "--",
+                    location2: station_names[station_ids.indexOf(trackingData[i]
+                            ["time_list"]
+                        [trackingData[i]["time_list"].length - 3]['station'])],
+                    time2: trackingData[i]["time_list"]
+                                    [trackingData[i]["time_list"].length - 3]
+                                ['time'] !=
+                            null
+                        ? DateFormat('jm').format(DateTime.parse(trackingData[i]
+                                        ["time_list"]
+                                    [trackingData[i]["time_list"].length - 3]
+                                ['time'])
+                            .toLocal())
+                        : "--",
+                    location3: station_names[station_ids.indexOf(trackingData[i]
+                            ["time_list"]
+                        [trackingData[i]["time_list"].length - 1]['station'])],
+                    time3: trackingData[i]["time_list"]
+                                    [trackingData[i]["time_list"].length - 1]
+                                ['time'] !=
+                            null
+                        ? DateFormat('jm').format(DateTime.parse(trackingData[i]
+                                        ["time_list"]
+                                    [trackingData[i]["time_list"].length - 1]
+                                ['time'])
+                            .toLocal())
+                        : "--",
                   ),
               if (trackingData.isEmpty)
                 Align(
