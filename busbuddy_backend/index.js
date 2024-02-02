@@ -1048,23 +1048,21 @@ process.stdin.on('keypress', async (chunk, key) => {
 
                 // Convert trip.path to a string representation using string concatenation
                 let pathStr = "{";
-                for (let i = 0; i < trip.path.length; i++) {
-                    pathStr += `(${trip.path[i].latitude}, ${trip.path[i].longitude})`;
-                    if (i < trip.path.length - 1) pathStr += ", ";
-                }
+                for (let i=0; i<trip.path.length; i++) {
+                    pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
+                    if (i<trip.path.length-1) pathStr += ", ";
+                };
                 pathStr += "}";
                 console.log(pathStr);
-
-                // Convert trip.time_list to a string representation using string concatenation
+                
                 let timeListStr = "{";
-                for (let i = 0; i < trip.time_list.length; i++) {
-                    if (trip.time_list[i].time)
-                        timeListStr += `(${trip.time_list[i].station}, \\\"${trip.time_list[i].time.toISOString()}\\\")`;
-                    else timeListStr += `(${trip.time_list[i].station}, \\\"${(new Date(0)).toISOString()}\\\")`;
-                    if (i < trip.time_list.length - 1) timeListStr += ",";
-                }
+                for (let i=0; i<trip.time_list.length; i++) {
+                    if (trip.time_list[i].time) 
+                        timeListStr += `"(${trip.time_list[i].station}, \\\"${trip.time_list[i].time.toISOString()}\\\")"`;
+                    else timeListStr += `"(${trip.time_list[i].station}, \\\"${(new Date(0)).toISOString()}\\\")"`;
+                    if (i<trip.time_list.length-1) timeListStr += ",";
+                };
                 timeListStr += "}";
-                console.log(timeListStr);
 
                 await dbclient.query(
                     `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`,
