@@ -418,13 +418,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     // Handle saving changes here
                     // You can access the entered values using the controller.text
                     // For example, nameController.text will give you the name entered by the user
-
-                    await editProfile(
-                        selectedId,
-                        emailController.text,
-                        phoneNoController.text,
-                        selectedStationId,
-                        residenceController.text);
+                    if (!(phoneNoController.text.length == 11)) {
+                      // Show toast for invalid phone number
+                      Fluttertoast.showToast(
+                          msg: "Invalid phone number",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0);
+                      return; // Don't proceed further
+                    } else {
+                      await editProfile(
+                          selectedId,
+                          emailController.text,
+                          phoneNoController.text,
+                          selectedStationId,
+                          residenceController.text);
+                    }
 
                     GoRouter.of(context).replace("/show_profile");
                     // GoRouter.of(context).refresh();

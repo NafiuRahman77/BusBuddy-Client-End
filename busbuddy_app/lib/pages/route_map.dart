@@ -18,6 +18,7 @@ class _RouteTimeMap extends State<RouteTimeMap> {
   @override
   void initState() {
     super.initState();
+    addCustomIcon();
     convertMarkersToLatLngPoints();
   }
 
@@ -27,19 +28,67 @@ class _RouteTimeMap extends State<RouteTimeMap> {
         .toList(growable: false);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    Marker startMarker = Marker(
-      markerId: MarkerId('start'),
-      position: stationLatLngPoints.first,
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+  BitmapDescriptor? markerIcon;
+  void addCustomIcon() async {
+    await BitmapDescriptor.fromAssetImage(
+            const ImageConfiguration(size: Size(200, 200)),
+            "lib/images/bus.png")
+        .then(
+      (icon) {
+        setState(() {
+          markerIcon = icon;
+        });
+      },
+    );
+  }
+
+  List<Marker> createMarkers() {
+    List<Marker> markers = [];
+
+    // Add custom marker for the first station
+    markers.add(
+      Marker(
+        markerId: MarkerId('start'),
+        position: widget.stationPoints.first.position,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+      ),
     );
 
-    Marker endMarker = Marker(
-      markerId: MarkerId('end'),
-      position: stationLatLngPoints.last,
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+    // Add default markers for stations in between
+    for (int i = 1; i < widget.stationPoints.length - 1; i++) {
+      markers.add(
+        Marker(
+          markerId: MarkerId(widget.stationPoints.elementAt(i).markerId.value),
+          position: widget.stationPoints.elementAt(i).position,
+        ),
+      );
+    }
+
+    // Add custom marker for the last station
+    markers.add(
+      Marker(
+        markerId: MarkerId('end'),
+        position: widget.stationPoints.last.position,
+        icon: markerIcon!,
+      ),
     );
+
+    return markers;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Marker startMarker = Marker(
+    //   markerId: MarkerId('start'),
+    //   position: stationLatLngPoints.first,
+    //   icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+    // );
+
+    // Marker endMarker = Marker(
+    //   markerId: MarkerId('end'),
+    //   position: stationLatLngPoints.last,
+    //   icon: markerIcon!,
+    // );
 
     return Scaffold(
       body: Padding(
@@ -60,10 +109,7 @@ class _RouteTimeMap extends State<RouteTimeMap> {
           onMapCreated: (GoogleMapController controller) {
             mapController = controller;
           },
-          //markers: widget.stationPoints,
-          // change marker of first and last station to be different
-          // plz change here
-          markers: {...widget.stationPoints, startMarker, endMarker},
+          markers: Set<Marker>.of(createMarkers()),
           polylines: Set<Polyline>.of([
             Polyline(
               polylineId: PolylineId('fsef'),
