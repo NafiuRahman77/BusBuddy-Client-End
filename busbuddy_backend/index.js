@@ -1079,4 +1079,5 @@ process.stdin.on('keypress', async (chunk, key) => {
             }).catch(e => console.error(e.stack));
         });
     };
+    if (key && key.name == 'x') process.exit();
 });
