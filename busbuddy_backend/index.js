@@ -1064,9 +1064,9 @@ process.stdin.on('keypress', async (chunk, key) => {
                 [trip.passenger_count, pathStr, timeListStr, trip_id]
             ).then(qres => {
                 console.log(qres);
+                console.log("backed up " + trip_id);
+                tracking.runningTrips.delete(trip_id);
             }).catch(e => console.error(e.stack));
-            console.log("backed up " + trip_id);
-            tracking.runningTrips.delete(trip_id);
         }).then(result => {
             console.log("bye");
             process.exit();
