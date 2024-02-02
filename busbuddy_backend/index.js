@@ -1042,7 +1042,7 @@ process.stdin.on('keypress', async (chunk, key) => {
         await httpTerminator.terminate();
         console.log("Connections closed, creating backups");
 
-        await map(tracking.runningTrips, async (trip_id, trip) => {
+        tracking.runningTrips.forEach( async (trip_id, trip) => {
             console.log("backing up " + trip_id);
             let pathStr = "{";
             for (let i = 0; i < trip.path.length; i++) {
