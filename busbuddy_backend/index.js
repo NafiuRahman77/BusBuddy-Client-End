@@ -1057,7 +1057,7 @@ process.stdin.on('keypress', async (chunk, key) => {
             if (i<trip.time_list.length-1) timeListStr += ",";
         };
         timeListStr += "}";
-        dbclient.query(
+        await dbclient.query(
             `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`, 
             [trip.passenger_count, pathStr, timeListStr, trip_id]
         ).then(qres => {
