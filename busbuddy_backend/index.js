@@ -1043,8 +1043,8 @@ process.stdin.on('keypress', async (chunk, key) => {
         console.log("Connections closed, creating backups");
 
         try {
-            tracking.runningTrips.forEach (async (trip_id, trip) => {
-                console.log("backing up " + trip_id);
+            tracking.runningTrips.forEach (async (trip) => {
+                console.log("backing up " + trip.id);
 
                 // Convert trip.path to a string representation using string concatenation
                 let pathStr = "{";
@@ -1068,11 +1068,11 @@ process.stdin.on('keypress', async (chunk, key) => {
 
                 await dbclient.query(
                     `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`,
-                    [trip.passenger_count, pathStr, timeListStr, trip_id]
+                    [trip.passenger_count, pathStr, timeListStr, trip.id]
                 );
 
-                console.log("backed up " + trip_id);
-                tracking.runningTrips.delete(trip_id);
+                console.log("backed up " + trip.id);
+                tracking.runningTrips.delete(trip.id);
             });
 
             console.log("bye");
