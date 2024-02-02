@@ -94,8 +94,8 @@ dbclient.query(
             td.travel_direction, td.bus, td.is_default,
             td.driver, td.helper, td.approved_by, td.end_timestamp,
             {   
-                latitude: td.start_location.x, 
-                longitude: td.start_location.y
+                latitude: td.start_location.x.toString(), 
+                longitude: td.start_location.y.toString(),
             }, 
             td.end_location);
         td.list_time.forEach (async tp =>  {
@@ -108,8 +108,8 @@ dbclient.query(
         if (td.path) td.path.forEach (async p =>  {
             // newTrip.time_list.push({...tp});
             newTrip.path.push({
-                latitude: p.x,
-                longitude: p.y,
+                latitude: p.x.toString(),
+                longitude: p.y.toString(),
             });
         });
         tracking.runningTrips.set (newTrip.id, newTrip);
