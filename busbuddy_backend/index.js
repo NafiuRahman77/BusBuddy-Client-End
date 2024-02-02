@@ -191,11 +191,14 @@ app.post('/api/sessionCheck', (req, res) => {
     if (req.session.userid) {
         res.send({
             recognized: true,
+            relogin: false,
+            user_type: req.session.user_type,
             user_id: req.session.userid,
         });
     } else {
         res.send({
             recognized: false,
+            relogin: false,
         });
     };
 });
