@@ -1036,8 +1036,9 @@ readline.emitKeypressEvents(process.stdin);
 
 if (process.stdin.isTTY) process.stdin.setRawMode(true);
 
-process.stdin.on('keypress', async (chunk, key) => {
-    if (key && key.name == 'b') {
+// process.stdin.on('keypress', async (chunk, key) => {
+    // if (key && key.name == 'b') {
+process.on('SIGTERM', async () => {
         console.log("\n\nInitiating Server Shutdown\n");
         await httpTerminator.terminate();
         console.log("Connections closed, creating backups");
@@ -1080,6 +1081,6 @@ process.stdin.on('keypress', async (chunk, key) => {
         } catch (error) {
             console.error(error.stack);
             process.exit(1); // Exit with an error code
-        }
-    }
+        };
+    // }
 });
