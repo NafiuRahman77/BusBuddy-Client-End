@@ -105,7 +105,7 @@ dbclient.query(
                 time: null
             });
         });
-        td.path.forEach (async p =>  {
+        if (td.path) td.path.forEach (async p =>  {
             // newTrip.time_list.push({...tp});
             newTrip.path.push({
                 latitude: p.x,
