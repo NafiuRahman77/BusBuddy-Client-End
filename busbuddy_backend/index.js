@@ -1101,6 +1101,7 @@ process.stdin.on('keypress', async (chunk, key) => {
         await httpTerminator.terminate();
         console.log("Connections closed, creating backups");
 
+        let backupCount = tracking.runningTrips.size, backupDone = 0;
         tracking.runningTrips.forEach (async (trip) => {
             console.log("backing up " + trip.id);
             let pathStr = "{";
@@ -1125,9 +1126,11 @@ process.stdin.on('keypress', async (chunk, key) => {
                 console.log(qres);
                 console.log("backed up " + trip.id);
                 tracking.runningTrips.delete(trip.id);
+                backupDone++;
             }).catch(e => console.error(e.stack));
         });
 
+        while (backupDone < backupCount);
         console.log("\nbye");
         process.exit();
     };
