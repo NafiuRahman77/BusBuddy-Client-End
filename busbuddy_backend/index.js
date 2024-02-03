@@ -1100,7 +1100,7 @@ process.stdin.on('keypress', async (chunk, key) => {
         await httpTerminator.terminate();
         console.log("Connections closed, creating backups");
 
-        tracking.runningTrips.forEach (async (trip) => {
+        tracking.runningTrips.forEach ((trip) => {
             console.log("backing up " + trip.id);
             let pathStr = "{";
             for (let i=0; i<trip.path.length; i++) {
@@ -1117,7 +1117,7 @@ process.stdin.on('keypress', async (chunk, key) => {
                 if (i<trip.time_list.length-1) timeListStr += ",";
             };
             timeListStr += "}";
-            await dbclient.query(
+            dbclient.query(
                 `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`, 
                 [trip.passenger_count, pathStr, timeListStr, trip.id]
             ).then(qres => {
