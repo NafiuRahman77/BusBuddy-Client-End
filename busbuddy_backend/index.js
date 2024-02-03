@@ -1008,7 +1008,7 @@ app.post('/api/endTrip', async (req,res) => {
     };
 });
 
-app.post('/api/updateStaffLocation', (req,res) => {
+app.post('/api/getCrewMap', (req,res) => {
     res.send({
         ...tracking.busStaffMap,
     });
