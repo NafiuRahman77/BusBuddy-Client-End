@@ -112,6 +112,7 @@ dbclient.query(
                 longitude: p.y.toString(),
             });
         });
+        newTrip.passenger_count = td.passenger_count;
         tracking.runningTrips.set (newTrip.id, newTrip);
         tracking.busStaffMap.set (newTrip.driver, newTrip.id);
         tracking.busStaffMap.set (newTrip.helper, newTrip.id);
