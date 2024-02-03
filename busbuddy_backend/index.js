@@ -1127,7 +1127,7 @@ process.stdin.on('keypress', async (chunk, key) => {
             }).catch(e => console.error(e.stack));
         });
 
-        console.log("bye");
+        console.log("\nbye");
         process.exit();
     };
     if (key && key.name == 'x') process.exit();
