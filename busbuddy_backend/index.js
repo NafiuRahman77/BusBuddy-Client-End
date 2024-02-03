@@ -1102,7 +1102,8 @@ process.stdin.on('keypress', async (chunk, key) => {
         console.log("Connections closed, creating backups");
 
         let backupCount = tracking.runningTrips.size, backupDone = 0;
-        tracking.runningTrips.forEach ((trip) => {
+        if (backupCount == 0) console,log("\nnothing to back up");
+        else tracking.runningTrips.forEach ((trip) => {
             console.log("backing up " + trip.id);
             let pathStr = "{";
             for (let i=0; i<trip.path.length; i++) {
