@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../globel.dart' as globel;
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:flutter/services.dart' show rootBundle;
 
 class RouteTimeMap extends StatefulWidget {
   final Set<Marker> stationPoints;
@@ -32,7 +35,19 @@ class _RouteTimeMap extends State<RouteTimeMap> {
 
   BitmapDescriptor? endIcon;
   BitmapDescriptor? startIcon;
-  void addCustomIcon() async {
+
+  Future<Uint8List> _getBytesFromAsset(
+      String path, int width, int height) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetWidth: width, targetHeight: height);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
+  }
+
+  Future<void> addCustomIcon() async {
     await BitmapDescriptor.fromAssetImage(
             const ImageConfiguration(size: Size(200, 200)),
             "lib/images/bus.png")
@@ -44,16 +59,12 @@ class _RouteTimeMap extends State<RouteTimeMap> {
       },
     );
 
-    await BitmapDescriptor.fromAssetImage(
-            const ImageConfiguration(size: Size(200, 200)),
-            "lib/images/start.png")
-        .then(
-      (icon) {
-        setState(() {
-          startIcon = icon;
-        });
-      },
-    );
+    Uint8List markerIcon =
+        await _getBytesFromAsset("lib/images/Start.png", 100, 100);
+
+    setState(() {
+      startIcon = BitmapDescriptor.fromBytes(markerIcon);
+    });
   }
 
   List<Marker> createMarkers() {
