@@ -135,6 +135,12 @@ class _ManageTripsState extends State<ManageTrips>
             children: [
               TabBar(
                 controller: _tabController,
+                onTap: (index) {
+                  print(index);
+                  if (_tabController.indexIsChanging == false) {
+                    GoRouter.of(context).push("/manage_trips");
+                  }
+                },
                 tabs: [
                   Tab(text: 'Upcoming'),
                   Tab(text: 'Ongoing/History'),
