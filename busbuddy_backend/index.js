@@ -1010,6 +1010,7 @@ app.post('/api/endTrip', async (req,res) => {
 
 app.post('/api/getCrewMap', (req,res) => {
     res.send({
+        success: true,
         ...tracking.busStaffMap,
     });
 });
