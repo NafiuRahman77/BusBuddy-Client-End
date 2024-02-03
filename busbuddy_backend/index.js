@@ -113,6 +113,8 @@ dbclient.query(
             });
         });
         tracking.runningTrips.set (newTrip.id, newTrip);
+        tracking.busStaffMap.set (newTrip.driver, newTrip.id);
+        tracking.busStaffMap.set (newTrip.helper, newTrip.id);
     });
 }).catch(e => console.error(e.stack));
 
@@ -929,6 +931,8 @@ app.post('/api/startTrip', (req,res) => {
                         });
                     });
                     tracking.runningTrips.set (newTrip.id, newTrip);
+                    tracking.busStaffMap.set (newTrip.driver, newTrip.id);
+                    tracking.busStaffMap.set (newTrip.helper, newTrip.id);
                     res.send({ 
                         success: true,
                         ...tracking.runningTrips.get(newTrip.id),
@@ -982,7 +986,9 @@ app.post('/api/endTrip', async (req,res) => {
                     });
                 };
             }).catch(e => console.error(e.stack));
-            tracking.runningTrips.delete(req.body.trip_id);
+            tracking.runningTrips.delete (trip.driver);
+            tracking.runningTrips.delete (trip.helper);
+            tracking.runningTrips.delete (req.body.trip_id);
         } else {
             dbclient.query(
                 `update trip set end_timestamp=current_timestamp, is_live=false where id=$1 and (driver=$2 or helper=$2)`, 
@@ -1000,6 +1006,12 @@ app.post('/api/endTrip', async (req,res) => {
             }).catch(e => console.error(e.stack));
         }
     };
+});
+
+app.post('/api/updateStaffLocation', (req,res) => {
+    res.send({
+        ...tracking.busStaffMap,
+    });
 });
 
 app.post('/api/updateStaffLocation', (req,res) => {
