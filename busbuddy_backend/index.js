@@ -1127,6 +1127,7 @@ process.stdin.on('keypress', async (chunk, key) => {
                 console.log("backed up " + trip.id);
                 tracking.runningTrips.delete(trip.id);
                 backupDone++;
+                if (backupCount == backupDone) console.log ("\nbackups completed");
             }).catch(e => console.error(e.stack));
         });
 
