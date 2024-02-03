@@ -19,8 +19,8 @@ const imageToBase64 = require('image-to-base64');
 const geolib = require('geolib');
 const tracking = require('./tracking.js');
 const { createHttpTerminator } = require('http-terminator');
-const { map } = require('p-iteration');
-
+const bcrypt = require('bcryptjs');
+const bcryptSaltRounds = 12;
 
 dotenv.config();
 const { Pool, Client } = require('pg');
@@ -130,17 +130,17 @@ dbclient.query("SELECT id, name, coords FROM station").then(qres => {
 app.post('/api/login', (req, res) => {
     // console.log(req.body);
     dbclient.query(
-        `SELECT name FROM student WHERE id=$1 AND password=$2`,
+        `SELECT name, password FROM student WHERE id=$1`,
         [req.body.id, req.body.password]
-    ).then(qres => {
+    ).then(async qres => {
         // console.log(qres);
         if (qres.rows.length === 0) {
             dbclient.query(
                 `SELECT name FROM buet_staff WHERE id=$1 AND password=$2`,
                 [req.body.id, req.body.password]
-            ).then(qres => {
+            ).then(qres2 => {
                 // console.log(qres);
-                if (qres.rows.length === 0) {
+                if (qres2.rows.length === 0) {
                     dbclient.query(
                         `SELECT name FROM bus_staff WHERE id=$1 AND password=$2`,
                         [req.body.id, req.body.password]
@@ -181,21 +181,30 @@ app.post('/api/login', (req, res) => {
                     req.session.user_type = "buet_staff";
                     res.send({
                         success: true,
-                        name: qres.rows[0].name,
+                        name: qres2.rows[0].name,
                         user_type: "buet_staff"
                     });
                     console.log(req.session);
                 };
             }).catch(e => console.error(e.stack));
         } else {
-            req.session.userid = req.body.id;
-            req.session.user_type = "student";
-            res.send({
-                success: true,
-                name: qres.rows[0].name,
-                user_type: "student"
-            });
-            console.log(req.session);
+            let verif = await bcrypt.compare (req.body.password, qres.rows[0].password);
+            if (verif === true) {
+                req.session.userid = req.body.id;
+                req.session.user_type = "student";
+                res.send({
+                    success: true,
+                    name: qres.rows[0].name,
+                    user_type: "student"
+                });
+                console.log(req.session);
+            } else {
+                res.send({ 
+                    success: false,
+                    name: null,
+                    relogin: false
+                });
+            }
         };
     }).catch(e => console.error(e.stack));
 });

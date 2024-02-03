@@ -9,6 +9,7 @@
   "author": "Wasif Jalal",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.0",
     "connect-pg-simple": "^9.0.1",
     "cookie-parser": "^1.4.6",
