@@ -363,7 +363,7 @@ app.post('/api/updatePassword', (req, res) => {
                 } else {
                     let verif = await bcrypt.compare (req.body.old, qres.rows[0].password);
                     if (verif === true) {
-                        let newhash = await bcrypt.hash (req.body.new, bcryptSaltRounds);
+                        let newHash = await bcrypt.hash (req.body.new, bcryptSaltRounds);
                         dbclient.query(
                             `update ${dbclient.escapeIdentifier(req.session.user_type)} set password=$1 where id=$2 and password=$3`, 
                             [newHash, req.session.userid, qres.rows[0].password]
