@@ -1068,7 +1068,7 @@ app.post('/api/staffScanTicket', (req,res) => {
             `update ticket set trip_id=$1, is_used=true where id=$2 returning student_id`, 
             [t_id, req.body.ticket_id]
         ).then(qres => {
-            let td = tracking.runningTrips.get(trip_id);
+            let td = tracking.runningTrips.get(t_id);
             td.passenger_count += 1;
             console.log(qres);
             if (qres.rowCount === 1) res.send({ 
