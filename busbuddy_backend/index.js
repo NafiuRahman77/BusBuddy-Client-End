@@ -153,7 +153,7 @@ app.post('/api/login', (req, res) => {
                                 relogin: false
                             });
                         } else {
-                            let verif = await bcrypt.compare (req.body.password, qres2.rows[0].password);
+                            let verif = await bcrypt.compare (req.body.password, qres3.rows[0].password);
                             if (verif === true) {
                                 dbclient.query(
                                     `select sid from session where sess->>'userid'= $1`,
