@@ -134,7 +134,7 @@ class _CustomCardState extends State<CustomCard> {
                                 setState(() {
                                   isExtended =
                                       !isExtended; // Toggle the card state
-                                  print(widget.extendedInfo);
+                                  //print(widget.extendedInfo);
                                 });
                               },
                               style: ElevatedButton.styleFrom(
@@ -165,6 +165,16 @@ class _CustomCardState extends State<CustomCard> {
                                         markerId: MarkerId("value"),
                                         position: LatLng(stop['coord']['x'],
                                             stop['coord']['y']),
+                                        infoWindow: InfoWindow(
+                                          title: widget.stationNames[widget
+                                              .stationIds
+                                              .indexOf(stop['station'])],
+                                          snippet: stop["time"] != null
+                                              ? DateFormat('jm').format(
+                                                  DateTime.parse(stop["time"])
+                                                      .toLocal())
+                                              : "--",
+                                        ),
                                       ));
                                   });
                                   GoRouter.of(context)
