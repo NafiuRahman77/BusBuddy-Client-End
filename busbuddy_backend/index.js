@@ -132,19 +132,19 @@ app.post('/api/login', (req, res) => {
     dbclient.query(
         `SELECT name, password FROM student WHERE id=$1`,
         [req.body.id]
-    ).then(async qres => {
+    ).then (async qres => {
         // console.log(qres);
         if (qres.rows.length === 0) {
             dbclient.query(
-                `SELECT name FROM buet_staff WHERE id=$1 AND password=$2`,
-                [req.body.id, req.body.password]
-            ).then(qres2 => {
+                `SELECT name, password FROM buet_staff WHERE id=$1`,
+                [req.body.id]
+            ).then (async qres2 => {
                 // console.log(qres);
                 if (qres2.rows.length === 0) {
                     dbclient.query(
                         `SELECT name FROM bus_staff WHERE id=$1 AND password=$2`,
                         [req.body.id, req.body.password]
-                    ).then(qres3 => {
+                    ).then (async qres3 => {
                         console.log(qres3);
                         if (qres3.rows.length === 0) {
                             res.send({ 
@@ -153,38 +153,55 @@ app.post('/api/login', (req, res) => {
                                 relogin: false
                             });
                         } else {
-                            dbclient.query(
-                                `select sid from session where sess->>'userid'= $1`,
-                                [req.body.id]
-                            ).then(qres4 => {
-                                console.log(qres4);
-                                let relogin = false;
-                                if (qres4.rows.length > 0) {
-                                    req.sessionStore.destroy(qres4.rows[0].sid);
-                                    relogin = true;
-                                };
-                                req.session.userid = req.body.id;
-                                req.session.user_type = "bus_staff";
-                                res.send({
-                                    success: true,
-                                    name: qres3.rows[0].name,
-                                    user_type: "bus_staff",
-                                    relogin: relogin,
+                            let verif = await bcrypt.compare (req.body.password, qres2.rows[0].password);
+                            if (verif === true) {
+                                dbclient.query(
+                                    `select sid from session where sess->>'userid'= $1`,
+                                    [req.body.id]
+                                ).then(qres4 => {
+                                    console.log(qres4);
+                                    let relogin = false;
+                                    if (qres4.rows.length > 0) {
+                                        req.sessionStore.destroy(qres4.rows[0].sid);
+                                        relogin = true;
+                                    };
+                                    req.session.userid = req.body.id;
+                                    req.session.user_type = "bus_staff";
+                                    res.send({
+                                        success: true,
+                                        name: qres3.rows[0].name,
+                                        user_type: "bus_staff",
+                                        relogin: relogin,
+                                    });
+                                    console.log(req.session);
+                                }).catch(e => console.error(e.stack));
+                            } else {
+                                res.send({ 
+                                    success: false,
+                                    name: null,
+                                    relogin: false
                                 });
-                                console.log(req.session);
-                            }).catch(e => console.error(e.stack));
-
+                            };
                         };
                     }).catch(e => console.error(e.stack));
                 } else {
-                    req.session.userid = req.body.id;
-                    req.session.user_type = "buet_staff";
-                    res.send({
-                        success: true,
-                        name: qres2.rows[0].name,
-                        user_type: "buet_staff"
-                    });
-                    console.log(req.session);
+                    let verif = await bcrypt.compare (req.body.password, qres2.rows[0].password);
+                    if (verif === true) {
+                        req.session.userid = req.body.id;
+                        req.session.user_type = "buet_staff";
+                        res.send({
+                            success: true,
+                            name: qres2.rows[0].name,
+                            user_type: "buet_staff"
+                        });
+                        console.log(req.session);
+                    } else {
+                        res.send({ 
+                            success: false,
+                            name: null,
+                            relogin: false
+                        });
+                    };
                 };
             }).catch(e => console.error(e.stack));
         } else {
@@ -204,7 +221,7 @@ app.post('/api/login', (req, res) => {
                     name: null,
                     relogin: false
                 });
-            }
+            };
         };
     }).catch(e => console.error(e.stack));
 });
