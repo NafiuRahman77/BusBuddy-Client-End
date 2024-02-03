@@ -131,7 +131,7 @@ app.post('/api/login', (req, res) => {
     // console.log(req.body);
     dbclient.query(
         `SELECT name, password FROM student WHERE id=$1`,
-        [req.body.id, req.body.password]
+        [req.body.id]
     ).then(async qres => {
         // console.log(qres);
         if (qres.rows.length === 0) {
