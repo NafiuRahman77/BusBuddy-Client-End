@@ -1018,7 +1018,7 @@ app.post('/api/getCrewMap', (req,res) => {
     });
     res.send({
         success: true,
-        ...tracking.busStaffMap,
+        data: [...crewMap],
     });
 });
 
