@@ -30,7 +30,8 @@ class _RouteTimeMap extends State<RouteTimeMap> {
         .toList(growable: false);
   }
 
-  BitmapDescriptor? markerIcon;
+  BitmapDescriptor? endIcon;
+  BitmapDescriptor? startIcon;
   void addCustomIcon() async {
     await BitmapDescriptor.fromAssetImage(
             const ImageConfiguration(size: Size(200, 200)),
@@ -38,7 +39,18 @@ class _RouteTimeMap extends State<RouteTimeMap> {
         .then(
       (icon) {
         setState(() {
-          markerIcon = icon;
+          endIcon = icon;
+        });
+      },
+    );
+
+    await BitmapDescriptor.fromAssetImage(
+            const ImageConfiguration(size: Size(200, 200)),
+            "lib/images/start.png")
+        .then(
+      (icon) {
+        setState(() {
+          startIcon = icon;
         });
       },
     );
@@ -52,7 +64,7 @@ class _RouteTimeMap extends State<RouteTimeMap> {
       Marker(
         markerId: MarkerId('start'),
         position: widget.stationPoints.first.position,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        icon: startIcon!,
         onTap: () {
           mapController.showMarkerInfoWindow(
               MarkerId(widget.stationPoints.elementAt(0).markerId.value));
@@ -87,7 +99,7 @@ class _RouteTimeMap extends State<RouteTimeMap> {
       Marker(
         markerId: MarkerId('end'),
         position: widget.stationPoints.last.position,
-        icon: markerIcon!,
+        icon: endIcon!,
         onTap: () {
           mapController.showMarkerInfoWindow(MarkerId(widget.stationPoints
               .elementAt(widget.stationPoints.length - 1)
