@@ -73,16 +73,7 @@ app.use(session({
 const getRealISODate = () => {
     return (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 10);
 };
-// const initiate_today = () => {
-//     dbclient.query("CALL initiate_occupancy_today()").then(res1 => {
-//         console.log(res1);
-//         dbclient.query("CALL initiate_availability_today()").then(res2 => {
-//             console.log(res2);
-//         });
-//     });
-// };
-// initiate_today();
-// const cron = setInterval (initiate_today, 1800000);
+
 
 dbclient.query(
     `select *, array_to_json(time_list) as list_time from trip where is_live=true`
@@ -242,28 +233,28 @@ app.post('/api/sessionCheck', (req, res) => {
     };
 });
 
-app.post('/api/adminLogin', (req, res) => {
-    console.log(req.body);
-    dbclient.query(
-        `SELECT name FROM admin WHERE id=$1 AND password=$2`,
-        [req.body.id, req.body.password]
-    ).then(qres => {
-        //console.log(qres);
-        if (qres.rows.length === 0) res.send({ 
-            success: false,
-            name: null,
-        });
-        else {
-            req.session.adminid = req.body.id;
-            res.send({
-                success: true,
-                name: qres.rows[0].name,
-                admin: true
-            });
-            console.log(req.session);
-        };
-    }).catch(e => console.error(e.stack));
-});
+// app.post('/api/adminLogin', (req, res) => {
+//     console.log(req.body);
+//     dbclient.query(
+//         `SELECT name FROM admin WHERE id=$1 AND password=$2`,
+//         [req.body.id, req.body.password]
+//     ).then(qres => {
+//         //console.log(qres);
+//         if (qres.rows.length === 0) res.send({ 
+//             success: false,
+//             name: null,
+//         });
+//         else {
+//             req.session.adminid = req.body.id;
+//             res.send({
+//                 success: true,
+//                 name: qres.rows[0].name,
+//                 admin: true
+//             });
+//             console.log(req.session);
+//         };
+//     }).catch(e => console.error(e.stack));
+// });
 
 app.post('/api/logout',(req,res) => {
     req.session.destroy();
@@ -350,6 +341,49 @@ app.post('/api/getProfileStatic', (req, res) => {
                         success: true,
                         imageStr: response,
                     });
+                };
+            }).catch(e => console.error(e.stack));
+        } else console.log("Session not recognised.")
+    };
+});
+
+app.post('/api/updatePassword', (req, res) => {
+    // console.log(req);
+    if (req.session.userid) {
+        if (req.session.user_type == "student" || req.session.user_type == "buet_staff" || req.session.user_type == "bus_staff") {
+            dbclient.query(
+                `select id, password from ${dbclient.escapeIdentifier(req.session.user_type)} where id=$1`, 
+                [req.session.userid]
+            ).then (async qres => {
+                console.log(qres);
+                if (qres.rows.length === 0) {
+                    res.send({ 
+                        success: false,
+                    });
+                } else {
+                    let verif = await bcrypt.compare (req.body.old, qres.rows[0].password);
+                    if (verif === true) {
+                        let newhash = await bcrypt.hash (req.body.new, bcryptSaltRounds);
+                        dbclient.query(
+                            `update ${dbclient.escapeIdentifier(req.session.user_type)} set password=$1 where id=$2 and password=$3`, 
+                            [newHash, req.session.userid, qres.rows[0].password]
+                        ).then (async qres2 => {
+                            console.log(qres2);
+                            if (qres2.rowCount === 1) {
+                                res.send({ 
+                                    success: true,
+                                });
+                            } else {
+                                res.send({ 
+                                    success: false,
+                                });
+                            };
+                        }).catch(e => console.error(e.stack));
+                    } else {
+                        res.send({ 
+                            success: false,
+                        });
+                    };
                 };
             }).catch(e => console.error(e.stack));
         } else console.log("Session not recognised.")
