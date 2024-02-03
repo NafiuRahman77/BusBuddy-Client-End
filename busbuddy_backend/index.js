@@ -130,20 +130,17 @@ dbclient.query("SELECT id, name, coords FROM station").then(qres => {
 app.post('/api/login', (req, res) => {
     // console.log(req.body);
     dbclient.query(
-        `SELECT name, password FROM student WHERE id=$1`,
-        [req.body.id]
+        `SELECT name, password FROM student WHERE id=$1`, [req.body.id]
     ).then (async qres => {
         // console.log(qres);
         if (qres.rows.length === 0) {
             dbclient.query(
-                `SELECT name, password FROM buet_staff WHERE id=$1`,
-                [req.body.id]
+                `SELECT name, password FROM buet_staff WHERE id=$1`, [req.body.id]
             ).then (async qres2 => {
                 // console.log(qres);
                 if (qres2.rows.length === 0) {
                     dbclient.query(
-                        `SELECT name FROM bus_staff WHERE id=$1 AND password=$2`,
-                        [req.body.id, req.body.password]
+                        `SELECT name, password FROM bus_staff WHERE id=$1`, [req.body.id]
                     ).then (async qres3 => {
                         console.log(qres3);
                         if (qres3.rows.length === 0) {
@@ -156,8 +153,7 @@ app.post('/api/login', (req, res) => {
                             let verif = await bcrypt.compare (req.body.password, qres3.rows[0].password);
                             if (verif === true) {
                                 dbclient.query(
-                                    `select sid from session where sess->>'userid'= $1`,
-                                    [req.body.id]
+                                    `select sid from session where sess->>'userid'= $1`, [req.body.id]
                                 ).then(qres4 => {
                                     console.log(qres4);
                                     let relogin = false;
