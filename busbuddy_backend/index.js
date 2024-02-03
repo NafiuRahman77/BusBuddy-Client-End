@@ -116,7 +116,7 @@ dbclient.query(
     });
 }).catch(e => console.error(e.stack));
 
-dbclient.query("SELECT id, name, coords FROM station").then(qres => {
+dbclient.query("SELECT id, coords FROM station").then(qres => {
     // console.log(qres.rows);
     qres.rows.forEach( (st)  =>  {
         tracking.stationCoords.set(st.id, {
@@ -811,18 +811,21 @@ app.post('/api/getBillHistory', (req,res) => {
 app.post('/api/getNearestStation', (req,res) => {
     //send a dummy response
     console.log(req.body);
+    let minDist = 1000000, nearestId, nearestCoord;
+    tracking.stationCoords.forEach( async (st, st_id) => {
+        let dist = geolib.getDistance(st, {
+            latitude: req.body.latitude,
+            longitude: req.body.longitude,
+        });
+        if (dist < minDist) {
+            minDist = dist;
+            nearestId = st_id;
+            nearestCoord = {...st};
+        };
+    });
     res.send({
-        success: true,
-        data: [
-            {
-                station_id: 1,
-                station_name: "Mohammadpur",
-                station_coordinates: "23.765, 90.365",
-                adjacent_stations : "Mirpur, Dhanmondi",
-                adjacent_stations_id: "2,3",
-            },       
-           
-        ]
+        station_id: nearestId,
+        station_coordinates: nearestCoord,
     });
 });
 
@@ -836,7 +839,6 @@ app.post('/api/getRouteFromStation', (req,res) => {
 
 //get trip data
 app.post('/api/getTripData', (req,res) => {
-    //send a dummy response
     console.log(req.body);
     res.send({
         success: true,
@@ -845,7 +847,6 @@ app.post('/api/getTripData', (req,res) => {
 });
 
 app.post('/api/checkStaffRunningTrip', (req,res) => {
-    //send a dummy response
     console.log(req.body);
     if (req.session.userid && req.session.user_type=="bus_staff") {
         let rt =  null;
@@ -1041,6 +1042,8 @@ app.post('/api/staffScanTicket', (req,res) => {
             `update ticket set trip_id=$1, is_used=true where id=$2 returning student_id`, 
             [req.body.trip_id, req.body.ticket_id]
         ).then(qres => {
+            let td = tracking.runningTrips.get(trip_id);
+            td.passenger_count += 1;
             console.log(qres);
             if (qres.rowCount === 1) res.send({ 
                 success: true,
