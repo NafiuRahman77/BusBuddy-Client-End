@@ -1009,6 +1009,13 @@ app.post('/api/endTrip', async (req,res) => {
 });
 
 app.post('/api/getCrewMap', (req,res) => {
+    let crewMap = [];
+    tracking.busStaffMap.forEach (async (t_id, s_id) => {
+        crewMap.push({
+            s_id: s_id,
+            t_id: t_id,
+        });
+    });
     res.send({
         success: true,
         ...tracking.busStaffMap,
