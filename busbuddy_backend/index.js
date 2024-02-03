@@ -1130,9 +1130,9 @@ process.stdin.on('keypress', async (chunk, key) => {
             }).catch(e => console.error(e.stack));
         });
 
-        while (backupDone < backupCount);
-        console.log("\nbye");
-        process.exit();
+        // while (backupDone < backupCount);
+        // console.log("\nbye");
+        // process.exit();
     };
     if (key && key.name == 'x') process.exit();
 });
