@@ -901,56 +901,60 @@ app.post('/api/getStaffTrips', (req,res) => {
 app.post('/api/startTrip', (req,res) => {
     console.log(req.body);
     if (req.session.userid && req.session.user_type=="bus_staff") {
-        dbclient.query(
-            `call initiate_trip2($1, $2, $3)`, 
-            [req.body.trip_id, req.session.userid, ('('+req.body.latitude+','+req.body.longitude+')')]
-        ).then(qres => {
-            // console.log(qres);
+        let ronin = tracking.runningTrips.has(req.session.userid);
+        if (!ronin) {
             dbclient.query(
-                `select *, array_to_json(time_list) as list_time from trip where id=$1`, 
-                [req.body.trip_id]
-            ).then(qres2 => {
-                // console.log(qres2);
-                if (qres2.rows.length == 1) {
-                    let td = {...qres2.rows[0]};
-                    console.log(td.list_time);
-                    let newTrip = new tracking.RunningTrip 
-                       (td.id, td.start_timestamp, td.route, td.time_type, 
-                        td.travel_direction, td.bus, td.is_default,
-                        td.driver, td.helper, td.approved_by, td.end_timestamp,
-                        {   
-                            latitude: req.body.latitude, 
-                            longitude: req.body.longitude
-                        }, 
-                        td.end_location);
-                    td.list_time.forEach (async tp =>  {
-                        // newTrip.time_list.push({...tp});
-                        newTrip.time_list.push({
-                            station: tp.station,
-                            time: null
+                `call initiate_trip2($1, $2, $3)`, 
+                [req.body.trip_id, req.session.userid, ('('+req.body.latitude+','+req.body.longitude+')')]
+            ).then(qres => {
+                // console.log(qres);
+                dbclient.query(
+                    `select *, array_to_json(time_list) as list_time from trip where id=$1`, 
+                    [req.body.trip_id]
+                ).then(qres2 => {
+                    // console.log(qres2);
+                    if (qres2.rows.length == 1) {
+                        let td = {...qres2.rows[0]};
+                        console.log(td.list_time);
+                        let newTrip = new tracking.RunningTrip 
+                        (td.id, td.start_timestamp, td.route, td.time_type, 
+                            td.travel_direction, td.bus, td.is_default,
+                            td.driver, td.helper, td.approved_by, td.end_timestamp,
+                            {   
+                                latitude: req.body.latitude, 
+                                longitude: req.body.longitude
+                            }, 
+                            td.end_location);
+                        td.list_time.forEach (async tp =>  {
+                            // newTrip.time_list.push({...tp});
+                            newTrip.time_list.push({
+                                station: tp.station,
+                                time: null
+                            });
                         });
-                    });
-                    tracking.runningTrips.set (newTrip.id, newTrip);
-                    tracking.busStaffMap.set (newTrip.driver, newTrip.id);
-                    tracking.busStaffMap.set (newTrip.helper, newTrip.id);
-                    res.send({ 
-                        success: true,
-                        ...tracking.runningTrips.get(newTrip.id),
-                    });
-                } else {
-                    res.send({
-                        success: false,
-                    });
-                };
+                        tracking.runningTrips.set (newTrip.id, newTrip);
+                        tracking.busStaffMap.set (newTrip.driver, newTrip.id);
+                        tracking.busStaffMap.set (newTrip.helper, newTrip.id);
+                        res.send({ 
+                            success: true,
+                            ...tracking.runningTrips.get(newTrip.id),
+                        });
+                    } else {
+                        res.send({
+                            success: false,
+                        });
+                    };
+                }).catch(e => console.error(e.stack));
             }).catch(e => console.error(e.stack));
-        }).catch(e => console.error(e.stack));
+        };
     };
 });
 
 app.post('/api/endTrip', async (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
-        let trip = await tracking.runningTrips.get(req.body.trip_id);
+        let t_id = await tracking.busStaffMap.get(req.session.userid);
+        let trip = await tracking.runningTrips.get(t_id);
         if (trip) {
             let pathStr = "{";
             for (let i=0; i<trip.path.length; i++) {
@@ -974,7 +978,7 @@ app.post('/api/endTrip', async (req,res) => {
                 is_live=false, path=$6, time_list=$7 where id=$4 and (driver=$5 or helper=$5)`, 
                 [trip.passenger_count, ('('+lt+','+lg+')'),  
                 ('('+req.body.latitude+','+req.body.longitude+')'), 
-                req.body.trip_id, req.session.userid, pathStr, timeListStr]
+                t_id, req.session.userid, pathStr, timeListStr]
             ).then(qres => {
                 console.log(qres);
                 if (qres.rowCount === 1) res.send({ 
@@ -988,11 +992,11 @@ app.post('/api/endTrip', async (req,res) => {
             }).catch(e => console.error(e.stack));
             tracking.runningTrips.delete (trip.driver);
             tracking.runningTrips.delete (trip.helper);
-            tracking.runningTrips.delete (req.body.trip_id);
+            tracking.runningTrips.delete (t_id);
         } else {
             dbclient.query(
                 `update trip set end_timestamp=current_timestamp, is_live=false where id=$1 and (driver=$2 or helper=$2)`, 
-                [req.body.trip_id, req.session.userid, pathStr]
+                [t_id, req.session.userid, pathStr]
             ).then(qres => {
                 console.log(qres);
                 if (qres.rowCount === 1) res.send({ 
@@ -1026,7 +1030,8 @@ app.post('/api/updateStaffLocation', (req,res) => {
     //send a dummy response
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
-        let trip = tracking.runningTrips.get(req.body.trip_id);
+        let t_id = tracking.busStaffMap.get(req.session.userid);
+        let trip = tracking.runningTrips.get(t_id);
         if (trip) {
             let r_coord = {
                 latitude: req.body.latitude, 
@@ -1058,9 +1063,10 @@ app.post('/api/staffScanTicket', (req,res) => {
     //send a dummy response
     if (req.session.userid && req.session.user_type=="bus_staff") {
         console.log(req.body);
+        let t_id = tracking.busStaffMap.get(req.session.userid);
         dbclient.query(
             `update ticket set trip_id=$1, is_used=true where id=$2 returning student_id`, 
-            [req.body.trip_id, req.body.ticket_id]
+            [t_id, req.body.ticket_id]
         ).then(qres => {
             let td = tracking.runningTrips.get(trip_id);
             td.passenger_count += 1;
