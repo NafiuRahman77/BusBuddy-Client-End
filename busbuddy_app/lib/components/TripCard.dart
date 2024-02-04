@@ -219,8 +219,17 @@ class _TripCardState extends State<TripCard>
 
     Duration remaining =
         DateTime.now().difference(DateTime.parse(widget.StartTime));
-    Duration remaining2 =
-        DateTime.now().difference(DateTime.parse(widget.StartTime));
+    Duration remaining2 = Duration();
+
+    if (widget.EndTime != null) {
+      try {
+        DateTime endTime = DateTime.parse(widget.EndTime!);
+        remaining2 = DateTime.now().difference(endTime);
+      } catch (e) {
+        print("Error parsing EndTime: $e");
+        // Handle the parsing error, log it, or set remaining2 to a default value
+      }
+    }
     remaining = remaining.abs();
     remaining2 = remaining2.abs();
     running_trip = widget.islive;
@@ -319,9 +328,17 @@ class _TripCardState extends State<TripCard>
                     color: Color.fromARGB(255, 16, 9, 202),
                   ),
                 ),
-              if (ended_trip)
+              if (ended_trip && end_minutes != 0)
                 Text(
                   'The trip is finished $end_hours hours and $end_minutes minutes ago',
+                  textAlign: TextAlign.center, // Center the text
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 4, 154, 94),
+                  ),
+                ),
+              if (ended_trip && end_minutes == 0)
+                Text(
+                  'The trip is finished',
                   textAlign: TextAlign.center, // Center the text
                   style: TextStyle(
                     color: Color.fromARGB(255, 4, 154, 94),
