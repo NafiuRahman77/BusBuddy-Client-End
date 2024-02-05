@@ -32,8 +32,8 @@ BusBuddy is a mobile application designed to provide a convenient and efficient 
 - **GPS Integration:** Using Google Maps API for live bus tracking.
 
 ## Installation and Usage
-- **Clone the Repository:** `git clone https://github.com/yourusername/BusBuddy.git`
-- **Navigate to the Project Directory:** `cd BusBuddy`
+- **Clone the Repository:** `git clone https://github.com/yourusername/BusBuddy-Client-End.git`
+- **Navigate to the Project Directory:** `cd busbuddy_app`
 - **Install Dependencies:** `flutter pub get`
 - **Run the App:** `flutter run`
 
