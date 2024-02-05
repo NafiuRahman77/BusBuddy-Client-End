@@ -571,7 +571,7 @@ class HomeViewState extends State<HomeView> {
                               });
                             },
                           ),
-                        if (globel.userType != "buet_staff")
+                        if (globel.userType == "student")
                           ListTile(
                             leading: const Icon(Icons.qr_code),
                             title: const Text('QR Code'),
