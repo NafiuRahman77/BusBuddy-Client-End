@@ -1121,7 +1121,7 @@ app.post('/api/staffScanTicket', (req,res) => {
             if (qres.rowCount === 1) res.send({ 
                 success: true,
                 student_id: qres.rows[0].student_id,
-                passenger_count: td.passenger_count,
+                passenger_count: td.passenger_count.toString(),
             });
             else if (qres.rowCount === 0) {
                 res.send({
