@@ -40,5 +40,4 @@ BusBuddy is a mobile application designed to provide a convenient and efficient 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any feature enhancements, bug fixes, or suggestions.
 
-## License
-This project is licensed under the [MIT License](LICENSE).
+
