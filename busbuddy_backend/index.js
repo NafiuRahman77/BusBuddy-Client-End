@@ -21,7 +21,7 @@ const { createHttpTerminator } = require('http-terminator');
 const bcrypt = require('bcryptjs');
 const bcryptSaltRounds = 12;
 const log = fs.createWriteStream("append.txt", {flags:'a'});
-const writeToLog = str => writeToLog (new Date() + "\t" + str);
+const writeToLog = str => log.write(new Date() + "\t" + str);
 
 dotenv.config();
 const { Pool, Client } = require('pg');
