@@ -1175,13 +1175,15 @@ process.stdin.on('keypress', async (chunk, key) => {
                 console.log("backed up " + trip.id);
                 tracking.runningTrips.delete(trip.id);
                 backupDone++;
-                if (backupCount == backupDone) console.log ("\nbackups completed");
+                if (backupCount == backupDone) {
+                    console.log ("\nbackups completed");
+                    console.log("\nbye");
+                    process.exit();
+                };
             }).catch(e => console.error(e.stack));
         });
 
         // while (backupDone < backupCount);
-        // console.log("\nbye");
-        // process.exit();
     };
     if (key && key.name == 'x') process.exit();
 });
