@@ -731,137 +731,129 @@ app.post('/api/getRouteTimeData', (req, res) => {
 app.post('/api/getTrackingData', async (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
-        // dbclient.query(
-        //     `select lpad(id::varchar, 8, '0') as id, start_timestamp, route, array_to_json(time_list), array_to_json(path) as path_, bus
-        //      from trip where route=$1`, [req.body.route]
-        // ).then(qres => {
 	    let list = [];
         //iterating over map
         tracking.runningTrips.forEach( async trip => {
             if (trip.route == req.body.route) list.push (trip);
         });
- 	    //list.forEach(trip => {
-	//	trip.time_list = JSON.parse(trip.timeList);
-	  //  });
         console.log(list);
         res.send(list);
     };
 });
 
-//dummy
-app.post('/api/sendRepairRequest', (req,res) => {
-    //send a dummy response
-    console.log(req.body);
-    res.send({
-        success: true,
-    });
-});
+// app.post('/api/sendRepairRequest', (req,res) => {
+//     //send a dummy response
+//     console.log(req.body);
+//     res.send({
+//         success: true,
+//     });
+// });
 
-app.post('/api/getRepairRequest', (req,res) => {
-    //send a dummy response
-    console.log(req.body);
-    res.send({
-        success: true,
-        data: [
-            {
-                id: 1,
-                staff_id: "altaf",
-                item : "Engine",
-                item_count: "1",
-                problem: "Engine problem",
-                status: "pending",
-                timestamp: "2021-05-01 12:00:00"
-            },
-            {
-                id: 2,
-                staff_id: "altaf",
-                item : "Engine",
-                item_count: "1",
-                problem: "Engine problem",
-                status: "pending",
-                timestamp: "2021-05-01 12:00:00"
-            },
-            {
-                id: 3,
-                staff_id: "altaf",
-                item : "Engine",
-                item_count: "1",
-                problem: "Engine problem",
-                status: "pending",
-                timestamp: "2021-05-01 12:00:00"
-            },
-            {
-                id: 4,
-                staff_id: "altaf",
-                item : "Engine",
-                item_count: "1",
-                problem: "Engine problem",
-                status: "pending",
-                timestamp: "2021-05-01 12:00:00"
-            },
+// app.post('/api/getRepairRequest', (req,res) => {
+//     //send a dummy response
+//     console.log(req.body);
+//     res.send({
+//         success: true,
+//         data: [
+//             {
+//                 id: 1,
+//                 staff_id: "altaf",
+//                 item : "Engine",
+//                 item_count: "1",
+//                 problem: "Engine problem",
+//                 status: "pending",
+//                 timestamp: "2021-05-01 12:00:00"
+//             },
+//             {
+//                 id: 2,
+//                 staff_id: "altaf",
+//                 item : "Engine",
+//                 item_count: "1",
+//                 problem: "Engine problem",
+//                 status: "pending",
+//                 timestamp: "2021-05-01 12:00:00"
+//             },
+//             {
+//                 id: 3,
+//                 staff_id: "altaf",
+//                 item : "Engine",
+//                 item_count: "1",
+//                 problem: "Engine problem",
+//                 status: "pending",
+//                 timestamp: "2021-05-01 12:00:00"
+//             },
+//             {
+//                 id: 4,
+//                 staff_id: "altaf",
+//                 item : "Engine",
+//                 item_count: "1",
+//                 problem: "Engine problem",
+//                 status: "pending",
+//                 timestamp: "2021-05-01 12:00:00"
+//             },
            
-        ]
-    });
-}
-);
-app.post('/api/getNotifications', (req,res) => {
-    //send a dummy response
-    console.log(req.body);
-    res.send({
-        success: true,
-        data: [
-            {
-                id: 1,
-                user_id: "1905067",
-                heading: "Your bus is near",
-                body: "Your bus is coming to your location. Please be ready at the bus stop.",
-                timestamp: "2021-05-01 12:00:00"
-            },
+//         ]
+//     });
+// }
+// );
+// app.post('/api/getNotifications', (req,res) => {
+//     //send a dummy response
+//     console.log(req.body);
+//     res.send({
+//         success: true,
+//         data: [
+//             {
+//                 id: 1,
+//                 user_id: "1905067",
+//                 heading: "Your bus is near",
+//                 body: "Your bus is coming to your location. Please be ready at the bus stop.",
+//                 timestamp: "2021-05-01 12:00:00"
+//             },
             
            
-        ]
-    });
-});
-//send real time notification api
-app.post('/api/sendNotification', (req,res) => {
-    //send a dummy response
-    console.log(req.body);
-    res.send({
-        success: true,
-    });
-});
+//         ]
+//     });
+// });
+// //send real time notification api
+// app.post('/api/sendNotification', (req,res) => {
+//     //send a dummy response
+//     console.log(req.body);
+//     res.send({
+//         success: true,
+//     });
+// });
 
-// Teacher bill payment api
-app.post('/api/payBill', (req,res) => {
-    //send a dummy response
-    console.log(req.body);
-    res.send({
-        success: true,
-        payment_id: 1984983210
-    });
-});
+// // Teacher bill payment api
+// app.post('/api/payBill', (req,res) => {
+//     //send a dummy response
+//     console.log(req.body);
+//     res.send({
+//         success: true,
+//         payment_id: 1984983210
+//     });
+// });
 
-// Teacher bill history api
-app.post('/api/getBillHistory', (req,res) => {
-    //send a dummy response
-    console.log(req.body);
-    res.send({
-        success: true,
-        data: [
-            {
-                id: 1,
-                teacher_id: "mtzcse",
-                name: "Md. Toufikuzzaman",
-                bill_type: "Monthly",
-                bill_amount: "200",
-                bill_month: "January",
-                bill_year: "2024",
-                timestamp: "2021-05-01 12:00:00"
-            },       
+// // Teacher bill history api
+// app.post('/api/getBillHistory', (req,res) => {
+//     //send a dummy response
+//     console.log(req.body);
+//     res.send({
+//         success: true,
+//         data: [
+//             {
+//                 id: 1,
+//                 teacher_id: "mtzcse",
+//                 name: "Md. Toufikuzzaman",
+//                 bill_type: "Monthly",
+//                 bill_amount: "200",
+//                 bill_month: "January",
+//                 bill_year: "2024",
+//                 timestamp: "2021-05-01 12:00:00"
+//             },       
            
-        ]
-    });
-});
+//         ]
+//     });
+// });
 
 //get route details
 //get nearest station
@@ -886,13 +878,13 @@ app.post('/api/getNearestStation', (req,res) => {
     });
 });
 
-app.post('/api/getRouteFromStation', (req,res) => {
-    //send a dummy response
-    console.log(req.body);
-    res.send([
-    {"id":"00000451","start_timestamp":"2023-09-11T00:40:00.000Z","route":"3","array_to_json":[{"station":"17","time":"2023-09-11T06:40:00+06:00"},{"station":"18","time":"2023-09-11T06:42:00+06:00"},{"station":"19","time":"2023-09-11T06:44:00+06:00"},{"station":"20","time":"2023-09-11T06:46:00+06:00"},{"station":"21","time":"2023-09-11T06:48:00+06:00"},{"station":"22","time":"2023-09-11T06:50:00+06:00"},{"station":"23","time":"2023-09-11T06:52:00+06:00"},{"station":"24","time":"2023-09-11T06:54:00+06:00"},{"station":"25","time":"2023-09-11T06:57:00+06:00"},{"station":"26","time":"2023-09-11T07:00:00+06:00"},{"station":"70","time":"2023-09-11T07:15:00+06:00"}],"bus":"Ba-24-8518"},
-    {"id":"00000452","start_timestamp":"2023-09-11T07:40:00.000Z","route":"3","array_to_json":[{"station":"70","time":"2023-09-11T13:40:00+06:00"},{"station":"26","time":"2023-09-11T13:55:00+06:00"},{"station":"25","time":"2023-09-11T13:58:00+06:00"},{"station":"24","time":"2023-09-11T14:00:00+06:00"},{"station":"23","time":"2023-09-11T14:02:00+06:00"},{"station":"22","time":"2023-09-11T14:04:00+06:00"},{"station":"21","time":"2023-09-11T14:06:00+06:00"},{"station":"20","time":"2023-09-11T14:08:00+06:00"},{"station":"19","time":"2023-09-11T14:10:00+06:00"},{"station":"18","time":"2023-09-11T14:12:00+06:00"},{"station":"17","time":"2023-09-11T14:14:00+06:00"}],"bus":"Ba-24-8518"},]);
-});
+// app.post('/api/getRouteFromStation', (req,res) => {
+//     //send a dummy response
+//     console.log(req.body);
+//     res.send([
+//     {"id":"00000451","start_timestamp":"2023-09-11T00:40:00.000Z","route":"3","array_to_json":[{"station":"17","time":"2023-09-11T06:40:00+06:00"},{"station":"18","time":"2023-09-11T06:42:00+06:00"},{"station":"19","time":"2023-09-11T06:44:00+06:00"},{"station":"20","time":"2023-09-11T06:46:00+06:00"},{"station":"21","time":"2023-09-11T06:48:00+06:00"},{"station":"22","time":"2023-09-11T06:50:00+06:00"},{"station":"23","time":"2023-09-11T06:52:00+06:00"},{"station":"24","time":"2023-09-11T06:54:00+06:00"},{"station":"25","time":"2023-09-11T06:57:00+06:00"},{"station":"26","time":"2023-09-11T07:00:00+06:00"},{"station":"70","time":"2023-09-11T07:15:00+06:00"}],"bus":"Ba-24-8518"},
+//     {"id":"00000452","start_timestamp":"2023-09-11T07:40:00.000Z","route":"3","array_to_json":[{"station":"70","time":"2023-09-11T13:40:00+06:00"},{"station":"26","time":"2023-09-11T13:55:00+06:00"},{"station":"25","time":"2023-09-11T13:58:00+06:00"},{"station":"24","time":"2023-09-11T14:00:00+06:00"},{"station":"23","time":"2023-09-11T14:02:00+06:00"},{"station":"22","time":"2023-09-11T14:04:00+06:00"},{"station":"21","time":"2023-09-11T14:06:00+06:00"},{"station":"20","time":"2023-09-11T14:08:00+06:00"},{"station":"19","time":"2023-09-11T14:10:00+06:00"},{"station":"18","time":"2023-09-11T14:12:00+06:00"},{"station":"17","time":"2023-09-11T14:14:00+06:00"}],"bus":"Ba-24-8518"},]);
+// });
 
 //get trip data
 app.post('/api/getTripData', (req,res) => {
@@ -1067,19 +1059,19 @@ app.post('/api/endTrip', async (req,res) => {
     };
 });
 
-app.post('/api/getCrewMap', (req,res) => {
-    let crewMap = [];
-    tracking.busStaffMap.forEach (async (t_id, s_id) => {
-        crewMap.push({
-            s_id: s_id,
-            t_id: t_id,
-        });
-    });
-    res.send({
-        success: true,
-        data: [...crewMap],
-    });
-});
+// app.post('/api/getCrewMap', (req,res) => {
+//     let crewMap = [];
+//     tracking.busStaffMap.forEach (async (t_id, s_id) => {
+//         crewMap.push({
+//             s_id: s_id,
+//             t_id: t_id,
+//         });
+//     });
+//     res.send({
+//         success: true,
+//         data: [...crewMap],
+//     });
+// });
 
 app.post('/api/updateStaffLocation', (req,res) => {
     //send a dummy response
@@ -1120,15 +1112,16 @@ app.post('/api/staffScanTicket', (req,res) => {
         console.log(req.body);
         let t_id = tracking.busStaffMap.get(req.session.userid);
         dbclient.query(
-            `update ticket set trip_id=$1, is_used=true where id=$2 returning student_id`, 
-            [t_id, req.body.ticket_id]
+            `update ticket set trip_id=$1, is_used=true, scanned_by=$2 where id=$3 and is_used=false returning student_id`, 
+            [t_id, req.session.user_id, req.body.ticket_id]
         ).then(qres => {
             let td = tracking.runningTrips.get(t_id);
             td.passenger_count += 1;
             console.log(qres);
             if (qres.rowCount === 1) res.send({ 
                 success: true,
-                student_id: qres.rows[0].student_id
+                student_id: qres.rows[0].student_id,
+                passenger_count: td.passenger_count,
             });
             else if (qres.rowCount === 0) {
                 res.send({
