@@ -686,6 +686,26 @@ app.post('/api/getUserPurchaseHistory', (req, res) => {
     };
 });
 
+app.post('/api/getTicketUsageHistory', (req, res) => {
+    console.log(req.session);
+    if (req.session.userid && req.session.user_type == 'student') {
+        dbclient.query(
+            `select tk.trip_id, tr.route, tr.start_timestamp, tr.travel_direction, 
+            tr.bus, tk.scanned_by from ticket tk, trip tr where tk.is_used = true 
+            and tk.trip_id = tr.id and tk.student_id=$1`, [req.session.userid]
+        ).then(qres => {
+            //console.log(qres);
+            res.send(qres.rows);
+        }).catch(e => {
+            console.error(e.stack);
+            res.send({ 
+                success: false,
+            });
+        });
+    };
+});
+
+
 app.post('/api/getRouteTimeData', (req, res) => {
     console.log(req.session);
     if (req.session.userid) {
