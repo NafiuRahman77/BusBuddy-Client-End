@@ -64,7 +64,14 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
                             child: FutureBuilder(
                               future: controller?.getFlashStatus(),
                               builder: (context, snapshot) {
-                                return Text('Flash: ${snapshot.data}');
+                                return Icon(
+                                    // flash icon
+                                    snapshot.data == true
+                                        ? Icons.flash_on
+                                        : Icons.flash_off,
+                                    // You can adjust the icon size and color here
+                                    size: 32.0,
+                                    color: Color(0xFF7B1B1B));
                               },
                             )),
                       ),
@@ -79,10 +86,14 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
                               future: controller?.getCameraInfo(),
                               builder: (context, snapshot) {
                                 if (snapshot.data != null) {
-                                  return Text(
-                                      'Camera facing ${describeEnum(snapshot.data!)}');
+                                  return Icon(
+                                      // switch camera icon
+                                      Icons.flip_camera_ios,
+                                      // You can adjust the icon size and color here
+                                      size: 32.0,
+                                      color: Color(0xFF7B1B1B));
                                 } else {
-                                  return const Text('loading');
+                                  return CircularProgressIndicator(); // Show a loading indicator
                                 }
                               },
                             )),
@@ -93,26 +104,32 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await controller?.pauseCamera();
-                          },
-                          child: const Text('pause',
-                              style: TextStyle(fontSize: 20)),
-                        ),
+                      // Container(
+                      //   margin: const EdgeInsets.all(8),
+                      //   child: ElevatedButton(
+                      //     onPressed: () async {
+                      //       await controller?.pauseCamera();
+                      //     },
+                      //     child: const Text('pause',
+                      //         style: TextStyle(fontSize: 20)),
+                      //   ),
+                      // ),
+                      // Container(
+                      //   margin: const EdgeInsets.all(8),
+                      //   child: ElevatedButton(
+                      //     onPressed: () async {
+                      //       await controller?.resumeCamera();
+                      //     },
+                      //     child: const Text('resume',
+                      //         style: TextStyle(fontSize: 20)),
+                      //   ),
+                      // ),
+                      // show the number of passengers
+
+                      Text(
+                        'Passenger: $passenger_count',
+                        style: TextStyle(fontSize: 20),
                       ),
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await controller?.resumeCamera();
-                          },
-                          child: const Text('resume',
-                              style: TextStyle(fontSize: 20)),
-                        ),
-                      )
                     ],
                   ),
                 ],
@@ -164,6 +181,8 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
     });
   }
 
+  String passenger_count = "";
+
   Future<void> scanTicket() async {
     context.loaderOverlay.show();
     var r = await Requests.post(globel.serverIp + 'staffScanTicket',
@@ -175,7 +194,6 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
 
     r.raiseForStatus();
     dynamic json = r.json();
-    print(json);
 
     if (json['success'] == true) {
       Fluttertoast.showToast(
@@ -187,6 +205,9 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
           backgroundColor: Color.fromARGB(118, 76, 175, 80),
           textColor: Colors.white,
           fontSize: 16.0);
+      setState(() {
+        passenger_count = json['passenger_count'].toString();
+      });
     } else {
       Fluttertoast.showToast(
           msg: 'Failed to load data.',
