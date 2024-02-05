@@ -24,6 +24,7 @@ const log = fs.createWriteStream("append.txt", {flags:'a'});
 const writeToLog = str => log.write(new Date() + "\t" + str);
 
 dotenv.config();
+
 const { Pool, Client } = require('pg');
 
 const readline = require('readline');
