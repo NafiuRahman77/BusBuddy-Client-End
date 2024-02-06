@@ -20,7 +20,8 @@ const tracking = require('./tracking.js');
 const { createHttpTerminator } = require('http-terminator');
 const bcrypt = require('bcryptjs');
 const bcryptSaltRounds = 12;
-const log = require('log-to-file');
+
+
 dotenv.config();
 
 const { Pool, Client } = require('pg');
@@ -133,7 +134,7 @@ app.post('/api/login', (req, res) => {
                     dbclient.query(
                         `SELECT name, password FROM bus_staff WHERE id=$1`, [req.body.id]
                     ).then (async qres3 => {
-                        log(qres3);
+                        logger.debug(qres3);
                         if (qres3.rows.length === 0) {
                             res.send({ 
                                 success: false,
@@ -146,7 +147,7 @@ app.post('/api/login', (req, res) => {
                                 dbclient.query(
                                     `select sid from session where sess->>'userid'= $1`, [req.body.id]
                                 ).then(qres4 => {
-                                    log(qres4);
+                                    logger.debug(qres4);
                                     let relogin = false;
                                     if (qres4.rows.length > 0) {
                                         req.sessionStore.destroy(qres4.rows[0].sid);
@@ -260,7 +261,7 @@ app.post('/api/logout',(req,res) => {
 });
 
 app.post('/api/getProfile', (req, res) => {
-    log(req.session);
+    logger.debug(req.session);
     if (req.session.userid) {
         if (req.session.user_type == "student") {
             dbclient.query(
@@ -323,7 +324,7 @@ app.post('/api/getProfileStatic', (req, res) => {
                 `select id, name from ${dbclient.escapeIdentifier(req.session.user_type)} where id=$1`, 
                 [req.session.userid]
             ).then(qres => {
-                log(qres);
+                logger.debug(qres);
                 if (qres.rows.length === 0) res.send({ 
                     success: false,
                 });
@@ -351,7 +352,7 @@ app.post('/api/updatePassword', (req, res) => {
                 `select id, password from ${dbclient.escapeIdentifier(req.session.user_type)} where id=$1`, 
                 [req.session.userid]
             ).then (async qres => {
-                log(qres);
+                logger.debug(qres);
                 if (qres.rows.length === 0) {
                     res.send({ 
                         success: false,
@@ -364,7 +365,7 @@ app.post('/api/updatePassword', (req, res) => {
                             `update ${dbclient.escapeIdentifier(req.session.user_type)} set password=$1 where id=$2 and password=$3`, 
                             [newHash, req.session.userid, qres.rows[0].password]
                         ).then (async qres2 => {
-                            log(qres2);
+                            logger.debug(qres2);
                             if (qres2.rowCount === 1) {
                                 res.send({ 
                                     success: true,
@@ -387,7 +388,7 @@ app.post('/api/updatePassword', (req, res) => {
 });
 
 app.post('/api/getDefaultRoute', (req, res) => {
-    log(req.session);
+    logger.debug(req.session);
     if (req.session.userid) {
         dbclient.query(
             `select default_route, r.terminal_point as default_route_name 
@@ -409,14 +410,14 @@ app.post('/api/getDefaultRoute', (req, res) => {
 });     
 
 app.post('/api/updateProfile', (req,res) => {
-    log(req.body);
+    logger.debug(req.body);
     if (req.session.userid === req.body.id) {
         if (req.session.user_type == "student") {
             dbclient.query(
                 `UPDATE student SET phone=$1, email=$2, default_route=$3, default_station=$4 WHERE id=$5`, 
                 [req.body.phone, req.body.email, req.body.default_route, req.body.default_station, req.body.id]
             ).then(qres => {
-                log(qres);
+                logger.debug(qres);
                 if (qres.rowCount === 1) res.send({ 
                     success: true,
                 });
@@ -431,7 +432,7 @@ app.post('/api/updateProfile', (req,res) => {
                 `UPDATE buet_staff SET phone=$1, residence=$2 WHERE id=$3`, 
                 [req.body.phone, req.body.residence, req.body.id]
             ).then(qres => {
-                log(qres);
+                logger.debug(qres);
                 if (qres.rowCount === 1) res.send({ 
                     success: true,
                 });
@@ -446,7 +447,7 @@ app.post('/api/updateProfile', (req,res) => {
                 `UPDATE bus_staff SET phone=$1 WHERE id=$2`, 
                 [req.body.phone, req.body.id]
             ).then(qres => {
-                log(qres);
+                logger.debug(qres);
                 if (qres.rowCount === 1) res.send({ 
                     success: true,
                 });
@@ -483,7 +484,7 @@ app.post('/api/getRouteStations', (req,res) => {
 });
 
 app.post('/api/addFeedback', (req,res) => {
-    log(req.body);
+    logger.debug(req.body);
     if (req.session.userid) {
         if (req.session.user_type == "student") {
             dbclient.query(
@@ -492,7 +493,7 @@ app.post('/api/addFeedback', (req,res) => {
                 [req.session.userid, req.body.route==""? null:req.body.route, 
                 req.body.timestamp==""? null:req.body.timestamp, req.body.text, JSON.parse(req.body.subject)]
             ).then(qres => {
-                log(qres);
+                logger.debug(qres);
                 if (qres.rowCount === 1) res.send({ 
                     success: true,
                 });
@@ -509,7 +510,7 @@ app.post('/api/addFeedback', (req,res) => {
                 [req.session.userid, req.body.route==""? null:req.body.route, 
                 req.body.timestamp==""? null:req.body.timestamp, req.body.text, JSON.parse(req.body.subject)]
             ).then(qres => {
-                log(qres);
+                logger.debug(qres);
                 if (qres.rowCount === 1) res.send({ 
                     success: true,
                 });
@@ -532,7 +533,7 @@ app.post('/api/addRequisition', (req,res) => {
             values ($1, $2, $3, $4, $5, $6)`, 
             [req.session.userid, req.body.destination, JSON.parse(req.body.bus_type), req.body.subject, req.body.text, req.body.timestamp]
         ).then(qres => {
-            log(qres);
+            logger.debug(qres);
             if (qres.rowCount === 1) res.send({ 
                 success: true,
             });
@@ -551,12 +552,12 @@ app.post('/api/purchaseTickets', (req,res) => {
             `CALL make_purchase($1, $2, $3, $4)`, 
             [req.session.userid, req.body.method, req.body.trxid, req.body.count]
         ).then(qres => {
-            log(qres);
+            logger.debug(qres);
             dbclient.query(
                 `select count(*) from purchase where trxid=$1`, 
                 [req.body.trxid]
             ).then(qres => {
-                log(qres);
+                logger.debug(qres);
                 if (qres.rowCount === 1) res.send({ 
                     success: true,
                 });
@@ -577,7 +578,7 @@ app.post('/api/getTicketCount', (req,res) => {
             `select count(*) from ticket where student_id=$1 and is_used = false`, 
             [req.session.userid]
         ).then(qres => {
-            log(qres);
+            logger.debug(qres);
             if (qres.rowCount === 1) res.send({ 
                 success: true,
                 count: qres.rows[0].count,
@@ -598,7 +599,7 @@ app.post('/api/getTicketQRData', (req,res) => {
             `select id from ticket where student_id=$1 and is_used=false limit 1`, 
             [req.session.userid]
         ).then(qres => {
-            log(qres);
+            logger.debug(qres);
             if (qres.rowCount === 1) 
             res.send({ 
                 success: true,
@@ -614,7 +615,7 @@ app.post('/api/getTicketQRData', (req,res) => {
 });
 
 app.post('/api/getUserFeedback', (req, res) => {
-    log(req.session);
+    logger.debug(req.session);
     if (req.session.userid) {
         if (req.session.user_type == "student") {
             dbclient.query(
@@ -622,7 +623,7 @@ app.post('/api/getUserFeedback', (req, res) => {
             from student_feedback as f, public.route as r 
             where f.route = r.id and f.complainer_id = $1`, [req.session.userid]
             ).then(qres => {
-                log(qres);
+                logger.debug(qres);
                 res.send(qres.rows);
             }).catch(e => {
                 console.error(e.stack);
@@ -636,7 +637,7 @@ app.post('/api/getUserFeedback', (req, res) => {
             from buet_staff_feedback as f, public.route as r 
             where f.route = r.id and f.complainer_id = $1`, [req.session.userid]
             ).then(qres => {
-                log(qres);
+                logger.debug(qres);
                 res.send(qres.rows);
             }).catch(e => {
                 console.error(e.stack);
@@ -649,12 +650,12 @@ app.post('/api/getUserFeedback', (req, res) => {
 });
 
 app.post('/api/getUserRequisition', (req, res) => {
-    log(req.session);
+    logger.debug(req.session);
     if (req.session.userid) {
         dbclient.query(
            `select * from requisition where requestor_id = $1`, [req.session.userid]
         ).then(qres => {
-            log(qres);
+            logger.debug(qres);
             res.send(qres.rows);
         }).catch(e => {
             console.error(e.stack);
@@ -666,7 +667,7 @@ app.post('/api/getUserRequisition', (req, res) => {
 });
 
 app.post('/api/getUserPurchaseHistory', (req, res) => {
-    log(req.session);
+    logger.debug(req.session);
     if (req.session.userid) {
         dbclient.query(
             `select * from purchase where buyer_id=$1`, [req.session.userid]
@@ -683,7 +684,7 @@ app.post('/api/getUserPurchaseHistory', (req, res) => {
 });
 
 app.post('/api/getTicketUsageHistory', (req, res) => {
-    log(req.session);
+    logger.debug(req.session);
     if (req.session.userid && req.session.user_type == 'student') {
         dbclient.query(
             `select tk.trip_id, tr.route, tr.start_timestamp, tr.travel_direction, 
@@ -703,7 +704,7 @@ app.post('/api/getTicketUsageHistory', (req, res) => {
 
 
 app.post('/api/getRouteTimeData', (req, res) => {
-    log(req.session);
+    logger.debug(req.session);
     if (req.session.userid) {
         dbclient.query(
             `select lpad(id::varchar, 8, '0') as id, start_timestamp, route, array_to_json(time_list), bus
@@ -713,7 +714,7 @@ app.post('/api/getRouteTimeData', (req, res) => {
 	    //list.forEach(trip => {
 	//	trip.time_list = JSON.parse(trip.timeList);
 	  //  });
-            log(list);
+            logger.debug(list);
             res.send(qres.rows);
         }).catch(e => {
             console.error(e.stack);
@@ -725,14 +726,14 @@ app.post('/api/getRouteTimeData', (req, res) => {
 });
 
 app.post('/api/getTrackingData', async (req, res) => {
-    log(req.session);
+    logger.debug(req.session);
     if (req.session.userid) {
 	    let list = [];
         //iterating over map
         tracking.runningTrips.forEach( async trip => {
             if (trip.route == req.body.route) list.push (trip);
         });
-        log(list);
+        logger.debug(list);
         res.send(list);
     };
 });
@@ -894,17 +895,13 @@ app.post('/api/getTripData', (req,res) => {
 app.post('/api/checkStaffRunningTrip', (req,res) => {
     console.log(req.body);
     if (req.session.userid && req.session.user_type=="bus_staff") {
-        let rt =  null;
-        tracking.runningTrips.forEach( async trip => {
-            if (trip.driver == req.session.userid || trip.helper == req.session.userid) rt = trip;
-        });
+        let rt = tracking.busStaffMap.get(req.session.userid);
         if (rt) res.send({
             success: true,
             ...rt,
         });
         else res.send({
             success: false,
-            ...rt,
         });
     };
 });
@@ -919,12 +916,12 @@ app.post('/api/getStaffTrips', (req,res) => {
             `select * from allocation where is_done=false and (driver=$1 or helper=$1) order by start_timestamp asc`, 
             [req.session.userid]
         ).then(qres => {
-            log(qres);
+            logger.debug(qres);
             dbclient.query(
                 `select * from trip where (driver=$1 or helper=$1) order by start_timestamp desc`, 
                 [req.session.userid]
             ).then(qres2 => {
-                log(qres2);
+                logger.debug(qres2);
                 if (qres.rows.length === 0 && qres2.rows.length === 0) {
                     res.send({
                         success: false,
@@ -950,15 +947,15 @@ app.post('/api/startTrip', (req,res) => {
                 `call initiate_trip2($1, $2, $3)`, 
                 [req.body.trip_id, req.session.userid, ('('+req.body.latitude+','+req.body.longitude+')')]
             ).then(qres => {
-                // log(qres);
+                // logger.debug(qres);
                 dbclient.query(
                     `select *, array_to_json(time_list) as list_time from trip where id=$1`, 
                     [req.body.trip_id]
                 ).then(qres2 => {
-                    // log(qres2);
+                    // logger.debug(qres2);
                     if (qres2.rows.length == 1) {
                         let td = {...qres2.rows[0]};
-                        log(td.list_time);
+                        logger.debug(td.list_time);
                         let newTrip = new tracking.RunningTrip 
                         (td.id, td.start_timestamp, td.route, td.time_type, 
                             td.travel_direction, td.bus, td.is_default,
@@ -1005,7 +1002,7 @@ app.post('/api/endTrip', async (req,res) => {
                 if (i<trip.path.length-1) pathStr += ", ";
             };
             pathStr += "}";
-            log(pathStr);
+            logger.debug(pathStr);
             let timeListStr = "{";
             for (let i=0; i<trip.time_list.length; i++) {
                 if (trip.time_list[i].time) 
@@ -1023,7 +1020,7 @@ app.post('/api/endTrip', async (req,res) => {
                 ('('+req.body.latitude+','+req.body.longitude+')'), 
                 t_id, req.session.userid, pathStr, timeListStr]
             ).then(qres => {
-                log(qres);
+                logger.debug(qres);
                 if (qres.rowCount === 1) res.send({ 
                     success: true,
                 });
@@ -1041,7 +1038,7 @@ app.post('/api/endTrip', async (req,res) => {
                 `update trip set end_timestamp=current_timestamp, is_live=false where id=$1 and (driver=$2 or helper=$2)`, 
                 [t_id, req.session.userid, pathStr]
             ).then(qres => {
-                log(qres);
+                logger.debug(qres);
                 if (qres.rowCount === 1) res.send({ 
                     success: true,
                 });
@@ -1083,7 +1080,7 @@ app.post('/api/updateStaffLocation', (req,res) => {
             trip.time_list.forEach( async tp => {
                 let p_coords = tracking.stationCoords.get(tp.station);
                 let dist = geolib.getDistance(p_coords, r_coord);
-                log(dist);               
+                logger.debug(dist);               
                 if (dist <= 180) {
                     console.log(trip.route);
                     tp.time = new Date();
@@ -1113,7 +1110,7 @@ app.post('/api/staffScanTicket', (req,res) => {
             if (qres.rowCount === 1) {
                 let td = tracking.runningTrips.get(t_id);
                 td.passenger_count += 1;
-                log(qres);
+                logger.debug(qres);
                 res.send({ 
                     success: true,
                     student_id: qres.rows[0].student_id,
@@ -1156,7 +1153,7 @@ process.stdin.on('keypress', async (chunk, key) => {
                 if (i<trip.path.length-1) pathStr += ", ";
             };
             pathStr += "}";
-            log(pathStr);
+            logger.debug(pathStr);
             let timeListStr = "{";
             for (let i=0; i<trip.time_list.length; i++) {
                 if (trip.time_list[i].time) 
@@ -1169,7 +1166,7 @@ process.stdin.on('keypress', async (chunk, key) => {
                 `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`, 
                 [trip.passenger_count, pathStr, timeListStr, trip.id]
             ).then(qres => {
-                log(qres);
+                logger.debug(qres);
                 console.log("backed up " + trip.id);
                 tracking.runningTrips.delete(trip.id);
                 backupDone++;
