@@ -23,7 +23,7 @@ const bcryptSaltRounds = 12;
 const log4js = require("log4js");
 log4js.configure({
     appenders: { busbuddy: { type: "file", filename: "busbuddy.log" } },
-    categories: { default: { appenders: ["busbuddy"], level: "error" } },
+    categories: { default: { appenders: ["busbuddy"], level: "debug" } },
 });
 const logger = log4js.getLogger("busbuddy");
 
