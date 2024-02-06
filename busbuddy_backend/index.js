@@ -26,6 +26,7 @@ log4js.configure({
     categories: { default: { appenders: ["busbuddy"], level: "debug" } },
 });
 const logger = log4js.getLogger("busbuddy");
+const readline = require('readline');
 
 dotenv.config();
 
