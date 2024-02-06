@@ -20,7 +20,12 @@ const tracking = require('./tracking.js');
 const { createHttpTerminator } = require('http-terminator');
 const bcrypt = require('bcryptjs');
 const bcryptSaltRounds = 12;
-
+const log4js = require("log4js");
+log4js.configure({
+    appenders: { busbuddy: { type: "file", filename: "busbuddy.log" } },
+    categories: { default: { appenders: ["busbuddy"], level: "error" } },
+});
+const logger = log4js.getLogger("busbuddy");
 
 dotenv.config();
 
