@@ -895,13 +895,14 @@ app.post('/api/getTripData', (req,res) => {
     });
 });
 
-app.post('/api/checkStaffRunningTrip', (req,res) => {
-    console.log(req.body);
+app.post('/api/checkStaffRunningTrip', async (req,res) => {
+    // console.log(req.body);
     if (req.session.userid && req.session.user_type=="bus_staff") {
-        let rt = tracking.busStaffMap.get(req.session.userid);
-        if (rt) res.send({
+        let t_id = await tracking.busStaffMap.get(req.session.userid);
+        let trip = await tracking.runningTrips.get(t_id);
+        if (trip) res.send({
             success: true,
-            ...rt,
+            ...trip,
         });
         else res.send({
             success: false,
