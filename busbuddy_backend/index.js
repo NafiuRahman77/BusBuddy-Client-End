@@ -30,9 +30,6 @@ const logger = log4js.getLogger("busbuddy");
 dotenv.config();
 
 const { Pool, Client } = require('pg');
-
-const readline = require('readline');
-
 const dbconnObj = {
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
