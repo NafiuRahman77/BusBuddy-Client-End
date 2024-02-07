@@ -617,6 +617,32 @@ app.post('/api/getTicketQRData', (req,res) => {
     };
 });
 
+app.post('/api/getTicketList', (req,res) => {
+    console.log(req.body);
+    if (req.session.userid && req.session.user_type=="student") {
+        dbclient.query(
+            `select id from ticket where student_id=$1 and is_used=false limit 5`, 
+            [req.session.userid]
+        ).then(qres => {
+            logger.debug(qres);
+            if (qres.rows.length > 0) {
+                let list = [];
+                for (let i=0 ; i< qres.rows.length; i++) {
+                    list.push (qres.rows[i].id);
+                };
+                res.send({ 
+                    success: true,
+                    ticket_list: [...list],
+                });
+            } else {
+                res.send({
+                    success: false,
+                });
+            };
+        }).catch(e => console.error(e.stack));
+    };
+});
+
 app.post('/api/getUserFeedback', (req, res) => {
     logger.debug(req.session);
     if (req.session.userid) {
