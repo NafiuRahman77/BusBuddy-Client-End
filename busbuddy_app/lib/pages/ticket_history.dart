@@ -19,9 +19,15 @@ class _TicketHistoryState extends State<TicketHistory>
   ];
 
   List<String> ticketAmountList = [];
-  List<String> usageDateList = ['2023-09-16', '2023-09-17'];
-  List<String> usageQuantityList = ['1', '1'];
+  List<String> usageDateList = [];
+  List<String> usageQuantityList = [];
   List<String> purchaseDateList = [];
+
+  List<String> usageRouteList = [];
+  List<String> usageTripIDList = [];
+  List<String> usageTimeList = [];
+  List<String> usageDirectionList = [];
+  List<String> usageScannedByList = [];
   // Add more ticket amounts and dates as needed
 
   @override
@@ -57,12 +63,40 @@ class _TicketHistoryState extends State<TicketHistory>
         purchaseDateList[i] = formattedDate + "  " + formattedTime;
       }
     });
+
+    var r1 = await Requests.post(globel.serverIp + 'getTicketUsageHistory');
+    dynamic json1 = r1.json();
+
+    setState(() {
+      for (int i = 0; i < json1.length; i++) {
+        usageRouteList.add(json1[i]['route'].toString());
+        usageTripIDList.add(json1[i]['trip_id'].toString());
+        usageTimeList.add(json1[i]['start_timestamp'].toString());
+        usageDirectionList.add(json1[i]['travel_direction'].toString());
+        usageScannedByList.add(json1[i]['scanned_by'].toString());
+      }
+      for (int i = 0; i < usageTimeList.length; i++) {
+        usageTimeList[i] = formatDateString(usageTimeList[i]);
+      }
+    });
+
+    print("in ticket history");
+    print(json);
+
     context.loaderOverlay.hide();
+  }
 
-    // print(purchaseDateList);
-    // print(ticketAmountList);
+  String formatDateString(String dateTimeString) {
+    // Parse the string into a DateTime object
+    DateTime dateTime = DateTime.parse(dateTimeString);
 
-    //print(r.content());
+    // Format the date
+    String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
+
+    // Format the time
+    String formattedTime = DateFormat('h:mm a').format(dateTime);
+
+    return '$formattedDate, $formattedTime';
   }
 
   @override
@@ -141,10 +175,14 @@ class _TicketHistoryState extends State<TicketHistory>
 
             // Usage Tab Content (Similar code as above)
             ListView.builder(
-              itemCount: usageDateList.length,
+              itemCount: usageTripIDList.length,
               itemBuilder: (BuildContext context, int index) {
-                final ticketAmount = usageQuantityList[index];
-                final date = usageDateList[index];
+                final route = usageRouteList[index];
+                final tripID = usageTripIDList[index];
+                final time = usageTimeList[index];
+                final direction = usageDirectionList[index];
+                final scannedBy = usageScannedByList[index];
+
                 return Container(
                   margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                   padding: EdgeInsets.all(16.0),
@@ -155,30 +193,93 @@ class _TicketHistoryState extends State<TicketHistory>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // Column 1: Route, Trip ID, Time
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Route : ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: route,
+                                  style: TextStyle(
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Trip ID : ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: tripID,
+                                  style: TextStyle(
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                           Text(
-                            'Date:',
+                            'Scanned By :',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14.0,
                             ),
                           ),
                           Text(
-                            date,
+                            scannedBy,
                             style: TextStyle(
                               fontSize: 14.0,
                             ),
                           ),
                         ],
                       ),
-                      Text(
-                        'Ticket Quantity:  ${ticketAmount}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14.0,
-                        ),
+                      // Column 2: Direction, Scanned By
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            children: [
+                              // Conditionally show icon based on direction
+                              if (direction.toLowerCase() == 'from_buet')
+                                Icon(Icons.arrow_upward,
+                                    color: Colors.green, size: 32.0),
+                              if (direction.toLowerCase() != 'from_buet')
+                                Icon(Icons.arrow_downward,
+                                    color: Colors.red, size: 32.0),
+                            ],
+                          ),
+                          // Place the Time text beneath the arrow icon
+                          SizedBox(
+                              height:
+                                  30.0), // Add some space between the arrow and the time
+                          Text(
+                            time,
+                            style: TextStyle(
+                              fontSize: 14.0,
+                              fontStyle:
+                                  FontStyle.italic, // Make the time italic
+                              color: Colors
+                                  .grey, // Change the color of the time text
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

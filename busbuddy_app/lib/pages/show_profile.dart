@@ -33,8 +33,6 @@ Widget buildInfoRow(String label, String value) {
   );
 }
 
-
-
 Widget buildUserInfoCard() {
   return Card(
     color: Color.fromARGB(223, 255, 255, 255),
@@ -71,13 +69,11 @@ Widget buildTeacherInfoCard() {
           buildInfoRow('Residence:', globel.teacherResidence),
           SizedBox(height: 12.0),
           buildInfoRow('Phone:', globel.userPhone),
-      
         ],
       ),
     ),
   );
 }
-
 
 Widget buildBusStaffInfoCard() {
   return Card(
@@ -95,6 +91,7 @@ Widget buildBusStaffInfoCard() {
     ),
   );
 }
+
 class ShowProfile extends StatefulWidget {
   @override
   _ShowProfileState createState() => _ShowProfileState();
@@ -126,16 +123,16 @@ class _ShowProfileState extends State<ShowProfile> {
   }
 
   Widget buildContent() {
-      Widget userCard = buildUserInfoCard();
+    Widget userCard = buildUserInfoCard();
 
     if (globel.userType == "student") {
       userCard = buildUserInfoCard();
     } else if (globel.userType == "buet_staff") {
       userCard = buildTeacherInfoCard();
-    } else if(globel.userType == "bus_staff"){
-      userCard = buildBusStaffInfoCard() ; 
+    } else if (globel.userType == "bus_staff") {
+      userCard = buildBusStaffInfoCard();
     }
-    
+
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -156,7 +153,7 @@ class _ShowProfileState extends State<ShowProfile> {
           ),
           SizedBox(height: 12.0),
           Text(
-            '${globel.userType}' , 
+            '${globel.userType}',
             style: TextStyle(fontSize: 16.0),
           ),
           SizedBox(height: 40.0),

@@ -259,6 +259,7 @@ class _LoginPageState extends State<LoginPage> {
           backgroundColor: Color.fromARGB(73, 56, 52, 52),
           textColor: Colors.white,
           fontSize: 16.0);
+
       return true;
     } else {
       Fluttertoast.showToast(
@@ -270,6 +271,7 @@ class _LoginPageState extends State<LoginPage> {
           textColor: Colors.white,
           fontSize: 16.0);
     }
+
     return false;
   }
   // sign user in method
@@ -412,7 +414,6 @@ class _LoginPageState extends State<LoginPage> {
 
                     // sign in button
                     MyButton(onTap: () async {
-                      //GoRouter.of(context).go("/show_profile");
                       context.loaderOverlay.show();
                       bool lgin = await onLogin(
                           usernameController.text, passwordController.text);
@@ -421,6 +422,7 @@ class _LoginPageState extends State<LoginPage> {
                         await onProfileMount();
                         GoRouter.of(context).go("/show_profile");
                       }
+
                       context.loaderOverlay.hide();
                     }),
 
