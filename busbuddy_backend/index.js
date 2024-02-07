@@ -990,6 +990,10 @@ app.post('/api/startTrip', (req,res) => {
                     };
                 }).catch(e => console.error(e.stack));
             }).catch(e => console.error(e.stack));
+        } else {
+            res.send({
+                success: false,
+            });
         };
     };
 });
