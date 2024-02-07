@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:requests/requests.dart';
@@ -35,6 +36,7 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFF7B1B1B),
       body: Column(
         children: <Widget>[
           Expanded(flex: 4, child: _buildQrView(context)),
@@ -45,61 +47,11 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  if (result != null)
-                    Text(
-                        'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-                  else
-                    const Text('Scan a code'),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.toggleFlash();
-                              setState(() {});
-                            },
-                            child: FutureBuilder(
-                              future: controller?.getFlashStatus(),
-                              builder: (context, snapshot) {
-                                return Icon(
-                                    // flash icon
-                                    snapshot.data == true
-                                        ? Icons.flash_on
-                                        : Icons.flash_off,
-                                    // You can adjust the icon size and color here
-                                    size: 32.0,
-                                    color: Color(0xFF7B1B1B));
-                              },
-                            )),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.flipCamera();
-                              setState(() {});
-                            },
-                            child: FutureBuilder(
-                              future: controller?.getCameraInfo(),
-                              builder: (context, snapshot) {
-                                if (snapshot.data != null) {
-                                  return Icon(
-                                      // switch camera icon
-                                      Icons.flip_camera_ios,
-                                      // You can adjust the icon size and color here
-                                      size: 32.0,
-                                      color: Color(0xFF7B1B1B));
-                                } else {
-                                  return CircularProgressIndicator(); // Show a loading indicator
-                                }
-                              },
-                            )),
-                      )
-                    ],
-                  ),
+                  // if (result != null)
+                  //   Text(
+                  //       'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
+                  // else
+                  //   const Text('Scan a code'),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -125,11 +77,90 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
                       //   ),
                       // ),
                       // show the number of passengers
-
-                      Text(
-                        'Passenger: $passenger_count',
-                        style: TextStyle(fontSize: 20),
+                      Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Text(
+                          'Passenger: $passenger_count',
+                          style:
+                              TextStyle(fontSize: 16, color: Color(0xFFFFFFFF)),
+                        ),
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        margin: const EdgeInsets.all(8),
+                        child: ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Color(0xFFFFFFFF).withOpacity(0.7)),
+                              shape: MaterialStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18.0),
+                                ),
+                              ),
+                              //set size
+                              minimumSize:
+                                  MaterialStateProperty.all<Size>(Size(35, 35)),
+                            ),
+                            onPressed: () async {
+                              await controller?.toggleFlash();
+                              setState(() {});
+                            },
+                            child: FutureBuilder(
+                              future: controller?.getFlashStatus(),
+                              builder: (context, snapshot) {
+                                return Icon(
+                                    // flash icon
+                                    snapshot.data == true
+                                        ? Icons.flash_on
+                                        : Icons.flash_off,
+                                    // You can adjust the icon size and color here
+                                    size: 16.0,
+                                    color: Color(0xFF7B1B1B));
+                              },
+                            )),
                       ),
+                      Container(
+                        margin: const EdgeInsets.all(8),
+                        child: ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Color(0xFFFFFFFF).withOpacity(0.7)),
+                              shape: MaterialStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18.0),
+                                ),
+                              ),
+                              //set size
+                              minimumSize:
+                                  MaterialStateProperty.all<Size>(Size(35, 35)),
+                            ),
+                            onPressed: () async {
+                              await controller?.flipCamera();
+                              setState(() {});
+                            },
+                            child: FutureBuilder(
+                              future: controller?.getCameraInfo(),
+                              builder: (context, snapshot) {
+                                if (snapshot.data != null) {
+                                  return Icon(
+                                      // switch camera icon
+                                      Icons.flip_camera_ios,
+                                      // You can adjust the icon size and color here
+                                      size: 16.0,
+                                      color: Color(0xFF7B1B1B));
+                                } else {
+                                  return CircularProgressIndicator(); // Show a loading indicator
+                                }
+                              },
+                            )),
+                      )
                     ],
                   ),
                 ],
@@ -235,5 +266,39 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
   void dispose() {
     controller?.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    onQrScannerMount();
+  }
+
+  Future<void> onQrScannerMount() async {
+    context.loaderOverlay.show();
+    var r4 = await Requests.post(globel.serverIp + 'checkStaffRunningTrip');
+    print("hello bus stff");
+    r4.raiseForStatus();
+    dynamic rt = r4.json();
+    if (rt['success']) {
+      globel.runningTripId = rt['id'];
+      setState(() {
+        passenger_count = rt['passenger_count'].toString();
+      });
+      context.loaderOverlay.hide();
+      return;
+    } else {
+      GoRouter.of(context).go('/show_profile');
+      Fluttertoast.showToast(
+          msg: 'Please start a trip first.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(118, 185, 26, 5),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      context.loaderOverlay.hide();
+      return;
+    }
   }
 }

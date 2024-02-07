@@ -646,18 +646,7 @@ class HomeViewState extends State<HomeView> {
                             selected: _selectedIndex == 13,
                             onTap: () {
                               if (_selectedIndex == 13) return;
-                              if (globel.runningTripId == "") {
-                                Fluttertoast.showToast(
-                                    msg: 'Please start a trip first.',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    timeInSecForIosWeb: 1,
-                                    backgroundColor:
-                                        Color.fromARGB(118, 185, 26, 5),
-                                    textColor: Colors.white,
-                                    fontSize: 16.0);
-                                return;
-                              }
+
                               // Update the state of the app
                               // _onItemTapped(2);
                               // Then close the drawer
