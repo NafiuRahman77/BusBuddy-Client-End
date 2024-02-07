@@ -621,7 +621,7 @@ app.post('/api/getTicketList', (req,res) => {
     console.log(req.body);
     if (req.session.userid && req.session.user_type=="student") {
         dbclient.query(
-            `select id from ticket where student_id=$1 and is_used=false limit 5`, 
+            `select id from ticket where student_id=$1 and is_used=false order by student_id limit 5`, 
             [req.session.userid]
         ).then(qres => {
             logger.debug(qres);
