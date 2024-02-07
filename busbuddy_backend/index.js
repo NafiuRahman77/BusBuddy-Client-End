@@ -1039,8 +1039,8 @@ app.post('/api/endTrip', async (req,res) => {
                 };
             }).catch(e => console.error(e.stack));
             tracking.runningTrips.delete (trip.driver);
-            tracking.runningTrips.delete (trip.helper);
-            tracking.runningTrips.delete (t_id);
+            tracking.busStaffMap.delete (trip.helper);
+            tracking.busStaffMap.delete (t_id);
         } else {
             dbclient.query(
                 `update trip set end_timestamp=current_timestamp, is_live=false where id=$1 and (driver=$2 or helper=$2)`, 
