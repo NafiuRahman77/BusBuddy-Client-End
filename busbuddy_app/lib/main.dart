@@ -23,6 +23,7 @@ import 'pages/route_map.dart';
 import 'pages/Requisition.dart';
 import 'package:shurjopay/utilities/functions.dart';
 import 'pages/ShowFeedback.dart';
+import 'pages/show_notifications.dart';
 import 'pages/manage_trips.dart';
 import 'pages/req_and_repair.dart';
 import 'pages/ShowRequisition.dart';
@@ -102,6 +103,9 @@ class BusBuddyApp extends StatelessWidget {
         path: "/trackingmap",
         builder: ((context, state) =>
             HomeView(page: "Tracking Map", extra: state.extra))),
+    GoRoute(
+        path: "/notifications",
+        builder: ((context, state) => const HomeView(page: "Notifications"))),
   ]);
   // This widget is the root of your application.
   @override
@@ -156,6 +160,8 @@ class PageBody extends StatelessWidget {
       return ReqRepair();
     else if (this.page == "Tracking")
       return Tracking();
+    else if (this.page == "Notifications")
+      return Notifications();
     else if (this.page == "Tracking Map")
       return trackingMap(
         extra: this.extra! as dynamic,
@@ -537,9 +543,8 @@ class HomeViewState extends State<HomeView> {
                           selected: _selectedIndex == 9,
                           onTap: () {
                             if (_selectedIndex == 9) return;
-                            // Update the state of the app
-                            // _onItemTapped(2);
-                            // Then close the drawer
+                            GoRouter.of(context).pop();
+                            GoRouter.of(context).push("/notifications");
                             setState(() {
                               _selectedIndex = 9;
                             });
