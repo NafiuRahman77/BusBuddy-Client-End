@@ -1129,7 +1129,12 @@ app.post('/api/staffScanTicket', (req,res) => {
                     success: false,
                 });
             };
-        }).catch(e => console.error(e.stack));
+        }).catch(e => {
+            console.error(e.stack);
+            res.send({
+                success: false,
+            });
+        });
     };
 });
 
