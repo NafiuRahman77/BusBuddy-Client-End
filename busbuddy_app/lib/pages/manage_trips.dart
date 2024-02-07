@@ -39,6 +39,9 @@ class _ManageTripsState extends State<ManageTrips>
     super.initState();
     getTripInfo();
     _tabController = TabController(length: 2, vsync: this);
+    if (globel.runningTripId != "") {
+      switchToOngoing();
+    }
   }
 
   @override

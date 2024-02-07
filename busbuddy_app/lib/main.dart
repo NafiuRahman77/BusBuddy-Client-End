@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:busbuddy_app/pages/edit_password.dart';
 import 'package:busbuddy_app/pages/scan_ticket_qr.dart';
 import 'package:busbuddy_app/pages/ticket_qr.dart';
 import 'package:cookie_jar/cookie_jar.dart';
@@ -102,6 +103,9 @@ class BusBuddyApp extends StatelessWidget {
         path: "/trackingmap",
         builder: ((context, state) =>
             HomeView(page: "Tracking Map", extra: state.extra))),
+    GoRoute(
+        path: "/edit_password",
+        builder: ((context, state) => const HomeView(page: "Edit Password"))),
   ]);
   // This widget is the root of your application.
   @override
@@ -161,7 +165,10 @@ class PageBody extends StatelessWidget {
         extra: this.extra! as dynamic,
         // pathCoords: this.extra! as List<dynamic>,
       );
-    return (Container());
+    else if (this.page == "Edit Password") {
+      return EditPasswordPage();
+    } else
+      return (Container());
   }
 }
 
@@ -246,6 +253,8 @@ class HomeViewState extends State<HomeView> {
     } else if (currentRouteName == '/route_map') {
       print("route map");
       _selectedIndex = 3;
+    } else if (currentRouteName == '/edit_password') {
+      _selectedIndex = 16;
     } else {
       _selectedIndex = 1000;
     }
@@ -562,7 +571,7 @@ class HomeViewState extends State<HomeView> {
                               });
                             },
                           ),
-                        if (globel.userType != "buet_staff")
+                        if (globel.userType == "student")
                           ListTile(
                             leading: const Icon(Icons.qr_code),
                             title: const Text('QR Code'),
@@ -637,18 +646,7 @@ class HomeViewState extends State<HomeView> {
                             selected: _selectedIndex == 13,
                             onTap: () {
                               if (_selectedIndex == 13) return;
-                              if (globel.runningTripId == "") {
-                                Fluttertoast.showToast(
-                                    msg: 'Please start a trip first.',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    timeInSecForIosWeb: 1,
-                                    backgroundColor:
-                                        Color.fromARGB(118, 185, 26, 5),
-                                    textColor: Colors.white,
-                                    fontSize: 16.0);
-                                return;
-                              }
+
                               // Update the state of the app
                               // _onItemTapped(2);
                               // Then close the drawer
@@ -661,6 +659,20 @@ class HomeViewState extends State<HomeView> {
                               });
                             },
                           ),
+                        ListTile(
+                          leading: const Icon(Icons.lock),
+                          title: const Text('Change Password'),
+                          selected: _selectedIndex == 16,
+                          onTap: () {
+                            if (_selectedIndex == 16) return;
+
+                            GoRouter.of(context).pop();
+                            GoRouter.of(context).push("/edit_password");
+                            setState(() {
+                              _selectedIndex = 16;
+                            });
+                          },
+                        ),
                         ListTile(
                           visualDensity: const VisualDensity(vertical: 4),
                           leading: const Icon(Icons.logout),

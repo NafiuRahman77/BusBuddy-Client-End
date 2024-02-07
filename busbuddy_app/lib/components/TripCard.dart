@@ -331,7 +331,8 @@ class _TripCardState extends State<TripCard>
               Center(
                 child: // show the button only if title is "Upcoming Trip" or title is "Ongoing trip" and islive is true
 
-                    (widget.title == "Start Trip" ||
+                    ((widget.title == "Start Trip" &&
+                                globel.runningTripId == "") ||
                             (widget.title == "End Trip" &&
                                 widget.islive == true))
                         ? ElevatedButton(
@@ -347,56 +348,67 @@ class _TripCardState extends State<TripCard>
                                 if (widget.title == "Start Trip") {
                                   bool startTrip =
                                       await onTripStart(globel.runningTripId);
+                                  if (startTrip) {
+                                    // Workmanager()
+                                    //     .registerOneOffTask("bus", "sojib");
+                                    late LocationSettings locationSettings;
 
-                                  // Workmanager()
-                                  //     .registerOneOffTask("bus", "sojib");
-                                  late LocationSettings locationSettings;
+                                    locationSettings = AndroidSettings(
+                                        accuracy: LocationAccuracy.high,
+                                        distanceFilter: globel.distanceFilter,
+                                        forceLocationManager: true,
+                                        intervalDuration:
+                                            const Duration(seconds: 10),
+                                        //(Optional) Set foreground notification config to keep the app alive
+                                        //when going to the background
+                                        foregroundNotificationConfig:
+                                            const ForegroundNotificationConfig(
+                                          notificationText:
+                                              "Example app will continue to receive your location even when you aren't using it",
+                                          notificationTitle:
+                                              "Running in Background",
+                                          enableWakeLock: true,
+                                        ));
 
-                                  locationSettings = AndroidSettings(
-                                      accuracy: LocationAccuracy.high,
-                                      distanceFilter: globel.distanceFilter,
-                                      forceLocationManager: true,
-                                      intervalDuration:
-                                          const Duration(seconds: 10),
-                                      //(Optional) Set foreground notification config to keep the app alive
-                                      //when going to the background
-                                      foregroundNotificationConfig:
-                                          const ForegroundNotificationConfig(
-                                        notificationText:
-                                            "Example app will continue to receive your location even when you aren't using it",
-                                        notificationTitle:
-                                            "Running in Background",
-                                        enableWakeLock: true,
-                                      ));
+                                    globel.positionStream =
+                                        Geolocator.getPositionStream(
+                                                locationSettings:
+                                                    locationSettings)
+                                            .listen((Position? position) async {
+                                      print(position == null
+                                          ? 'Unknown'
+                                          : '${position.latitude.toString()}, ${position.longitude.toString()}');
 
-                                  globel.positionStream =
-                                      Geolocator.getPositionStream(
-                                              locationSettings:
-                                                  locationSettings)
-                                          .listen((Position? position) async {
-                                    print(position == null
-                                        ? 'Unknown'
-                                        : '${position.latitude.toString()}, ${position.longitude.toString()}');
+                                      if (position != null) {
+                                        var r2 = await Requests.post(
+                                            globel.serverIp +
+                                                'updateStaffLocation',
+                                            body: {
+                                              'trip_id': globel.runningTripId,
+                                              'latitude':
+                                                  position.latitude.toString(),
+                                              'longitude':
+                                                  position.longitude.toString(),
+                                            },
+                                            bodyEncoding: RequestBodyEncoding
+                                                .FormURLEncoded);
 
-                                    if (position != null) {
-                                      var r2 = await Requests.post(
-                                          globel.serverIp +
-                                              'updateStaffLocation',
-                                          body: {
-                                            'trip_id': globel.runningTripId,
-                                            'latitude':
-                                                position.latitude.toString(),
-                                            'longitude':
-                                                position.longitude.toString(),
-                                          },
-                                          bodyEncoding: RequestBodyEncoding
-                                              .FormURLEncoded);
-
-                                      r2.raiseForStatus();
-                                    }
-                                  });
-                                  widget.parentTabController();
-                                  await widget.parentReloadCallback();
+                                        r2.raiseForStatus();
+                                      }
+                                    });
+                                    widget.parentTabController();
+                                    await widget.parentReloadCallback();
+                                  } else {
+                                    // fluttertoast
+                                    Fluttertoast.showToast(
+                                        msg: "A trip is already ongoing",
+                                        toastLength: Toast.LENGTH_SHORT,
+                                        gravity: ToastGravity.BOTTOM,
+                                        timeInSecForIosWeb: 1,
+                                        backgroundColor: Colors.red,
+                                        textColor: Colors.white,
+                                        fontSize: 16.0);
+                                  }
                                 } else if (widget.title == "End Trip") {
                                   bool endTrip =
                                       await onTripEnd(globel.runningTripId);
@@ -420,7 +432,11 @@ class _TripCardState extends State<TripCard>
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                             ),
-                            child: Text(widget.title),
+                            child: Text(widget.title,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                )),
                           )
                         : SizedBox.shrink(),
               ),
