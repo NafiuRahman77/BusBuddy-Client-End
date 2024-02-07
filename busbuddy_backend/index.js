@@ -945,7 +945,7 @@ app.post('/api/getStaffTrips', (req,res) => {
 app.post('/api/startTrip', (req,res) => {
     console.log(req.body);
     if (req.session.userid && req.session.user_type=="bus_staff") {
-        let ronin = tracking.runningTrips.has(req.session.userid);
+        let ronin = tracking.busStaffMap.has(req.session.userid);
         if (!ronin) {
             dbclient.query(
                 `call initiate_trip2($1, $2, $3)`, 
