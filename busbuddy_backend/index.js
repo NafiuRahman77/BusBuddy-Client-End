@@ -1040,7 +1040,7 @@ app.post('/api/endTrip', async (req,res) => {
         } else {
             dbclient.query(
                 `update trip set end_timestamp=current_timestamp, is_live=false where id=$1 and (driver=$2 or helper=$2)`, 
-                [t_id, req.session.userid, pathStr]
+                [t_id, req.session.userid]
             ).then(qres => {
                 logger.debug(qres);
                 if (qres.rowCount === 1) res.send({ 
@@ -1052,7 +1052,7 @@ app.post('/api/endTrip', async (req,res) => {
                     });
                 };
             }).catch(e => console.error(e.stack));
-        }
+        };
     };
 });
 
