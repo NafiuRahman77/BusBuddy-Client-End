@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../globel.dart' as globel;
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:flutter/services.dart' show rootBundle;
 
 class RouteTimeMap extends StatefulWidget {
   final Set<Marker> stationPoints;
@@ -19,6 +22,8 @@ class _RouteTimeMap extends State<RouteTimeMap> {
   void initState() {
     super.initState();
     addCustomIcon();
+    globel.printWarning("station Points : ");
+    print(widget.stationPoints);
     convertMarkersToLatLngPoints();
   }
 
@@ -28,18 +33,38 @@ class _RouteTimeMap extends State<RouteTimeMap> {
         .toList(growable: false);
   }
 
-  BitmapDescriptor? markerIcon;
-  void addCustomIcon() async {
+  BitmapDescriptor? endIcon;
+  BitmapDescriptor? startIcon;
+
+  Future<Uint8List> _getBytesFromAsset(
+      String path, int width, int height) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetWidth: width, targetHeight: height);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
+  }
+
+  Future<void> addCustomIcon() async {
     await BitmapDescriptor.fromAssetImage(
             const ImageConfiguration(size: Size(200, 200)),
             "lib/images/bus.png")
         .then(
       (icon) {
         setState(() {
-          markerIcon = icon;
+          endIcon = icon;
         });
       },
     );
+
+    Uint8List markerIcon =
+        await _getBytesFromAsset("lib/images/Start.png", 100, 100);
+
+    setState(() {
+      startIcon = BitmapDescriptor.fromBytes(markerIcon);
+    });
   }
 
   List<Marker> createMarkers() {
@@ -50,7 +75,15 @@ class _RouteTimeMap extends State<RouteTimeMap> {
       Marker(
         markerId: MarkerId('start'),
         position: widget.stationPoints.first.position,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        icon: startIcon!,
+        onTap: () {
+          mapController.showMarkerInfoWindow(
+              MarkerId(widget.stationPoints.elementAt(0).markerId.value));
+        },
+        infoWindow: InfoWindow(
+          title: widget.stationPoints.elementAt(0).infoWindow.title,
+          snippet: widget.stationPoints.elementAt(0).infoWindow.snippet,
+        ),
       ),
     );
 
@@ -58,8 +91,16 @@ class _RouteTimeMap extends State<RouteTimeMap> {
     for (int i = 1; i < widget.stationPoints.length - 1; i++) {
       markers.add(
         Marker(
-          markerId: MarkerId(widget.stationPoints.elementAt(i).markerId.value),
+          markerId: MarkerId(i.toString()),
           position: widget.stationPoints.elementAt(i).position,
+          onTap: () {
+            mapController.showMarkerInfoWindow(
+                MarkerId(widget.stationPoints.elementAt(i).markerId.value));
+          },
+          infoWindow: InfoWindow(
+            title: widget.stationPoints.elementAt(i).infoWindow.title,
+            snippet: widget.stationPoints.elementAt(i).infoWindow.snippet,
+          ),
         ),
       );
     }
@@ -69,7 +110,23 @@ class _RouteTimeMap extends State<RouteTimeMap> {
       Marker(
         markerId: MarkerId('end'),
         position: widget.stationPoints.last.position,
-        icon: markerIcon!,
+        icon: endIcon!,
+        onTap: () {
+          mapController.showMarkerInfoWindow(MarkerId(widget.stationPoints
+              .elementAt(widget.stationPoints.length - 1)
+              .markerId
+              .value));
+        },
+        infoWindow: InfoWindow(
+          title: widget.stationPoints
+              .elementAt(widget.stationPoints.length - 1)
+              .infoWindow
+              .title,
+          snippet: widget.stationPoints
+              .elementAt(widget.stationPoints.length - 1)
+              .infoWindow
+              .snippet,
+        ),
       ),
     );
 
@@ -78,18 +135,6 @@ class _RouteTimeMap extends State<RouteTimeMap> {
 
   @override
   Widget build(BuildContext context) {
-    // Marker startMarker = Marker(
-    //   markerId: MarkerId('start'),
-    //   position: stationLatLngPoints.first,
-    //   icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-    // );
-
-    // Marker endMarker = Marker(
-    //   markerId: MarkerId('end'),
-    //   position: stationLatLngPoints.last,
-    //   icon: markerIcon!,
-    // );
-
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.all(15),
@@ -114,7 +159,7 @@ class _RouteTimeMap extends State<RouteTimeMap> {
             Polyline(
               polylineId: PolylineId('fsef'),
               color: Colors.red,
-              width: 5,
+              width: 2,
               points: stationLatLngPoints,
             ),
           ]),

@@ -8,7 +8,7 @@ import '../../globel.dart' as globel;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 bool isSameDate(DateTime one, DateTime other) {
-  print("hi am here");
+  //print("hi am here");
   return one.year == other.year &&
       one.month == other.month &&
       one.day == other.day;
@@ -43,6 +43,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
 
   Future<void> onCalendarMount() async {
     context.loaderOverlay.show();
+
     var r = await Requests.post(globel.serverIp + 'getDefaultRoute');
 
     r.raiseForStatus();
@@ -67,7 +68,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
             fontSize: 16.0);
       }
     }
-    print(r.content());
+    //print(r.content());
 
     var r1 = await Requests.post(globel.serverIp + 'getRoutes');
     r1.raiseForStatus();
@@ -87,7 +88,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       }
     });
     route_names.forEach((element) {
-      print(element);
+      //print(element);
     });
 
     var r2 = await Requests.post(globel.serverIp + 'getStations');
@@ -111,7 +112,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
     // });
 
     station_coords.forEach((element) {
-      print(element);
+      //print(element);
     });
 
     context.loaderOverlay.hide();
@@ -131,11 +132,11 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       acceptedList.clear();
 
       routeTimeData.forEach((bus) {
-        print(bus['array_to_json'][0]['time']);
-        print(selectedDate!);
+        // print(bus['array_to_json'][0]['time']);
+        //print(selectedDate!);
         if (isSameDate(
             DateTime.parse(bus['array_to_json'][0]['time']), selectedDate!)) {
-          print('match');
+          //print('match');
           acceptedList.add(bus);
         } else
           rejectedData.add(bus);
@@ -144,7 +145,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       routeTimeData = acceptedList;
     });
 
-    print("ok" + routeTimeData.length.toString());
+    // print("ok" + routeTimeData.length.toString());
   }
 
   Future<void> onRouteSelect(String route) async {
@@ -158,6 +159,8 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
     r.raiseForStatus();
     setState(() {
       routeTimeData = r.json();
+      //
+      //print(routeTimeData);
       loadedRouteTimeData = true;
 
       routeTimeData.forEach((j) {
