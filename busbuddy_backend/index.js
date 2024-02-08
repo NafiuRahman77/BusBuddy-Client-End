@@ -1176,6 +1176,22 @@ app.post('/api/staffScanTicket', (req,res) => {
     };
 });
 
+app.post('/api/broadcastNotification', (req,res) => {
+    //send a dummy response
+        dbclient.query(
+            `select array(select distinct sess->>'fcm_id' from session where sess->>'fcm_id' is not null)`, 
+        ).then(qres => {
+            res.send([
+                ...qres.rows[0].array,
+            ]);
+        }).catch(e => {
+            console.error(e.stack);
+            res.send({
+                success: false,
+            });
+        });
+});
+
 const server = app.listen(port, () => {
     console.log(`BudBuddy backend listening on port ${port}`);
 });
