@@ -1178,6 +1178,7 @@ app.post('/api/staffScanTicket', (req,res) => {
 
 app.post('/api/broadcastNotification', (req,res) => {
     //send a dummy response
+        console.log(req.body);
         dbclient.query(
             `select array(select distinct sess->>'fcm_id' from session where sess->>'fcm_id' is not null)`, 
         ).then(qres => {
