@@ -87,28 +87,6 @@ const getRealISODate = () => {
 };
 
 
-var token = 'dVj_grVZT82cpXtN9RZUEr:APA91bHjgnFIoOTDcMO4h6Ma7dXNbBQMVbEkMnjy_8rBhPyfTJQwmxASrat1UPDyc5zLoaRIOR57gMVZH9G5LyeuIjcGBmMgkNE-rCsDni_vkPh1i-0xlwzaiYeoVz3L9KxuCrluaiuV';
- 
-    var message = {
-        data: {    //This is only optional, you can send any data
-            score: '850',
-            time: '2:45'
-        },
-        notification:{
-            title : 'Title of notification',
-            body : 'Body of notification'
-        },
-        token : token
-        };
- 
-FCM.send(message, function(err, response) {
-    if(err){
-        console.log('error found', err);
-    }else {
-        console.log('response here', response);
-    }
-});
-
 dbclient.query(
     `select *, array_to_json(time_list) as list_time from trip where is_live=true`
 ).then(qres2 => {
@@ -565,9 +543,9 @@ app.post('/api/addRequisition', (req,res) => {
     console.log(req.body);
     if (req.session.userid) {
         dbclient.query(
-            `INSERT INTO requisition (requestor_id, destination, bus_type, subject, text, timestamp) 
-            values ($1, $2, $3, $4, $5, $6)`, 
-            [req.session.userid, req.body.destination, JSON.parse(req.body.bus_type), req.body.subject, req.body.text, req.body.timestamp]
+            `INSERT INTO requisition (requestor_id, destination, bus_type, subject, text, timestamp, source) 
+            values ($1, $2, $3, $4, $5, $6, $7)`, 
+            [req.session.userid, req.body.destination, JSON.parse(req.body.bus_type), req.body.subject, req.body.text, req.body.timestamp, req.body.source]
         ).then(qres => {
             logger.debug(qres);
             if (qres.rowCount === 1) res.send({ 
@@ -1251,6 +1229,29 @@ process.stdin.on('keypress', async (chunk, key) => {
         });
 
         // while (backupDone < backupCount);
+    };
+    if (key && key.name == 'n') {
+
+        var token = 'dVj_grVZT82cpXtN9RZUEr:APA91bHjgnFIoOTDcMO4h6Ma7dXNbBQMVbEkMnjy_8rBhPyfTJQwmxASrat1UPDyc5zLoaRIOR57gMVZH9G5LyeuIjcGBmMgkNE-rCsDni_vkPh1i-0xlwzaiYeoVz3L9KxuCrluaiuV';
+        var message = {
+            data: {    //This is only optional, you can send any data
+                score: '850',
+                time: '2:45'
+            },
+            notification:{
+                title : 'Title of notification',
+                body : 'Body of notification'
+            },
+            token : token
+            };
+
+        FCM.send(message, function(err, response) {
+        if(err){
+            console.log('error found', err);
+        }else {
+            console.log('response here', response);
+        }
+        });
     };
     if (key && key.name == 'x') process.exit();
 });
