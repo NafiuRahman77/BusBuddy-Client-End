@@ -1200,6 +1200,10 @@ app.post('/api/broadcastNotification', (req,res) => {
                       console.log('response-----', response);
                   };
             });
+        }).then(r => {
+            res.send({
+                success: true,
+            });
         }).catch(e => {
             console.error(e.stack);
             res.send({
