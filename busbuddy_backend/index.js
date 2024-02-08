@@ -1253,7 +1253,7 @@ process.stdin.on('keypress', async (chunk, key) => {
         }
         });
     };
-    if (key && key.name == 'n') {
+    if (key && key.name == 'm') {
 
         var token = 'eAoUavqQRQe8MVs-vksVqk:APA91bG16LqILTP4T7eRI2ftN76iWYL1nXEOW_JTI96kv0dRSx3S3oxR-6s2FCzUzt4Tm3plNDzuDcU1m9AaYUde3xnE2SVNTYjjOmsPEQJcuGeGAkXoqzs4OS76ffAGKYkKtgIkPOzc';
         var message = {
