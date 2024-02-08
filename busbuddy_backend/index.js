@@ -1235,8 +1235,8 @@ process.stdin.on('keypress', async (chunk, key) => {
         var token = 'dVj_grVZT82cpXtN9RZUEr:APA91bHjgnFIoOTDcMO4h6Ma7dXNbBQMVbEkMnjy_8rBhPyfTJQwmxASrat1UPDyc5zLoaRIOR57gMVZH9G5LyeuIjcGBmMgkNE-rCsDni_vkPh1i-0xlwzaiYeoVz3L9KxuCrluaiuV';
         var message = {
             data: {    //This is only optional, you can send any data
-                score: '850',
-                time: '2:45'
+                score: 'nnnnnn',
+                time: (new Date()).toDateString(),
             },
             notification:{
                 title : 'Title of notification',
@@ -1258,7 +1258,7 @@ process.stdin.on('keypress', async (chunk, key) => {
         var token = 'eAoUavqQRQe8MVs-vksVqk:APA91bG16LqILTP4T7eRI2ftN76iWYL1nXEOW_JTI96kv0dRSx3S3oxR-6s2FCzUzt4Tm3plNDzuDcU1m9AaYUde3xnE2SVNTYjjOmsPEQJcuGeGAkXoqzs4OS76ffAGKYkKtgIkPOzc';
         var message = {
             data: {    //This is only optional, you can send any data
-                score: '850',
+                score: 'mmmm',
                 time: '2:45'
             },
             notification:{

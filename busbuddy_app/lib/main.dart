@@ -59,13 +59,14 @@ void main() async {
   runApp(BusBuddyApp());
 }
 
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   print("bg message handler");
 
-  main();
+  // main();
 }
 
 class BusBuddyApp extends StatelessWidget {
