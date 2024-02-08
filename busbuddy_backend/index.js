@@ -1181,9 +1181,28 @@ app.post('/api/broadcastNotification', (req,res) => {
         dbclient.query(
             `select array(select distinct sess->>'fcm_id' from session where sess->>'fcm_id' is not null)`, 
         ).then(qres => {
-            res.send([
-                ...qres.rows[0].array,
-            ]);
+            let tokenList = [qres.rows[0].array];
+            let message = {
+                data: {
+                  score: '850',
+                  time: '2:45'
+                },
+                notification:{
+                  title : 'Navish',
+                  body : 'Test message by navish'
+                }
+            };
+            FCM.sendToMultipleToken(message, tokenList, function(err, response) {
+                  if (err) {
+                      console.log('err--', err);
+                  } else {
+                      console.log('response-----', response);
+                  };
+            }).then((r) => {
+                res.send({
+                    success: true,
+                });
+            });
         }).catch(e => {
             console.error(e.stack);
             res.send({
@@ -1263,11 +1282,11 @@ process.stdin.on('keypress', async (chunk, key) => {
             };
 
         FCM.send(message, function(err, response) {
-        if(err){
-            console.log('error found', err);
-        }else {
-            console.log('response here', response);
-        }
+            if(err){
+                console.log('error found', err);
+            }else {
+                console.log('response here', response);
+            }
         });
     };
     if (key && key.name == 'm') {
