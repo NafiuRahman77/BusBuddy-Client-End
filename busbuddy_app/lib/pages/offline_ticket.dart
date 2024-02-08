@@ -28,35 +28,12 @@ class _OfflineTicketQRState extends State<OfflineTicketQR> {
   }
 
   Future<void> getTicketInfo() async {
-    context.loaderOverlay.show();
-    var r = await Requests.post(globel.serverIp + 'getTicketList');
-
-    r.raiseForStatus();
-    dynamic json = r.json();
-    print(json);
-
-    if (json['success'] == true) {
-      setState(() {
-        ticketIds = List<String>.from(json['ticket_list']);
-      });
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setStringList('ticketIds', ticketIds);
-      setState(() {
-        // shorten the strings to 10 characters
-        ticketIdsShortened = ticketIds.map((e) => e.substring(0, 10)).toList();
-      });
-    } else {
-      Fluttertoast.showToast(
-        msg: 'Failed to load data.',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Color.fromARGB(118, 244, 67, 54),
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-    }
-    context.loaderOverlay.hide();
+    // get from shared preferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      ticketIds = prefs.getStringList('ticketIds') ?? [];
+      ticketIdsShortened = ticketIds.map((e) => e.substring(0, 5)).toList();
+    });
   }
 
   @override

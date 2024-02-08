@@ -22,8 +22,8 @@ class TicketChoose extends StatefulWidget {
 }
 
 class _TicketChooseState extends State<TicketChoose> {
-  int selectedTicket = 20; // Initialize with the first ticket
-  int amount = 1 * 20;
+  int selectedTicket = 50; // Initialize with the first ticket
+  int amount = 2 * 50;
   int currentTicket = 20;
   String studentName = "";
   String studentPhone = "";
@@ -75,25 +75,6 @@ class _TicketChooseState extends State<TicketChoose> {
   ShurjopayResponseModel shurjopayResponseModel = ShurjopayResponseModel();
   ShurjopayVerificationModel shurjopayVerificationModel =
       ShurjopayVerificationModel();
-
-  void incrementTicket() {
-    setState(() {
-      selectedTicket++;
-      amount = selectedTicket * 2;
-      ticketController.text = selectedTicket.toString();
-    });
-  }
-
-// Minus button onPressed handler
-  void decrementTicket() {
-    if (selectedTicket > 1) {
-      setState(() {
-        selectedTicket--;
-        amount = selectedTicket * 2;
-        ticketController.text = selectedTicket.toString();
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -199,10 +180,6 @@ class _TicketChooseState extends State<TicketChoose> {
 
                     items: [
                       DropdownMenuItem<int>(
-                        value: 20,
-                        child: Text('20'),
-                      ),
-                      DropdownMenuItem<int>(
                         value: 50,
                         child: Text('50'),
                       ),
@@ -265,10 +242,17 @@ class _TicketChooseState extends State<TicketChoose> {
             Center(
               child: ElevatedButton(
                 onPressed: () async {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => ConfirmPayment()),
-                  // );
+                  if (selectedTicket + currentTicket > 600) {
+                    Fluttertoast.showToast(
+                        msg: 'You can not have more than 600 tickets at a time',
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.BOTTOM,
+                        timeInSecForIosWeb: 1,
+                        backgroundColor: Color.fromARGB(132, 244, 67, 54),
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                    return;
+                  }
                   ShurjopayRequestModel shurjopayRequestModel =
                       ShurjopayRequestModel(
                     configs: shurjopayConfigs,
@@ -318,14 +302,25 @@ class _TicketChooseState extends State<TicketChoose> {
                         dynamic json = r.json();
                         context.loaderOverlay.hide();
                         getTicketInfo();
-                        Fluttertoast.showToast(
-                            msg: 'Payment Successful.',
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIosWeb: 1,
-                            backgroundColor: Color.fromARGB(134, 48, 196, 3),
-                            textColor: Colors.white,
-                            fontSize: 16.0);
+                        if (json['success'] == true) {
+                          Fluttertoast.showToast(
+                              msg: 'Payment Successful.',
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Color.fromARGB(134, 48, 196, 3),
+                              textColor: Colors.white,
+                              fontSize: 16.0);
+                        } else {
+                          Fluttertoast.showToast(
+                              msg: 'Payment Unsuccessful.',
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Color.fromARGB(132, 244, 67, 54),
+                              textColor: Colors.white,
+                              fontSize: 16.0);
+                        }
                       } else if (shurjopayVerificationModel.spCode == "1005") {
                         print(shurjopayVerificationModel.bankStatus);
                         Fluttertoast.showToast(

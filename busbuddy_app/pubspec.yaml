@@ -51,6 +51,7 @@ dependencies:
   cookie_jar: ^4.0.8
   path_provider: ^2.1.2
   shared_preferences: ^2.2.2
+  internet_connection_checker: ^1.0.0+1
 
 
 dev_dependencies:
