@@ -211,6 +211,7 @@ app.post('/api/login', (req, res) => {
             if (verif === true) {
                 req.session.userid = req.body.id;
                 req.session.user_type = "student";
+                req.session.fcm_id = req.body.fcm_id;
                 res.send({
                     success: true,
                     name: qres.rows[0].name,

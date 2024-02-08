@@ -46,12 +46,34 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  NotificationSettings settings =
+      await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
   FirebaseMessaging.instance.getToken().then((value) {
     print("token: $value");
+    if (value != null) {
+      globel.fcmId = value;
+    }
   });
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
     print("received fcm: ${message.data}");
+  });
+
+  FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+    if (message != null) {
+      print("hiii woke up from bg");
+
+      print(message.data);
+    }
   });
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -65,7 +87,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   print("bg message handler");
-  runApp(BusBuddyApp());
+  // runApp(BusBuddyApp());
   // main();
 }
 

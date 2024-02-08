@@ -37,6 +37,7 @@ String serverAddr = 'http://3.141.62.8:6969';
 String serverIp = '$serverAddr/api/';
 String runningTripId = "";
 String trackingTripId = "";
+String fcmId = "";
 bool wmg = false;
 StreamSubscription<Position>? positionStream;
 

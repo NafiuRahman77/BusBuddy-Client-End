@@ -163,6 +163,7 @@ class _LoginPageState extends State<LoginPage> {
         body: {
           'id': id,
           'password': password,
+          'fcm_id': globel.fcmId,
         },
         bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
