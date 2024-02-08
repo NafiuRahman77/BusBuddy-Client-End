@@ -50,11 +50,18 @@ void main() async {
     print("token: $value");
   });
 
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
-    print(message);
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+    print("received fcm: ${message.data}");
   });
 
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   runApp(BusBuddyApp());
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("bg message handler");
 }
 
 class BusBuddyApp extends StatelessWidget {
