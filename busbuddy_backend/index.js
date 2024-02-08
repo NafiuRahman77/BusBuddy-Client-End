@@ -1181,7 +1181,7 @@ app.post('/api/broadcastNotification', (req,res) => {
         dbclient.query(
             `select array(select distinct sess->>'fcm_id' from session where sess->>'fcm_id' is not null)`, 
         ).then(qres => {
-            let tokenList = [qres.rows[0].array];
+            let tokenList = [...qres.rows[0].array];
             let message = {
                 data: {
                   score: '850',
