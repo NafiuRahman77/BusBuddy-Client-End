@@ -22,9 +22,9 @@ class TicketChoose extends StatefulWidget {
 }
 
 class _TicketChooseState extends State<TicketChoose> {
-  int selectedTicket = 1; // Initialize with the first ticket
-  int amount = 1 * 2;
-  int currentTicket = 0;
+  int selectedTicket = 20; // Initialize with the first ticket
+  int amount = 1 * 20;
+  int currentTicket = 20;
   String studentName = "";
   String studentPhone = "";
   String studentEmail = "";
@@ -171,58 +171,52 @@ class _TicketChooseState extends State<TicketChoose> {
                   Expanded(
                     child: Text(
                       'Price: ৳${selectedTicket * 2}', // Assuming each ticket costs $100
-                      style: TextStyle(fontSize: 18.0),
+                      style: TextStyle(fontSize: 16.0),
                     ),
                   ),
 
                   SizedBox(width: 16.0), // Add some spacing between elements
 
                   // Inside your build method
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          decrementTicket();
-                          // setState(() {
-                          //   ticketController.text = selectedTicket.toString();
-                          // });
-                        },
-                        icon: Icon(Icons.remove),
+                  DropdownButton<int>(
+                    value: selectedTicket,
+                    // add some styling to the dropdown button
+                    style: TextStyle(color: Color(0xFF781B1B), fontSize: 16.0),
+                    underline: Container(
+                      height: 2,
+                      width: 2,
+                      color: Color(0xFF781B1B),
+                    ),
+                    onChanged: (int? value) {
+                      if (value != null) {
+                        setState(() {
+                          selectedTicket = value;
+                          amount = selectedTicket * 2;
+                          ticketController.text = selectedTicket.toString();
+                        });
+                      }
+                    },
+
+                    items: [
+                      DropdownMenuItem<int>(
+                        value: 20,
+                        child: Text('20'),
                       ),
-                      Container(
-                        width: 40, // Adjust the width as needed
-                        height: 20,
-                        child: TextField(
-                          controller: ticketController,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          onChanged: (value) {
-                            if (value.isNotEmpty) {
-                              int newValue = int.parse(value);
-                              if (newValue >= 1) {
-                                setState(() {
-                                  selectedTicket = newValue;
-                                  amount = selectedTicket * 2;
-                                  ticketController.text =
-                                      selectedTicket.toString();
-                                });
-                              } else {
-                                setState(() {
-                                  //ticketController.text = '20';
-                                });
-                              }
-                            }
-                          },
-                        ),
+                      DropdownMenuItem<int>(
+                        value: 50,
+                        child: Text('50'),
                       ),
-                      IconButton(
-                        onPressed: () {
-                          incrementTicket();
-                          // setState(() {
-                          //   ticketController.text = selectedTicket.toString();
-                          // });
-                        },
-                        icon: Icon(Icons.add),
+                      DropdownMenuItem<int>(
+                        value: 100,
+                        child: Text('100'),
+                      ),
+                      DropdownMenuItem<int>(
+                        value: 200,
+                        child: Text('200'),
+                      ),
+                      DropdownMenuItem<int>(
+                        value: 500,
+                        child: Text('500'),
                       ),
                     ],
                   ),
