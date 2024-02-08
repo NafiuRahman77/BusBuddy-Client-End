@@ -1198,10 +1198,6 @@ app.post('/api/broadcastNotification', (req,res) => {
                   } else {
                       console.log('response-----', response);
                   };
-            }).then((r) => {
-                res.send({
-                    success: true,
-                });
             });
         }).catch(e => {
             console.error(e.stack);
