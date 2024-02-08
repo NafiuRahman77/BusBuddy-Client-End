@@ -13,7 +13,7 @@ class Requisition extends StatefulWidget {
 }
 
 class _RequisitionState extends State<Requisition> {
-  String reasonForRequisition = "";
+  String reasonForRequisition = "official";
   DateTime? selectedDate;
 
   TimeOfDay _selectedTime = TimeOfDay(hour: 8, minute: 30);
@@ -27,7 +27,6 @@ class _RequisitionState extends State<Requisition> {
   String reportingLocation = "";
   String destination = '';
 
-  String choice = "0";
   String carSeatText = "";
   String miniBusCapacity = "";
   String busCapacity = "";
@@ -256,11 +255,11 @@ class _RequisitionState extends State<Requisition> {
                             child: Row(
                               children: [
                                 Radio(
-                                  value: "0",
-                                  groupValue: choice,
+                                  value: "official",
+                                  groupValue: reasonForRequisition,
                                   onChanged: (value) {
                                     setState(() {
-                                      choice = value as String;
+                                      reasonForRequisition = value as String;
                                     });
                                   },
                                 ),
@@ -278,11 +277,11 @@ class _RequisitionState extends State<Requisition> {
                             child: Row(
                               children: [
                                 Radio(
-                                  value: "1",
-                                  groupValue: choice,
+                                  value: "personal",
+                                  groupValue: reasonForRequisition,
                                   onChanged: (value) {
                                     setState(() {
-                                      choice = value as String;
+                                      reasonForRequisition = value as String;
                                     });
                                   },
                                 ),
@@ -305,11 +304,11 @@ class _RequisitionState extends State<Requisition> {
                             child: Row(
                               children: [
                                 Radio(
-                                  value: "2",
-                                  groupValue: choice,
+                                  value: "BRTC",
+                                  groupValue: reasonForRequisition,
                                   onChanged: (value) {
                                     setState(() {
-                                      choice = value as String;
+                                      reasonForRequisition = value as String;
                                     });
                                   },
                                 ),
@@ -327,11 +326,11 @@ class _RequisitionState extends State<Requisition> {
                             child: Row(
                               children: [
                                 Radio(
-                                  value: "3",
-                                  groupValue: choice,
+                                  value: "Others",
+                                  groupValue: reasonForRequisition,
                                   onChanged: (value) {
                                     setState(() {
-                                      choice = value as String;
+                                      reasonForRequisition = value as String;
                                     });
                                   },
                                 ),
