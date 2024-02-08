@@ -65,7 +65,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   print("bg message handler");
-
+  runApp(BusBuddyApp());
   // main();
 }
 

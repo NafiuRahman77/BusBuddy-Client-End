@@ -1236,7 +1236,7 @@ process.stdin.on('keypress', async (chunk, key) => {
         var message = {
             data: {    //This is only optional, you can send any data
                 score: 'nnnnnn',
-                time: (new Date()).toDateString(),
+                time: (new Date()).toLocaleTimeString(),
             },
             notification:{
                 title : 'Title of notification',
