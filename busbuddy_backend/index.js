@@ -22,7 +22,7 @@ const bcrypt = require('bcryptjs');
 const bcryptSaltRounds = 12;
 
 const admin = require("firebase-admin");
-const serviceAccount = require("busbuddy-user-end-firebase-adminsdk.json");
+const serviceAccount = require("./busbuddy-user-end-firebase-adminsdk.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
@@ -107,7 +107,7 @@ FCM.send(message, function(err, response) {
     }else {
         console.log('response here', response);
     }
-})
+});
 
 dbclient.query(
     `select *, array_to_json(time_list) as list_time from trip where is_live=true`
