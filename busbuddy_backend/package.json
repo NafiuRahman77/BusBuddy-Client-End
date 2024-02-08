@@ -9,6 +9,7 @@
   "author": "Wasif Jalal",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.0",
     "connect-pg-simple": "^9.0.1",
     "cookie-parser": "^1.4.6",
@@ -19,6 +20,8 @@
     "geolib": "^3.3.4",
     "http-terminator": "^3.2.0",
     "image-to-base64": "^2.2.0",
+    "log-to-file": "^3.0.3",
+    "log4js": "^6.9.1",
     "multer": "^1.4.5-lts.1",
     "node-fetch": "^2.6.7",
     "node-geo-distance": "^1.2.0",

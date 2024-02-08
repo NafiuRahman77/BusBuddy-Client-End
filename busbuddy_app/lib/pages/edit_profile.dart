@@ -417,7 +417,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     // Handle saving changes here
                     // You can access the entered values using the controller.text
                     // For example, nameController.text will give you the name entered by the user
-                    if (!(phoneNoController.text.length == 11)) {
+                    if (!(phoneNoController.text.length == 11 ||
+                        phoneNoController.text.length == 0)) {
                       // Show toast for invalid phone number
                       Fluttertoast.showToast(
                           msg: "Invalid phone number",
