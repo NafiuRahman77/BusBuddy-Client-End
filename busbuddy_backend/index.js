@@ -557,7 +557,7 @@ app.post('/api/purchaseTickets', (req,res) => {
         ).then(qres => {
             logger.debug(qres);
             dbclient.query(
-                `select count(*) from purchase where trxid=$1`, 
+                `select * from purchase where trxid=$1`, 
                 [req.body.trxid]
             ).then(qres => {
                 logger.debug(qres);
