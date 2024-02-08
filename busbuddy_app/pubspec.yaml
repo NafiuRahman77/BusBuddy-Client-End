@@ -51,6 +51,9 @@ dependencies:
   cookie_jar: ^4.0.8
   path_provider: ^2.1.2
   shared_preferences: ^2.2.2
+  firebase_messaging: ^14.7.15
+  firebase_core: ^2.25.4
+  firebase_crashlytics: ^3.4.14
 
 
 dev_dependencies:

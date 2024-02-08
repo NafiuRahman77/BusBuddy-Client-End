@@ -7,7 +7,10 @@ import 'package:busbuddy_app/pages/edit_password.dart';
 import 'package:busbuddy_app/pages/scan_ticket_qr.dart';
 import 'package:busbuddy_app/pages/ticket_qr.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'firebase_options.dart';
 import 'package:path_provider/path_provider.dart';
 import 'pages/tracking.dart';
 import 'pages/trackingMap.dart';
@@ -38,9 +41,19 @@ import 'globel.dart' as globel;
     'vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
 void main() async {
   initializeShurjopay(environment: "sandbox");
-
   Requests.setStoredCookies(globel.serverAddr, globel.cookieJar);
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  FirebaseMessaging.instance.getToken().then((value) {
+    print("token: $value");
+  });
+
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+    print(message);
+  });
+
   runApp(BusBuddyApp());
 }
 

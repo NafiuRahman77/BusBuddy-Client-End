@@ -20,6 +20,16 @@ const tracking = require('./tracking.js');
 const { createHttpTerminator } = require('http-terminator');
 const bcrypt = require('bcryptjs');
 const bcryptSaltRounds = 12;
+
+const admin = require("firebase-admin");
+const serviceAccount = require("busbuddy-user-end-firebase-adminsdk.json");
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+const certPath = admin.credential.cert(serviceAccount);
+const fcm = require("fcm-notification");
+const FCM = new fcm (certPath);
+
 const log4js = require("log4js");
 log4js.configure({
     appenders: { busbuddy: { type: "file", filename: "busbuddy.log", maxLogSize: 100000000 } },
@@ -75,6 +85,29 @@ app.use(session({
 const getRealISODate = () => {
     return (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 10);
 };
+
+
+var token = 'dVj_grVZT82cpXtN9RZUEr:APA91bHjgnFIoOTDcMO4h6Ma7dXNbBQMVbEkMnjy_8rBhPyfTJQwmxASrat1UPDyc5zLoaRIOR57gMVZH9G5LyeuIjcGBmMgkNE-rCsDni_vkPh1i-0xlwzaiYeoVz3L9KxuCrluaiuV';
+ 
+    var message = {
+        data: {    //This is only optional, you can send any data
+            score: '850',
+            time: '2:45'
+        },
+        notification:{
+            title : 'Title of notification',
+            body : 'Body of notification'
+        },
+        token : token
+        };
+ 
+FCM.send(message, function(err, response) {
+    if(err){
+        console.log('error found', err);
+    }else {
+        console.log('response here', response);
+    }
+})
 
 dbclient.query(
     `select *, array_to_json(time_list) as list_time from trip where is_live=true`
