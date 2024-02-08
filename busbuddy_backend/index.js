@@ -1188,8 +1188,8 @@ app.post('/api/broadcastNotification', (req,res) => {
                   time: '2:45'
                 },
                 notification:{
-                  title : 'Navish',
-                  body : 'Test message by navish'
+                  title : req.body.nTitle,
+                  body : req.body.nBody,
                 }
             };
             FCM.sendToMultipleToken(message, tokenList, function(err, response) {
