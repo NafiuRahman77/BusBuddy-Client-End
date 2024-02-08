@@ -1253,5 +1253,28 @@ process.stdin.on('keypress', async (chunk, key) => {
         }
         });
     };
+    if (key && key.name == 'n') {
+
+        var token = 'eAoUavqQRQe8MVs-vksVqk:APA91bG16LqILTP4T7eRI2ftN76iWYL1nXEOW_JTI96kv0dRSx3S3oxR-6s2FCzUzt4Tm3plNDzuDcU1m9AaYUde3xnE2SVNTYjjOmsPEQJcuGeGAkXoqzs4OS76ffAGKYkKtgIkPOzc';
+        var message = {
+            data: {    //This is only optional, you can send any data
+                score: '850',
+                time: '2:45'
+            },
+            notification:{
+                title : 'Title of notification',
+                body : 'Body of notification'
+            },
+            token : token
+            };
+
+        FCM.send(message, function(err, response) {
+        if(err){
+            console.log('error found', err);
+        }else {
+            console.log('response here', response);
+        }
+        });
+    };
     if (key && key.name == 'x') process.exit();
 });

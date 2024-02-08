@@ -60,8 +60,12 @@ void main() async {
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   print("bg message handler");
+
+  main();
 }
 
 class BusBuddyApp extends StatelessWidget {
