@@ -46,11 +46,8 @@ class _CollapsibleCardState extends State<CollapsibleCard> {
       concatenatedSubjects += send_modify(subject) + ' ';
     }
     return Card(
-      margin: EdgeInsets.fromLTRB(
-          20.0, 20.0, 20.0, 0.0), // Manually set margins as needed
-
-      color:
-          backgroundColor, // Set the card background color based on responseMessage
+      margin: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
+      color: backgroundColor,
       child: InkWell(
         onTap: () {
           setState(() {
@@ -62,12 +59,9 @@ class _CollapsibleCardState extends State<CollapsibleCard> {
           children: [
             ListTile(
               title: Padding(
-                padding: EdgeInsets.only(
-                    top: 8.0,
-                    bottom: 8.0), // Add space at the bottom of the title
+                padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
                 child: Padding(
-                  padding: EdgeInsets.only(
-                      left: 4.0), // Add left padding to the title
+                  padding: EdgeInsets.only(left: 4.0),
                   child: Text(
                     concatenatedSubjects,
                     style: TextStyle(
@@ -82,31 +76,48 @@ class _CollapsibleCardState extends State<CollapsibleCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(
-                        bottom: 4.0), // Add space at the bottom of the date
+                    padding: EdgeInsets.only(bottom: 4.0),
                     child: Padding(
-                      padding: EdgeInsets.only(
-                          left: 4.0), // Add left padding to the date
-                      child: Text(
-                        widget.date,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                          fontSize: 14,
-                        ),
+                      padding: EdgeInsets.only(left: 4.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.date_range,
+                            color: Colors.black,
+                            size: 16,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            widget.date,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(
-                        left: 4.0), // Add left padding to the route
-                    child: Text(
-                      widget.route,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                        fontSize: 14,
-                      ),
+                    padding: EdgeInsets.only(left: 4.0),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          color: Colors.black,
+                          size: 16,
+                        ),
+                        SizedBox(width: 5),
+                        Text(
+                          widget.route,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

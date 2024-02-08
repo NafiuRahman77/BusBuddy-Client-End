@@ -34,6 +34,16 @@ class _FeedbackFormState extends State<FeedbackForm> {
     onCalendarMount();
   }
 
+  void updateSelectedSubject(String subject) {
+    setState(() {
+      if (selectedSubject.contains(subject)) {
+        selectedSubject.remove(subject);
+      } else {
+        selectedSubject.add(subject);
+      }
+    });
+  }
+
   Future<void> onCalendarMount() async {
     context.loaderOverlay.show();
     var r = await Requests.post(globel.serverIp + 'getDefaultRoute');
@@ -183,14 +193,14 @@ class _FeedbackFormState extends State<FeedbackForm> {
     // then parse the JSON.
     //print('bb: ${jsonDecode(response.body)['email']}');
     if (json['success'] == true) {
-      // Fluttertoast.showToast(
-      //     msg: 'Feedback submitted.',
-      //     toastLength: Toast.LENGTH_SHORT,
-      //     gravity: ToastGravity.CENTER,
-      //     timeInSecForIosWeb: 1,
-      //     backgroundColor: Color.fromARGB(131, 71, 62, 62),
-      //     textColor: Colors.white,
-      //     fontSize: 16.0);
+      Fluttertoast.showToast(
+          msg: 'Feedback submitted.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(131, 71, 62, 62),
+          textColor: Colors.white,
+          fontSize: 16.0);
       setState(() {
         // email = json['email'];
         // phoneNo = json['phone'];
@@ -238,72 +248,78 @@ class _FeedbackFormState extends State<FeedbackForm> {
               SizedBox(height: 8.0),
               Row(
                 children: [
-                  Checkbox(
-                    value: isA,
-                    onChanged: (value) {
-                      setState(() {
-                        if (selectedSubject.contains("staff"))
-                          selectedSubject.remove("staff");
-                        else
-                          selectedSubject.add("staff");
-                        isA = !isA;
-                      });
-                    },
-                    activeColor: Color(0xFF781B1B), // Change to red
-                  ),
-                  Text('Bus Staff'),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Checkbox(
-                      value: isB,
-                      onChanged: (value) {
-                        setState(() {
-                          if (selectedSubject.contains("driver"))
-                            selectedSubject.remove("driver");
-                          else
-                            selectedSubject.add("driver");
-                          isB = !isB;
-                        });
-                      },
-                      activeColor: Color(0xFF781B1B), // Change to red
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: isA,
+                          onChanged: (value) {
+                            setState(() {
+                              isA = value!;
+                              updateSelectedSubject("staff");
+                            });
+                          },
+                          activeColor: Color(0xFF781B1B), // Change to red
+                        ),
+                        Text('Bus Staff'),
+                      ],
                     ),
                   ),
-                  Text('Bus Driver'),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: isB,
+                          onChanged: (value) {
+                            setState(() {
+                              isB = value!;
+                              updateSelectedSubject("driver");
+                            });
+                          },
+                          activeColor: Color(0xFF781B1B), // Change to red
+                        ),
+                        Text('Bus Driver'),
+                      ],
+                    ),
+                  ),
                 ],
               ),
               Row(
                 children: [
-                  Checkbox(
-                    value: isC,
-                    onChanged: (value) {
-                      setState(() {
-                        if (selectedSubject.contains("bus"))
-                          selectedSubject.remove("bus");
-                        else
-                          selectedSubject.add("bus");
-                        isC = !isC;
-                      });
-                    },
-                    activeColor: Color(0xFF781B1B), // Change to red
-                  ),
-                  Text('Bus Issue'),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Checkbox(
-                      value: isD,
-                      onChanged: (value) {
-                        setState(() {
-                          if (selectedSubject.contains("other"))
-                            selectedSubject.remove("other");
-                          else
-                            selectedSubject.add("other");
-                          isD = !isD;
-                        });
-                      },
-                      activeColor: Color(0xFF781B1B), // Change to red
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: isC,
+                          onChanged: (value) {
+                            setState(() {
+                              isC = value!;
+                              updateSelectedSubject("bus");
+                            });
+                          },
+                          activeColor: Color(0xFF781B1B), // Change to red
+                        ),
+                        Text('Bus Issue'),
+                      ],
                     ),
                   ),
-                  Text('Others'),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: isD,
+                          onChanged: (value) {
+                            setState(() {
+                              isD = value!;
+                              updateSelectedSubject("other");
+                            });
+                          },
+                          activeColor: Color(0xFF781B1B), // Change to red
+                        ),
+                        Text('Others'),
+                      ],
+                    ),
+                  ),
                 ],
               ),
               SizedBox(height: 16.0),

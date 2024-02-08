@@ -51,7 +51,7 @@ class _ReqCollapsibleCardState extends State<Req_CollapsibleCard> {
     List<String> stringList =
         widget.bus_type.replaceAll('{', '').replaceAll('}', '').split(',');
     for (String bus in stringList) {
-      conc_btype += send_modify(bus) + '--';
+      conc_btype += send_modify(bus) + ' ';
     }
 
     return Card(
