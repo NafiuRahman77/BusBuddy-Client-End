@@ -1,3 +1,4 @@
+const fs = require("fs");
 const fileExists = async (filename) => {
     try {
         await access(filename);
