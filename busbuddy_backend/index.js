@@ -48,8 +48,7 @@ const errLogger = log4js.getLogger("err");
 const readline = require('readline');
 
 const reqLogger = (req, res, next) => {
-    consoleLogger.info ("Request at " +  req.originalUrl + " from " + 
-                        req.session? (req.session.userid? req.session.userid : "") : "" + " (" + req.ip + ")");
+    
     next();
 };
 
@@ -247,6 +246,8 @@ app.post('/api/login', (req, res) => {
 });
 
 app.post('/api/sessionCheck', (req, res) => {
+    consoleLogger.info (`Request at ${req.originalUrl} from ` + 
+                        req.session? (req.session.userid? req.session.userid : "") : "" + ` (${req.ip})`);
     if (req.session.userid) {
         req.session.fcm_id = req.body.fcm_id;
         res.send({
