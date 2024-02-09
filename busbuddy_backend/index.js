@@ -364,8 +364,13 @@ app.post('/api/getProfileStatic', (req, res) => {
                         success: false,
                     });
                 } else {
-                    let response;
-                    response = await fs.readFile("../../busbuddy_storage/"+req.session.userid).toString('base64');
+                    let response = "";
+                    fs.readFile("../../busbuddy_storage/"+req.session.userid, (e, data) => {
+                        if (e) errLogger.error(e);
+                        else {
+                            response = data.toString('base64');
+                        };
+                    });
                     res.send({
                         ...qres.rows[0],
                         success: true,
