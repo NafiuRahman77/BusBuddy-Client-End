@@ -1032,6 +1032,7 @@ app.post('/api/startTrip', (req,res) => {
                         tracking.busStaffMap.set (newTrip.helper, newTrip.id);
                         let notif_list = await notifyRouteMembers(newTrip.route);  
                         if (notif_list) {
+                            console.log(notif_list);
                             let message = {
                                 // data: {
                                 //   score: '850',
