@@ -365,7 +365,7 @@ app.post('/api/getProfileStatic', (req, res) => {
                 else {
                     let response;
                     if (fs.existsSync("../../busbuddy_storage/"+req.session.userid))
-                        response = new Buffer(fs.readFileSync("../../busbuddy_storage/"+req.session.userid)).toString('base64');
+                        response = fs.readFileSync("../../busbuddy_storage/"+req.session.userid).toString('base64');
                     else response = "";
                     res.send({
                         ...qres.rows[0],
@@ -625,7 +625,6 @@ app.post('/api/getTicketCount', (req,res) => {
 });
 
 app.post('/api/getTicketQRData', (req,res) => {
-    consoleLogger.info(req.body);
     if (req.session.userid && req.session.user_type=="student") {
         dbclient.query(
             `select id from ticket where student_id=$1 and is_used=false limit 1`, 
