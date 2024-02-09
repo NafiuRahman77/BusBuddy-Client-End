@@ -1038,6 +1038,7 @@ app.post('/api/startTrip', (req,res) => {
                             where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_route=$1)`, [newTrip.route]
                         ).then(qres => {
                             console.log('why -_-   ' + qres);
+                            notif_list = [...qres.rows[0].array];
                             if (notif_list) {
                                 console.log(notif_list);
                                 let message = {
