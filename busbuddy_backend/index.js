@@ -48,8 +48,7 @@ const errLogger = log4js.getLogger("err");
 const readline = require('readline');
 
 const reqLogger = (req, res, next) => {
-    consoleLogger.info (`Req@ ${req.originalUrl} from 
-                         ${req.session? (req.session.userid? req.session.userid : "") : "" } (${req.ip})`);
+    consoleLogger.info (`Req@ ${req.originalUrl} from ${req.session? (req.session.userid? req.session.userid : "") : "" } (${req.ip})`);
     next();
 };
 
