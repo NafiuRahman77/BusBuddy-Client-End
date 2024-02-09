@@ -1233,16 +1233,16 @@ app.post('/api/broadcastNotification', (req,res) => {
         ).then(qres => {
             let tokenList = [...qres.rows[0].array];
             let message = {
-                data: {
-                  score: '850',
-                  time: '2:45'
+                notification: {
+                    title: req.body.nTitle,
+                    body: req.body.nBody,
                 },
-                notification:{
-                    title : req.body.nTitle,
-                    body : req.body.nBody,
-                    // android: {
-                    //     priority: 'high',
-                    // },
+                android: {
+                    ttl: 3600 * 1000,
+                    notification: {
+                        icon: 'stock_ticker_update',
+                        color: '#7b7b7b',
+                    },
                 },
             };
             FCM.sendToMultipleToken(message, tokenList, function(err, response) {
