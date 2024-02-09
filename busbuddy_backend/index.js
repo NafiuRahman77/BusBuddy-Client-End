@@ -368,11 +368,12 @@ app.post('/api/getProfileStatic', (req, res) => {
                     fs.readFile("../../busbuddy_storage/"+req.session.userid, (e, data) => {
                         if (e) errLogger.error(e);
                         response = data.toString('base64');
-                    });
-                    res.send({
-                        ...qres.rows[0],
-                        success: true,
-                        imageStr: response,
+                    }).then(() => {
+                        res.send({
+                            ...qres.rows[0],
+                            success: true,
+                            imageStr: response,
+                        });
                     });
                 };
             }).catch(e => errLogger.error(e.stack));
