@@ -1238,7 +1238,7 @@ app.post('/api/broadcastNotification', (req,res) => {
                     body: req.body.nBody,
                 },
                 android: {
-                    ttl: 3600 * 1000,
+                    priority: 'high',
                     notification: {
                         icon: 'stock_ticker_update',
                         color: '#7b7b7b',
