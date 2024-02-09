@@ -212,6 +212,7 @@ app.post('/api/login', (req, res) => {
                 req.session.userid = req.body.id;
                 req.session.user_type = "student";
                 req.session.fcm_id = req.body.fcm_id;
+                res.session.default_route = req.body.default_route,
                 res.send({
                     success: true,
                     name: qres.rows[0].name,
