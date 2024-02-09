@@ -1037,7 +1037,7 @@ app.post('/api/startTrip', (req,res) => {
                             `select array(select distinct s.sess->>'fcm_id' from session s, student st 
                             where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_route=$1)`, [newTrip.route]
                         ).then(qres => {
-                            console.log(qres);
+                            console.log('why -_-   ' + qres);
                             if (notif_list) {
                                 console.log(notif_list);
                                 let message = {
