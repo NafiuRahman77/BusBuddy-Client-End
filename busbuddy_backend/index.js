@@ -650,7 +650,7 @@ app.post('/api/getTicketQRData', (req,res) => {
 });
 
 app.post('/api/getTicketList', (req,res) => {
-    consoleLogger.info(req.body);
+    // consoleLogger.info(req.body);
     if (req.session.userid && req.session.user_type=="student") {
         dbclient.query(
             `select id from ticket where student_id=$1 and is_used=false order by student_id limit 5`, 
@@ -1253,11 +1253,8 @@ app.post('/api/broadcastNotification', (req,res) => {
             // },
         };
         FCM.sendToMultipleToken(message, tokenList, function(err, response) {
-                if (err) {
-                    historyLogger.debug ('err--', err);
-                } else {
-                    historyLogger.debug ('response-----', response);
-                };
+            if (err) errLogger.error ('err--', err);
+            else historyLogger.debug ('response-----', response);
         });
     }).then(r => {
         res.send({
@@ -1342,11 +1339,8 @@ process.stdin.on('keypress', async (chunk, key) => {
             };
 
         FCM.send(message, function(err, response) {
-            if(err){
-                consoleLogger.info('error found', err);
-            }else {
-                consoleLogger.info('response here', response);
-            }
+            if (err) errLogger.error ('err--', err);
+            else historyLogger.debug ('response-----', response);
         });
     };
     if (key && key.name == 'x') process.exit();
