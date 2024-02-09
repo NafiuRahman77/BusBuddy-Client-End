@@ -134,7 +134,7 @@ dbclient.query("SELECT id, coords FROM station").then(qres => {
 }).catch(e => console.error(e.stack));
 
 const notifyRouteMembers = async (route_id) => {
-    await dbclient.query(
+    dbclient.query(
         `select array(select distinct s.sess->>'fcm_id' from session s, student st 
          where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_route=$1)`, [route_id]
     ).then(qres => {
