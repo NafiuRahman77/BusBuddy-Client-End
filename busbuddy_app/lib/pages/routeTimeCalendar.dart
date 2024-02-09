@@ -22,7 +22,6 @@ class RouteTimeCalendar extends StatefulWidget {
 class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
   String selectedValue2 = 'DH-0974';
   DateTime? selectedDate = new DateTime.now(); // Store the selected date here
-  List<String> route_ids = [], route_names = [];
   List<String> station_ids = [], station_names = [];
   List<dynamic> station_coords = [];
   List<int> route_st_cnt = [];
@@ -70,26 +69,12 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
     }
     //print(r.content());
 
-    var r1 = await Requests.post(globel.serverIp + 'getRoutes');
-    r1.raiseForStatus();
-    List<dynamic> json1 = r1.json();
-    setState(() {
-      //clear the lists
-      route_ids.clear();
-      route_names.clear();
-
-      for (int i = 0; i < json1.length; i++) {
-        route_ids.add(json1[i]['id']);
-        route_names.add(json1[i]['terminal_point']);
-        if (json1[i]['id'] == defaultRoute) {
-          selectedRouteId = route_ids[i];
-          selectedRouteName = route_names[i];
-        }
+    for (int i = 0; i < globel.routeIDs.length; i++) {
+      if (globel.routeIDs[i] == globel.userDefaultRouteId) {
+        selectedRouteId = globel.routeIDs[i];
+        selectedRouteName = globel.routeNames[i];
       }
-    });
-    route_names.forEach((element) {
-      //print(element);
-    });
+    }
 
     var r2 = await Requests.post(globel.serverIp + 'getStations');
     r2.raiseForStatus();
@@ -189,7 +174,8 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       setState(() {
         selectedDate = pickedDate;
       });
-      onRouteSelect(route_ids[route_names.indexOf(selectedRouteName)]);
+      onRouteSelect(
+          globel.routeIDs[globel.routeNames.indexOf(selectedRouteName)]);
       setDateInit();
     }
   }
@@ -232,12 +218,12 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
                         // Handle dropdown selection
                         selectedRouteName = value!;
                         // print(selectedOption);
-                        int idx = route_names.indexOf(selectedRouteName);
-                        selectedRouteId = route_ids[idx];
+                        int idx = globel.routeNames.indexOf(selectedRouteName);
+                        selectedRouteId = globel.routeIDs[idx];
                       });
                       onRouteSelect(selectedRouteId);
                     },
-                    items: route_names
+                    items: globel.routeNames
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,

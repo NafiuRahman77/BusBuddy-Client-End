@@ -183,6 +183,15 @@ class _LoginPageState extends State<LoginPage> {
 
         await onProfileReady();
         await onProfileMount();
+        var r1 = await Requests.post(globel.serverIp + 'getRoutes');
+        r1.raiseForStatus();
+        List<dynamic> json1 = r1.json();
+        setState(() {
+          for (int i = 0; i < json1.length; i++) {
+            globel.routeIDs.add(json1[i]['id']);
+            globel.routeNames.add(json1[i]['terminal_point']);
+          }
+        });
         GoRouter.of(context).go("/show_profile");
       }
       context.loaderOverlay.hide();
@@ -203,12 +212,6 @@ class _LoginPageState extends State<LoginPage> {
     dynamic json = r.json();
 
     print(json['success']);
-
-    // var r2 = await Requests.post(globel.serverIp + 'getProfile');
-
-    // r2.raiseForStatus();
-    // dynamic json2 = r2.json();
-    // print(r2.content());
 
     if (json['success'] == true) {
       final SharedPreferences prefs = await SharedPreferences.getInstance();

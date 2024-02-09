@@ -210,11 +210,10 @@ class _TripCardState extends State<TripCard>
 
   @override
   Widget build(BuildContext context) {
-    // print(widget.SourceLocation);
-
-    // Map<String, String> Sdt = getDateAndTime(widget.StartTime);
-    // Map<String, String> Ddt = getDateAndTime(widget.EndTime!);
-
+    globel.printWarning("build");
+    for (int i = 0; i < globel.routeNames.length; i++) {
+      print(globel.routeNames[i]);
+    }
     Duration remaining =
         DateTime.now().difference(DateTime.parse(widget.StartTime));
     Duration remaining2 = Duration();
@@ -267,7 +266,8 @@ class _TripCardState extends State<TripCard>
               if (!widget.islive && widget.EndTime != "")
                 Center(
                   child: buildDataTable({
-                    'Route': widget.Route,
+                    'Route': globel
+                        .routeNames[globel.routeIDs.indexOf(widget.Route)],
                     'Trip #': widget.TripID,
                     'Start Date': DateTime.parse(widget.StartTime)
                         .toLocal()
@@ -295,7 +295,8 @@ class _TripCardState extends State<TripCard>
               if (widget.islive || widget.EndTime == "")
                 Center(
                   child: buildDataTable({
-                    'Route': widget.Route,
+                    'Route': globel
+                        .routeNames[globel.routeIDs.indexOf(widget.Route)],
                     'Trip #': widget.TripID,
                     'Start Date': DateTime.parse(widget.StartTime)
                         .toLocal()
