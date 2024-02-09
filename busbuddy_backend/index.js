@@ -246,8 +246,7 @@ app.post('/api/login', (req, res) => {
 });
 
 app.post('/api/sessionCheck', (req, res) => {
-    consoleLogger.info (`Request at ${req.originalUrl} from ` + 
-                        req.session? (req.session.userid? req.session.userid : "") : "" + ` (${req.ip})`);
+    consoleLogger.info (`Request at ${req.originalUrl} from ${req.session? (req.session.userid? req.session.userid : "") : "" } (${req.ip})`);
     if (req.session.userid) {
         req.session.fcm_id = req.body.fcm_id;
         res.send({
