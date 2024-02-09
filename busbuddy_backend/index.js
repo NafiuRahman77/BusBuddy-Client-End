@@ -1031,30 +1031,40 @@ app.post('/api/startTrip', (req,res) => {
                         tracking.runningTrips.set (newTrip.id, newTrip);
                         tracking.busStaffMap.set (newTrip.driver, newTrip.id);
                         tracking.busStaffMap.set (newTrip.helper, newTrip.id);
-                        let notif_list = await notifyRouteMembers(newTrip.route);  
-                        if (notif_list) {
-                            console.log(notif_list);
-                            let message = {
-                                // data: {
-                                //   score: '850',
-                                //   time: '2:45'
-                                // },
-                                notification:{
-                                  title : 'Your bus is arriving',
-                                  body : `Trip #${newTrip.id} has started on Route#${newTrip.route}`,
-                                }
+                        let notif_list;  
+                        console.log("trying to get list for notif");
+                        dbclient.query(
+                            `select array(select distinct s.sess->>'fcm_id' from session s, student st 
+                            where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_route=$1)`, [route_id]
+                        ).then(qres => {
+                            console.log(qres);
+                            if (notif_list) {
+                                console.log(notif_list);
+                                let message = {
+                                    // data: {
+                                    //   score: '850',
+                                    //   time: '2:45'
+                                    // },
+                                    notification:{
+                                      title : 'Your bus is arriving',
+                                      body : `Trip #${newTrip.id} has started on Route#${newTrip.route}`,
+                                    }
+                                };
+                                FCM.sendToMultipleToken(message, notif_list, function(err, response) {
+                                      if (err) {
+                                          console.log('err--', err);
+                                      } else {
+                                          console.log('response-----', response);
+                                      };
+                                });
                             };
-                            FCM.sendToMultipleToken(message, notif_list, function(err, response) {
-                                  if (err) {
-                                      console.log('err--', err);
-                                  } else {
-                                      console.log('response-----', response);
-                                  };
+                            res.send({ 
+                                success: true,
+                                ...tracking.runningTrips.get(newTrip.id),
                             });
-                        };
-                        res.send({ 
-                            success: true,
-                            ...tracking.runningTrips.get(newTrip.id),
+                        }).catch(e => {
+                            console.error(e.stack);
+                            return null;
                         });
                     } else {
                         res.send({
