@@ -37,12 +37,12 @@ log4js.configure({
         console: { type: "stdout" },
     },
     categories: { 
-        busbuddy: { appenders: ["busbuddy"], level: "debug" },
+        default: { appenders: ["busbuddy"], level: "debug" },
         all: { appenders: ["busbuddy", "console"], level: "info" },
         err: { appenders: ["busbuddy", "console"], level: "error" },
     },
 });
-const historyLogger = log4js.getLogger("busbuddy");
+const historyLogger = log4js.getLogger();
 const consoleLogger = log4js.getLogger("all");
 const errLogger = log4js.getLogger("err");
 const readline = require('readline');
