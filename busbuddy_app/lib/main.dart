@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:busbuddy_app/pages/edit_password.dart';
+import 'package:busbuddy_app/pages/offline_ticket.dart';
 import 'package:busbuddy_app/pages/scan_ticket_qr.dart';
 import 'package:busbuddy_app/pages/ticket_qr.dart';
 import 'package:cookie_jar/cookie_jar.dart';
@@ -157,6 +158,9 @@ class BusBuddyApp extends StatelessWidget {
     GoRoute(
         path: "/edit_password",
         builder: ((context, state) => const HomeView(page: "Edit Password"))),
+    GoRoute(
+        path: "/offline_ticket",
+        builder: ((context, state) => const HomeView(page: "Offline QR")))
   ]);
   // This widget is the root of your application.
   @override
@@ -220,6 +224,8 @@ class PageBody extends StatelessWidget {
       );
     else if (this.page == "Edit Password") {
       return EditPasswordPage();
+    } else if (this.page == "Offline QR") {
+      return OfflineTicketQR();
     } else
       return (Container());
   }
@@ -308,6 +314,8 @@ class HomeViewState extends State<HomeView> {
       _selectedIndex = 3;
     } else if (currentRouteName == '/edit_password') {
       _selectedIndex = 16;
+    } else if (currentRouteName == '/offline_ticket') {
+      _selectedIndex = 17;
     } else {
       _selectedIndex = 1000;
     }
@@ -639,6 +647,25 @@ class HomeViewState extends State<HomeView> {
 
                               setState(() {
                                 _selectedIndex = 10;
+                              });
+                            },
+                          ),
+                        if (globel.userType == "student")
+                          ListTile(
+                            leading: const Icon(Icons.qr_code),
+                            title: const Text('Offline Ticket'),
+                            selected: _selectedIndex == 17,
+                            onTap: () {
+                              if (_selectedIndex == 17) return;
+                              // Update the state of the app
+                              // _onItemTapped(2);
+                              // Then close the drawer
+
+                              GoRouter.of(context).pop();
+                              GoRouter.of(context).push("/offline_ticket");
+
+                              setState(() {
+                                _selectedIndex = 17;
                               });
                             },
                           ),

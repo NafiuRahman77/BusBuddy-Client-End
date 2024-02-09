@@ -159,7 +159,8 @@ class _CustomCardState extends State<CustomCard> {
                               child: ElevatedButton.icon(
                                 onPressed: () {
                                   Set<Marker> jMarkerSet = Set<Marker>();
-                                  widget.extendedInfo.forEach((stop) {
+
+                                  for (dynamic stop in widget.extendedInfo) {
                                     if (stop['coord'] != null)
                                       jMarkerSet.add(Marker(
                                         markerId: MarkerId("value"),
@@ -176,7 +177,7 @@ class _CustomCardState extends State<CustomCard> {
                                               : "--",
                                         ),
                                       ));
-                                  });
+                                  }
                                   GoRouter.of(context)
                                       .push("/routetimemap", extra: jMarkerSet);
                                 },

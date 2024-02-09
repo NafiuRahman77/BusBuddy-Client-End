@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import '../../globel.dart' as globel;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -36,18 +37,8 @@ class _RouteTimeMap extends State<RouteTimeMap> {
   BitmapDescriptor? endIcon;
   BitmapDescriptor? startIcon;
 
-  Future<Uint8List> _getBytesFromAsset(
-      String path, int width, int height) async {
-    ByteData data = await rootBundle.load(path);
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetWidth: width, targetHeight: height);
-    ui.FrameInfo fi = await codec.getNextFrame();
-    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
-        .buffer
-        .asUint8List();
-  }
-
   Future<void> addCustomIcon() async {
+    context.loaderOverlay.show();
     await BitmapDescriptor.fromAssetImage(
             const ImageConfiguration(size: Size(200, 200)),
             "lib/images/bus.png")
@@ -59,12 +50,17 @@ class _RouteTimeMap extends State<RouteTimeMap> {
       },
     );
 
-    Uint8List markerIcon =
-        await _getBytesFromAsset("lib/images/Start.png", 100, 100);
-
-    setState(() {
-      startIcon = BitmapDescriptor.fromBytes(markerIcon);
-    });
+    await BitmapDescriptor.fromAssetImage(
+            const ImageConfiguration(size: Size(200, 200)),
+            "lib/images/Start.png")
+        .then(
+      (icon) {
+        setState(() {
+          startIcon = icon;
+        });
+      },
+    );
+    context.loaderOverlay.hide();
   }
 
   List<Marker> createMarkers() {
@@ -135,34 +131,36 @@ class _RouteTimeMap extends State<RouteTimeMap> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.all(15),
-        child: GoogleMap(
-          mapType: MapType.terrain,
-          initialCameraPosition: CameraPosition(
-            target: LatLng(
-              (stationLatLngPoints.first.latitude +
-                      stationLatLngPoints.last.latitude) /
-                  2,
-              (stationLatLngPoints.first.longitude +
-                      stationLatLngPoints.last.longitude) /
-                  2,
+    return LoaderOverlay(
+      child: Scaffold(
+        body: Padding(
+          padding: EdgeInsets.all(15),
+          child: GoogleMap(
+            mapType: MapType.terrain,
+            initialCameraPosition: CameraPosition(
+              target: LatLng(
+                (stationLatLngPoints.first.latitude +
+                        stationLatLngPoints.last.latitude) /
+                    2,
+                (stationLatLngPoints.first.longitude +
+                        stationLatLngPoints.last.longitude) /
+                    2,
+              ),
+              zoom: 14,
             ),
-            zoom: 14,
+            onMapCreated: (GoogleMapController controller) {
+              mapController = controller;
+            },
+            markers: Set<Marker>.of(createMarkers()),
+            polylines: Set<Polyline>.of([
+              Polyline(
+                polylineId: PolylineId('fsef'),
+                color: Colors.red,
+                width: 2,
+                points: stationLatLngPoints,
+              ),
+            ]),
           ),
-          onMapCreated: (GoogleMapController controller) {
-            mapController = controller;
-          },
-          markers: Set<Marker>.of(createMarkers()),
-          polylines: Set<Polyline>.of([
-            Polyline(
-              polylineId: PolylineId('fsef'),
-              color: Colors.red,
-              width: 2,
-              points: stationLatLngPoints,
-            ),
-          ]),
         ),
       ),
     );

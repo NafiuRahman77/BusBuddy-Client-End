@@ -14,6 +14,7 @@ import 'package:requests/requests.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import '../../globel.dart' as globel;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -66,6 +67,9 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  bool isConnected = true;
+  bool flagforofflinebutton = false;
+
   @override
   void initState() {
     super.initState();
@@ -73,6 +77,33 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> onLoginMount() async {
+    print('Checking internet connection... 1');
+    bool result = await InternetConnectionChecker().hasConnection;
+
+    final SharedPreferences prefs1 = await SharedPreferences.getInstance();
+    List<String> ticketIds = prefs1.getStringList('ticketIds') ?? [];
+    print(result);
+    setState(() {
+      if (result == true) {
+        isConnected = true;
+      } else {
+        print('No internet :( Reason:');
+        Fluttertoast.showToast(
+            msg:
+                'No internet connection. Please connect to the internet and try again.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(131, 244, 67, 54),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        isConnected = false;
+      }
+      flagforofflinebutton = ticketIds.isNotEmpty;
+    });
+    if (!isConnected) {
+      return;
+    }
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? c = await prefs.getString('connect.sid');
     if (c != null) {
@@ -159,6 +190,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<bool> onLogin(String id, String password) async {
+    print('Checking internet connection... 2');
     var r = await Requests.post(globel.serverIp + 'login',
         body: {
           'id': id,
@@ -251,6 +283,36 @@ class _LoginPageState extends State<LoginPage> {
           }
         }
       }
+      if (globel.userType == 'student') {
+        context.loaderOverlay.show();
+        var r = await Requests.post(globel.serverIp + 'getTicketList');
+
+        r.raiseForStatus();
+        dynamic json = r.json();
+        print(json);
+
+        if (json['success'] == true) {
+          List<String> ticketIds = List<String>.from(json['ticket_list']);
+
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setStringList('ticketIds', ticketIds);
+          // setState(() {
+          //   flagforofflinebutton = ticketIds.isNotEmpty;
+          // });
+          print(ticketIds.isNotEmpty.toString() + "..........");
+        } else {
+          Fluttertoast.showToast(
+            msg: 'Failed to load data.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(118, 244, 67, 54),
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
+        context.loaderOverlay.hide();
+      }
       // print(globel.userType);
       Fluttertoast.showToast(
           msg: 'Welcome, ${json['name']}',
@@ -278,6 +340,7 @@ class _LoginPageState extends State<LoginPage> {
   // sign user in method
 
   Future<void> onProfileReady() async {
+    print('Checking internet connection... 3');
     var r = await Requests.post(globel.serverIp + 'getProfileStatic');
 
     r.raiseForStatus();
@@ -364,8 +427,6 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const SizedBox(height: 50),
-
-                    // welcome back, you've been missed!
                     Image(
                       width: 300,
                       image: AssetImage('lib/images/logobusbuddy-1.png'),
@@ -380,7 +441,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 25),
                     const SizedBox(height: 50),
-
                     Text(
                       'Login',
                       style: TextStyle(
@@ -390,53 +450,82 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       textAlign: TextAlign.left,
                     ),
-
-                    // username textfield
-                    MyTextField(
-                      controller: usernameController,
-                      hintText: 'Username',
-                      obscureText: false,
-                      ispass: false,
+                    Visibility(
+                      visible: isConnected,
+                      child: Column(
+                        children: [
+                          // username textfield
+                          MyTextField(
+                            controller: usernameController,
+                            hintText: 'Username',
+                            obscureText: false,
+                            ispass: false,
+                          ),
+                          const SizedBox(height: 50),
+                          // password textfield
+                          MyTextField(
+                            controller: passwordController,
+                            hintText: 'Password',
+                            obscureText: hidepass,
+                            ispass: true,
+                          ),
+                          const SizedBox(height: 50),
+                          // sign in button
+                          MyButton(
+                            onTap: () async {
+                              context.loaderOverlay.show();
+                              bool lgin = await onLogin(usernameController.text,
+                                  passwordController.text);
+                              if (lgin == true) {
+                                await onProfileReady();
+                                await onProfileMount();
+                                GoRouter.of(context).go("/show_profile");
+                              }
+                              context.loaderOverlay.hide();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Visibility(
+                      visible: !isConnected,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 70),
+                          ColorFiltered(
+                            colorFilter: ColorFilter.mode(
+                              Colors.white.withOpacity(0.6),
+                              BlendMode.srcIn,
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                print("retry");
+                                onLoginMount();
+                              },
+                              icon: Icon(Icons.refresh, size: 50),
+                              tooltip: 'Retry',
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Visibility(
+                            visible: flagforofflinebutton,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                GoRouter.of(context).push("/offline_ticket");
+                              },
+                              child: Text("Offline Ticket"),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
 
-                    const SizedBox(height: 50),
-
-                    // password textfield
-                    MyTextField(
-                      controller: passwordController,
-                      hintText: 'Password',
-                      obscureText: hidepass,
-                      ispass: true,
-                    ),
-
-                    const SizedBox(width: 20),
-
-                    const SizedBox(height: 25),
-
-                    // sign in button
-                    MyButton(onTap: () async {
-                      context.loaderOverlay.show();
-                      bool lgin = await onLogin(
-                          usernameController.text, passwordController.text);
-                      if (lgin == true) {
-                        await onProfileReady();
-                        await onProfileMount();
-                        GoRouter.of(context).go("/show_profile");
-                      }
-
-                      context.loaderOverlay.hide();
-                    }),
-
-                    const SizedBox(height: 50),
-
-                    const SizedBox(height: 10),
-
+                    const SizedBox(height: 70),
                     // forgot password?
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 25.0),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment
-                            .center, // Center the text horizontally
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             'Forgot Password?',
@@ -445,9 +534,7 @@ class _LoginPageState extends State<LoginPage> {
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 50),
-
                     const SizedBox(height: 50),
                   ],
                 ),
