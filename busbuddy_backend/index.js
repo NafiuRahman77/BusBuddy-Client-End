@@ -1238,8 +1238,11 @@ app.post('/api/broadcastNotification', (req,res) => {
                   time: '2:45'
                 },
                 notification:{
-                  title : req.body.nTitle,
-                  body : req.body.nBody,
+                    title : req.body.nTitle,
+                    body : req.body.nBody,
+                    android: {
+                        priority: 'high',
+                    },
                 },
             };
             FCM.sendToMultipleToken(message, tokenList, function(err, response) {
