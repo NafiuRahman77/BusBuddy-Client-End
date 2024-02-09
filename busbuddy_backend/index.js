@@ -68,7 +68,6 @@ dbclient.connect();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(reqLogger);
 app.enable('trust proxy');
 
 // app.use(cors());
@@ -95,6 +94,8 @@ app.use(session({
         httpOnly: false
     }
 }));
+
+app.use(reqLogger);
 
 
 const getRealISODate = () => {
