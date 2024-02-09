@@ -239,7 +239,11 @@ app.post('/api/login', (req, res) => {
 });
 
 app.post('/api/sessionCheck', (req, res) => {
-    consoleLogger.info(req.ip + "\n" + req.path + "\n" + req.originalUrl + "\n" + req.secure + "\n" + req.signedCookies + "\n");
+    consoleLogger.info(req.ip);
+    consoleLogger.info(req.path);
+    consoleLogger.info(req.originalUrl);
+    consoleLogger.info(req.secure);
+    consoleLogger.info(req.signedCookies);
     if (req.session.userid) {
         req.session.fcm_id = req.body.fcm_id;
         res.send({
@@ -1266,7 +1270,7 @@ app.post('/api/broadcastNotification', (req,res) => {
 });
 
 const server = app.listen(port, () => {
-    consoleLogger.info(`BudBuddy backend listening on port ${port}`);
+    consoleLogger.info(`\n\nBudBuddy backend listening on port ${port}\n\n`);
 });
 
 const httpTerminator = createHttpTerminator({ server });
