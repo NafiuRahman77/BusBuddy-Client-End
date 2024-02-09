@@ -1253,8 +1253,8 @@ app.post('/api/broadcastNotification', (req,res) => {
             // },
         };
         FCM.sendToMultipleToken(message, tokenList, function(err, response) {
-            if (err) errLogger.error ('err--', err);
-            else historyLogger.debug ('response-----', response);
+            if (err) errLogger.error(err);
+            else historyLogger.debug(response);
         });
     }).then(r => {
         res.send({
@@ -1339,8 +1339,8 @@ process.stdin.on('keypress', async (chunk, key) => {
             };
 
         FCM.send(message, function(err, response) {
-            if (err) errLogger.error ('err--', err);
-            else historyLogger.debug ('response-----', response);
+            if (err) errLogger.error (err);
+            else historyLogger.debug (response);
         });
     };
     if (key && key.name == 'x') process.exit();
