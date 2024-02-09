@@ -20,7 +20,7 @@ const tracking = require('./tracking.js');
 const { createHttpTerminator } = require('http-terminator');
 const bcrypt = require('bcryptjs');
 const bcryptSaltRounds = 12;
-
+const util = require('./util.js');
 const admin = require("firebase-admin");
 const serviceAccount = require("./busbuddy-user-end-firebase-adminsdk.json");
 admin.initializeApp({
@@ -357,16 +357,16 @@ app.post('/api/getProfileStatic', (req, res) => {
             dbclient.query(
                 `select id, name from ${dbclient.escapeIdentifier(req.session.user_type)} where id=$1`, 
                 [req.session.userid]
-            ).then(qres => {
+            ).then (async qres => {
                 historyLogger.debug(qres);
-                if (qres.rows.length === 0) res.send({ 
-                    success: false,
-                });
-                else {
-                    let response;
-                    if (fs.existsSync("../../busbuddy_storage/"+req.session.userid))
-                        response = fs.readFileSync("../../busbuddy_storage/"+req.session.userid).toString('base64');
-                    else response = "";
+                if (qres.rows.length === 0) {
+                    res.send({ 
+                        success: false,
+                    });
+                } else {
+                    let response = "", ex = await util.fileExists ("../../busbuddy_storage/"+req.session.userid);
+                    if (ex)
+                        response = await fs.readFile("../../busbuddy_storage/"+req.session.userid).toString('base64');
                     res.send({
                         ...qres.rows[0],
                         success: true,
