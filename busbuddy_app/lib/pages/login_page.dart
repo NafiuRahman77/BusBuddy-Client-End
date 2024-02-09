@@ -111,7 +111,11 @@ class _LoginPageState extends State<LoginPage> {
           Requests.getHostname(globel.serverIp), 'connect.sid', c);
 
       context.loaderOverlay.show();
-      var r = await Requests.post(globel.serverIp + 'sessionCheck');
+      var r = await Requests.post(globel.serverIp + 'sessionCheck',
+          body: {
+            'fcm_id': globel.fcmId,
+          },
+          bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
       r.raiseForStatus();
       dynamic json = r.json();

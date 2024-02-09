@@ -91,8 +91,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  if (message.notification.android != null)
-    message.notification.android.priority = print("bg message handler");
+  print("bg message handler");
   // runApp(BusBuddyApp());
   // main();
 }

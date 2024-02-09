@@ -245,6 +245,7 @@ app.post('/api/login', (req, res) => {
 
 app.post('/api/sessionCheck', (req, res) => {
     if (req.session.userid) {
+        req.session.fcm_id = req.body.fcm_id;
         res.send({
             recognized: true,
             relogin: false,
