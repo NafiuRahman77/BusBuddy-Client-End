@@ -20,6 +20,16 @@ const tracking = require('./tracking.js');
 const { createHttpTerminator } = require('http-terminator');
 const bcrypt = require('bcryptjs');
 const bcryptSaltRounds = 12;
+
+const admin = require("firebase-admin");
+const serviceAccount = require("./busbuddy-user-end-firebase-adminsdk.json");
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+const certPath = admin.credential.cert(serviceAccount);
+const fcm = require("fcm-notification");
+const FCM = new fcm (certPath);
+
 const log4js = require("log4js");
 log4js.configure({
     appenders: { busbuddy: { type: "file", filename: "busbuddy.log", maxLogSize: 100000000 } },
@@ -76,6 +86,7 @@ const getRealISODate = () => {
     return (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 10);
 };
 
+
 dbclient.query(
     `select *, array_to_json(time_list) as list_time from trip where is_live=true`
 ).then(qres2 => {
@@ -121,6 +132,20 @@ dbclient.query("SELECT id, coords FROM station").then(qres => {
     });
     // console.log(tracking.stationCoords);
 }).catch(e => console.error(e.stack));
+
+const notifyRouteMembers = async (route_id) => {
+    console.log("trying to get list for notif");
+    dbclient.query(
+        `select array(select distinct s.sess->>'fcm_id' from session s, student st 
+         where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_route=$1)`, [route_id]
+    ).then(qres => {
+        console.log(qres);
+        return [...qres.rows[0].array];
+    }).catch(e => {
+        console.error(e.stack);
+        return null;
+    });
+};
 
 app.post('/api/login', (req, res) => {
     // console.log(req.body);
@@ -200,6 +225,7 @@ app.post('/api/login', (req, res) => {
             if (verif === true) {
                 req.session.userid = req.body.id;
                 req.session.user_type = "student";
+                req.session.fcm_id = req.body.fcm_id;
                 res.send({
                     success: true,
                     name: qres.rows[0].name,
@@ -532,9 +558,9 @@ app.post('/api/addRequisition', (req,res) => {
     console.log(req.body);
     if (req.session.userid) {
         dbclient.query(
-            `INSERT INTO requisition (requestor_id, destination, bus_type, subject, text, timestamp) 
-            values ($1, $2, $3, $4, $5, $6)`, 
-            [req.session.userid, req.body.destination, JSON.parse(req.body.bus_type), req.body.subject, req.body.text, req.body.timestamp]
+            `INSERT INTO requisition (requestor_id, destination, bus_type, subject, text, timestamp, source) 
+            values ($1, $2, $3, $4, $5, $6, $7)`, 
+            [req.session.userid, req.body.destination, JSON.parse(req.body.bus_type), req.body.subject, req.body.text, req.body.timestamp, req.body.source]
         ).then(qres => {
             logger.debug(qres);
             if (qres.rowCount === 1) res.send({ 
@@ -557,7 +583,7 @@ app.post('/api/purchaseTickets', (req,res) => {
         ).then(qres => {
             logger.debug(qres);
             dbclient.query(
-                `select count(*) from purchase where trxid=$1`, 
+                `select * from purchase where trxid=$1`, 
                 [req.body.trxid]
             ).then(qres => {
                 logger.debug(qres);
@@ -609,6 +635,32 @@ app.post('/api/getTicketQRData', (req,res) => {
                 ticket_id: qres.rows[0].id,
             });
             else if (qres.rowCount === 0) {
+                res.send({
+                    success: false,
+                });
+            };
+        }).catch(e => console.error(e.stack));
+    };
+});
+
+app.post('/api/getTicketList', (req,res) => {
+    console.log(req.body);
+    if (req.session.userid && req.session.user_type=="student") {
+        dbclient.query(
+            `select id from ticket where student_id=$1 and is_used=false order by student_id limit 5`, 
+            [req.session.userid]
+        ).then(qres => {
+            logger.debug(qres);
+            if (qres.rows.length > 0) {
+                let list = [];
+                for (let i=0 ; i< qres.rows.length; i++) {
+                    list.push (qres.rows[i].id);
+                };
+                res.send({ 
+                    success: true,
+                    ticket_list: [...list],
+                });
+            } else {
                 res.send({
                     success: false,
                 });
@@ -955,7 +1007,7 @@ app.post('/api/startTrip', (req,res) => {
                 dbclient.query(
                     `select *, array_to_json(time_list) as list_time from trip where id=$1`, 
                     [req.body.trip_id]
-                ).then(qres2 => {
+                ).then (async qres2 => {
                     // logger.debug(qres2);
                     if (qres2.rows.length == 1) {
                         let td = {...qres2.rows[0]};
@@ -979,9 +1031,41 @@ app.post('/api/startTrip', (req,res) => {
                         tracking.runningTrips.set (newTrip.id, newTrip);
                         tracking.busStaffMap.set (newTrip.driver, newTrip.id);
                         tracking.busStaffMap.set (newTrip.helper, newTrip.id);
-                        res.send({ 
-                            success: true,
-                            ...tracking.runningTrips.get(newTrip.id),
+                        let notif_list;  
+                        console.log("trying to get list for notif");
+                        dbclient.query(
+                            `select array(select distinct s.sess->>'fcm_id' from session s, student st 
+                            where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_route=$1)`, [newTrip.route]
+                        ).then(qres => {
+                            console.log('why -_-   ' + qres);
+                            notif_list = [...qres.rows[0].array];
+                            if (notif_list) {
+                                console.log(notif_list);
+                                let message = {
+                                    // data: {
+                                    //   score: '850',
+                                    //   time: '2:45'
+                                    // },
+                                    notification:{
+                                      title : 'Your bus is arriving',
+                                      body : `Trip #${newTrip.id} has started on Route#${newTrip.route}`,
+                                    }
+                                };
+                                FCM.sendToMultipleToken(message, notif_list, function(err, response) {
+                                      if (err) {
+                                          console.log('err--', err);
+                                      } else {
+                                          console.log('response-----', response);
+                                      };
+                                });
+                            };
+                            res.send({ 
+                                success: true,
+                                ...tracking.runningTrips.get(newTrip.id),
+                            });
+                        }).catch(e => {
+                            console.error(e.stack);
+                            return null;
                         });
                     } else {
                         res.send({
@@ -1138,6 +1222,42 @@ app.post('/api/staffScanTicket', (req,res) => {
     };
 });
 
+app.post('/api/broadcastNotification', (req,res) => {
+    //send a dummy response
+        console.log(req.body);
+        dbclient.query(
+            `select array(select distinct sess->>'fcm_id' from session where sess->>'fcm_id' is not null)`, 
+        ).then(qres => {
+            let tokenList = [...qres.rows[0].array];
+            let message = {
+                data: {
+                  score: '850',
+                  time: '2:45'
+                },
+                notification:{
+                  title : req.body.nTitle,
+                  body : req.body.nBody,
+                }
+            };
+            FCM.sendToMultipleToken(message, tokenList, function(err, response) {
+                  if (err) {
+                      console.log('err--', err);
+                  } else {
+                      console.log('response-----', response);
+                  };
+            });
+        }).then(r => {
+            res.send({
+                success: true,
+            });
+        }).catch(e => {
+            console.error(e.stack);
+            res.send({
+                success: false,
+            });
+        });
+});
+
 const server = app.listen(port, () => {
     console.log(`BudBuddy backend listening on port ${port}`);
 });
@@ -1192,6 +1312,52 @@ process.stdin.on('keypress', async (chunk, key) => {
         });
 
         // while (backupDone < backupCount);
+    };
+    if (key && key.name == 'n') {
+
+        var token = 'dVj_grVZT82cpXtN9RZUEr:APA91bHjgnFIoOTDcMO4h6Ma7dXNbBQMVbEkMnjy_8rBhPyfTJQwmxASrat1UPDyc5zLoaRIOR57gMVZH9G5LyeuIjcGBmMgkNE-rCsDni_vkPh1i-0xlwzaiYeoVz3L9KxuCrluaiuV';
+        var message = {
+            data: {    //This is only optional, you can send any data
+                score: 'nnnnnn',
+                time: (new Date()).toLocaleTimeString(),
+            },
+            notification:{
+                title : 'Title of notification',
+                body : 'Body of notification'
+            },
+            token : token
+            };
+
+        FCM.send(message, function(err, response) {
+            if(err){
+                console.log('error found', err);
+            }else {
+                console.log('response here', response);
+            }
+        });
+    };
+    if (key && key.name == 'm') {
+
+        var token = 'eAoUavqQRQe8MVs-vksVqk:APA91bG16LqILTP4T7eRI2ftN76iWYL1nXEOW_JTI96kv0dRSx3S3oxR-6s2FCzUzt4Tm3plNDzuDcU1m9AaYUde3xnE2SVNTYjjOmsPEQJcuGeGAkXoqzs4OS76ffAGKYkKtgIkPOzc';
+        var message = {
+            data: {    //This is only optional, you can send any data
+                score: 'mmmm',
+                time: '2:45'
+            },
+            notification:{
+                title : 'Title of notification',
+                body : 'Body of notification'
+            },
+            token : token
+            };
+
+        FCM.send(message, function(err, response) {
+        if(err){
+            console.log('error found', err);
+        }else {
+            console.log('response here', response);
+        }
+        });
     };
     if (key && key.name == 'x') process.exit();
 });
