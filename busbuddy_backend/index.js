@@ -47,6 +47,11 @@ const consoleLogger = log4js.getLogger("all");
 const errLogger = log4js.getLogger("err");
 const readline = require('readline');
 
+const reqLogger = (req, res, next) => {
+    consoleLogger.info (`Request at ${req.originalUrl} from ` + 
+                        req.session.userid? req.session.userid : "" + ` (${req.ip})`);
+};
+
 dotenv.config();
 
 const { Pool, Client } = require('pg');
@@ -63,6 +68,7 @@ dbclient.connect();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(reqLogger);
 app.enable('trust proxy');
 
 // app.use(cors());
@@ -239,11 +245,6 @@ app.post('/api/login', (req, res) => {
 });
 
 app.post('/api/sessionCheck', (req, res) => {
-    consoleLogger.info(req.ip);
-    consoleLogger.info(req.path);
-    consoleLogger.info(req.originalUrl);
-    consoleLogger.info(req.secure);
-    consoleLogger.info(req.signedCookies);
     if (req.session.userid) {
         req.session.fcm_id = req.body.fcm_id;
         res.send({
