@@ -239,6 +239,7 @@ app.post('/api/login', (req, res) => {
 });
 
 app.post('/api/sessionCheck', (req, res) => {
+    consoleLogger.info(req.ip + "\n" + req.path + "\n" + req.originalUrl + "\n" + req.secure + "\n" + req.signedCookies + "\n");
     if (req.session.userid) {
         req.session.fcm_id = req.body.fcm_id;
         res.send({
