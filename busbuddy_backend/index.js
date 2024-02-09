@@ -10,7 +10,7 @@ const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const url = require('url')
 // const pdf = require("pdf-creator-node");
-const fs = require("fs");
+const fs = require("fs").promises;
 const multer = require('multer');
 // const html = fs.readFileSync("src/ticket.html", "utf8");
 const { Readable } = require('stream');
@@ -365,15 +365,16 @@ app.post('/api/getProfileStatic', (req, res) => {
                     });
                 } else {
                     let response = "";
-                    fs.readFile("../../busbuddy_storage/"+req.session.userid, (e, data) => {
-                        if (e) errLogger.error(e);
+                    try {
+                        let data = await fs.readFile("../../busbuddy_storage/" + req.session.userid);
                         response = data.toString('base64');
-                    }).then(() => {
-                        res.send({
-                            ...qres.rows[0],
-                            success: true,
-                            imageStr: response,
-                        });
+                    } catch (e) {
+                        errLogger.error(e);
+                    };
+                    res.send({
+                        ...qres.rows[0],
+                        success: true,
+                        imageStr: response,
                     });
                 };
             }).catch(e => errLogger.error(e.stack));
