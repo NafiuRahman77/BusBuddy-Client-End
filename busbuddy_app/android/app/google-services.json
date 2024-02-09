@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "567556902142",
+    "project_id": "busbuddy-user-end",
+    "storage_bucket": "busbuddy-user-end.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567556902142:android:5452623e8ac399e32369af",
+        "android_client_info": {
+          "package_name": "edu.buet.busbuddy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCC_6xihngZ8_-VqnxYRcV4dFBK3Ov8sCU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
