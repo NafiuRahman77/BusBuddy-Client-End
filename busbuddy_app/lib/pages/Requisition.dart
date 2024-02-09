@@ -13,26 +13,32 @@ class Requisition extends StatefulWidget {
 }
 
 class _RequisitionState extends State<Requisition> {
+  String reasonForRequisition = "official";
   DateTime? selectedDate;
 
   TimeOfDay _selectedTime = TimeOfDay(hour: 8, minute: 30);
   TimeOfDay _finishedTime = TimeOfDay(hour: 10, minute: 30);
+  bool isCar = false;
+  bool isMicroBus = false;
+  String microSeatCapacity = "";
+  bool isMiniBus = false;
+  bool isBus = false;
+  List<String> BusTypeSelected = [];
+  String reportingLocation = "";
+  String destination = '';
 
+  String carSeatText = "";
+  String miniBusCapacity = "";
+  String busCapacity = "";
+  String microBusCapacity = "";
+  bool showMicroBusCapacity = false;
   @override
   void initState() {
     super.initState();
   }
 
-  List<String> BusTypeSelected = [];
-  String location = '';
-
-  bool isA = false;
-  bool isB = false;
-  bool isC = false;
-  bool isD = false;
-
-  TextEditingController RequestController = TextEditingController();
-  TextEditingController LocationController = TextEditingController();
+  TextEditingController DestinationController = TextEditingController();
+  TextEditingController ReportingController = TextEditingController();
   TextEditingController DescribeController = TextEditingController();
 
   void _showDatePicker() async {
@@ -130,7 +136,7 @@ class _RequisitionState extends State<Requisition> {
     else
       timestampStr = combinedStr;
 
-    if (!isA && !isB && !isC && !isD) {
+    if (!isCar && !isMicroBus && !isMiniBus && !isBus) {
       Fluttertoast.showToast(
           msg: 'Select at least one bus type.',
           toastLength: Toast.LENGTH_SHORT,
@@ -143,7 +149,7 @@ class _RequisitionState extends State<Requisition> {
       return false;
     }
 
-    if (RequestController.text.isEmpty) {
+    if (DescribeController.text.isEmpty) {
       Fluttertoast.showToast(
           msg: 'Please enter Requisition details.',
           toastLength: Toast.LENGTH_SHORT,
@@ -158,12 +164,13 @@ class _RequisitionState extends State<Requisition> {
 
     var r = await Requests.post(globel.serverIp + 'addRequisition',
         body: {
-          'destination': LocationController.text,
+          'destination': DestinationController.text,
           'submission_timestamp': DateTime.now().toIso8601String(),
           'timestamp': timestampStr,
           'text': DescribeController.text,
           'bus_type': jsonEncode(BusTypeSelected),
-          'subject': RequestController.text,
+          'source': ReportingController.text,
+          'subject': reasonForRequisition
         },
         bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
@@ -216,306 +223,573 @@ class _RequisitionState extends State<Requisition> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.0),
-                        border: Border.all(color: Colors.grey),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              child: Text(
+                                'Reason for Requisition',
+                                style: TextStyle(
+                                  color: Color(0xFF781B1B),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      child: MaterialButton(
-                        onPressed: _showDatePicker,
-                        child: Text(
-                          selectedDate != null
-                              ? selectedDate.toString().split(' ')[0]
-                              : 'Choose Date',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Radio(
+                                  value: "official",
+                                  groupValue: reasonForRequisition,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      reasonForRequisition = value as String;
+                                    });
+                                  },
+                                ),
+                                Text(
+                                  'Official',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Radio(
+                                  value: "personal",
+                                  groupValue: reasonForRequisition,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      reasonForRequisition = value as String;
+                                    });
+                                  },
+                                ),
+                                Text(
+                                  'Personal',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Radio(
+                                  value: "BRTC",
+                                  groupValue: reasonForRequisition,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      reasonForRequisition = value as String;
+                                    });
+                                  },
+                                ),
+                                Text(
+                                  'BRTC',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Radio(
+                                  value: "Others",
+                                  groupValue: reasonForRequisition,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      reasonForRequisition = value as String;
+                                    });
+                                  },
+                                ),
+                                Text(
+                                  'Others',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: MaterialButton(
+                            onPressed: _showDatePicker,
+                            child: Text(
+                              selectedDate != null
+                                  ? selectedDate.toString().split(' ')[0]
+                                  : 'Choose Date',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 15,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: 15.0),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.0),
-                        border: Border.all(color: Colors.grey),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Text(
-                              'Start Time:',
-                              style: TextStyle(
-                                fontSize: 16,
-                              ),
-                            ),
+                  SizedBox(height: 15.0),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            border: Border.all(color: Colors.grey),
                           ),
-                          GestureDetector(
-                            onTap: _showTimePicker,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    color:
-                                        const Color.fromARGB(255, 186, 185, 185)
-                                            .withOpacity(0.3)),
-                              ),
-                              margin: const EdgeInsets.all(10.0),
-                              padding: const EdgeInsets.all(5.0),
-                              child: Text(
-                                _selectedTime.format(context),
-                                style: TextStyle(
-                                  fontSize: 16,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0),
+                                child: Text(
+                                  'Start Time:',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 15.0),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.0),
-                        border: Border.all(color: Colors.grey),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Text(
-                              'End Time:',
-                              style: TextStyle(
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: _showTimePicker2,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    color:
-                                        const Color.fromARGB(255, 186, 185, 185)
+                              GestureDetector(
+                                onTap: _showTimePicker,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: const Color.fromARGB(
+                                                255, 186, 185, 185)
                                             .withOpacity(0.3)),
-                              ),
-                              margin: const EdgeInsets.all(10.0),
-                              padding: const EdgeInsets.all(5.0),
-                              child: Text(
-                                _finishedTime.format(context),
-                                style: TextStyle(
-                                  fontSize: 16,
+                                  ),
+                                  margin: const EdgeInsets.all(10.0),
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Text(
+                                    _selectedTime.format(context),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 15.0),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0),
+                                child: Text(
+                                  'End Time:',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: _showTimePicker2,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: const Color.fromARGB(
+                                                255, 186, 185, 185)
+                                            .withOpacity(0.3)),
+                                  ),
+                                  margin: const EdgeInsets.all(10.0),
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Text(
+                                    _finishedTime.format(context),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.0),
+                  Container(
+                    margin: const EdgeInsets.only(left: 10.0),
+                    child: Text(
+                      'Select Bus Type',
+                      style: TextStyle(
+                        color: Color(0xFF781B1B),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.0,
                       ),
                     ),
                   ),
-                ],
-              ),
-              SizedBox(height: 16.0),
-              Container(
-                margin: const EdgeInsets.only(left: 10.0),
-                child: Text(
-                  'Select Bus Type',
-                  style: TextStyle(
-                    color: Color(0xFF781B1B),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16.0,
+                  SizedBox(height: 8.0),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 3),
+                        child: Checkbox(
+                          value: isCar,
+                          onChanged: (value) {
+                            setState(() {
+                              if (BusTypeSelected.contains("car")) {
+                                BusTypeSelected.remove("car");
+                                carSeatText = '';
+                              } else {
+                                BusTypeSelected.add("car");
+                                carSeatText = '4 seats';
+                              }
+                              isCar = !isCar;
+                            });
+                          },
+                          activeColor: Color(0xFF781B1B),
+                        ),
+                      ),
+                      Text(
+                        'Car',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text(
+                        carSeatText,
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color: Color(0xFF781B1B),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              SizedBox(height: 8.0),
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 3),
-                    child: Checkbox(
-                      value: isA,
-                      onChanged: (value) {
-                        setState(() {
-                          if (BusTypeSelected.contains("single_decker"))
-                            BusTypeSelected.remove("single_decker");
-                          else
-                            BusTypeSelected.add("single_decker");
-                          isA = !isA;
-                        });
-                      },
-                      activeColor: Color(0xFF781B1B), // Change to red
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 3),
+                        child: Checkbox(
+                          value: isMicroBus,
+                          onChanged: (value) {
+                            setState(() {
+                              if (isMicroBus) {
+                                BusTypeSelected.remove("Micro Bus");
+                                microBusCapacity = '';
+                                showMicroBusCapacity = false;
+                                BusTypeSelected.removeWhere(
+                                    (element) => element.startsWith("micro-"));
+                              } else {
+                                //BusTypeSelected.add("Micro Bus");
+                                showMicroBusCapacity = true;
+                              }
+                              isMicroBus = !isMicroBus;
+                            });
+                          },
+                          activeColor: Color(0xFF781B1B),
+                        ),
+                      ),
+                      Text(
+                        'Micro Bus',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      if (microBusCapacity != "")
+                        Text(
+                          microBusCapacity + " seats",
+                          style: TextStyle(
+                            fontSize: 14.0,
+                            color: Color(0xFF781B1B),
+                          ),
+                        ),
+                    ],
+                  ),
+                  if (showMicroBusCapacity)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Radio(
+                            value: "8",
+                            groupValue: microBusCapacity,
+                            onChanged: (value) {
+                              setState(() {
+                                microBusCapacity = value as String;
+                                // Update BusTypeSelected array with microbus seat count
+                                BusTypeSelected.removeWhere(
+                                    (element) => element.startsWith("micro-"));
+                                BusTypeSelected.add("micro-8");
+                              });
+                            },
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            '8 seats',
+                            style: TextStyle(
+                              fontSize: 12.0,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Radio(
+                            value: "12",
+                            groupValue: microBusCapacity,
+                            onChanged: (value) {
+                              setState(() {
+                                microBusCapacity = value as String;
+                                // Update BusTypeSelected array with microbus seat count
+                                BusTypeSelected.removeWhere(
+                                    (element) => element.startsWith("micro-"));
+                                BusTypeSelected.add("micro-12");
+                              });
+                            },
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            '12 seats',
+                            style: TextStyle(
+                              fontSize: 12.0,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Radio(
+                            value: "15",
+                            groupValue: microBusCapacity,
+                            onChanged: (value) {
+                              setState(() {
+                                microBusCapacity = value as String;
+                                // Update BusTypeSelected array with microbus seat count
+                                BusTypeSelected.removeWhere(
+                                    (element) => element.startsWith("micro-"));
+                                BusTypeSelected.add("micro-15");
+                              });
+                            },
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            '15 seats',
+                            style: TextStyle(
+                              fontSize: 12.0,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 3),
+                        child: Checkbox(
+                          value: isMiniBus,
+                          onChanged: (value) {
+                            setState(() {
+                              if (BusTypeSelected.contains("mini"))
+                                BusTypeSelected.remove("mini");
+                              else
+                                BusTypeSelected.add("mini");
+                              isMiniBus = !isMiniBus;
+                              miniBusCapacity =
+                                  miniBusCapacity == "" ? "30 seats" : "";
+                            });
+                          },
+                          activeColor: Color(0xFF781B1B),
+                        ),
+                      ),
+                      Text(
+                        'Mini Bus',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text(
+                        miniBusCapacity,
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color: Color(0xFF781B1B),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 3),
+                        child: Checkbox(
+                          value: isBus,
+                          onChanged: (value) {
+                            setState(() {
+                              if (BusTypeSelected.contains("normal"))
+                                BusTypeSelected.remove("normal");
+                              else
+                                BusTypeSelected.add("normal");
+                              isBus = !isBus;
+                              busCapacity = busCapacity == "" ? "52 seats" : "";
+                            });
+                          },
+                          activeColor: Color(0xFF781B1B),
+                        ),
+                      ),
+                      Text(
+                        'Bus',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text(
+                        busCapacity,
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color: Color(0xFF781B1B),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.0),
+                      border: Border.all(color: Colors.grey.withOpacity(0.1)),
+                    ),
+                    child: TextFormField(
+                      controller: ReportingController,
+                      maxLines: 1,
+                      decoration: InputDecoration(
+                        hintText: 'Reporting location ',
+                        hintStyle:
+                            TextStyle(color: Colors.grey.withOpacity(0.8)),
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
-                  Text(
-                    'Single Decker',
-                    style: TextStyle(
-                      fontSize: 16.0,
+                  SizedBox(height: 16.0),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.0),
+                      border: Border.all(color: Colors.grey.withOpacity(0.1)),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10, left: 2),
-                    child: Checkbox(
-                      value: isB,
-                      onChanged: (value) {
-                        setState(() {
-                          if (BusTypeSelected.contains("double_decker"))
-                            BusTypeSelected.remove("double_decker");
-                          else
-                            BusTypeSelected.add("double_decker");
-                          isB = !isB;
-                        });
-                      },
-                      activeColor: Color(0xFF781B1B), // Change to red
-                    ),
-                  ),
-                  Text(
-                    'Double Decker',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 3),
-                    child: Checkbox(
-                      value: isC,
-                      onChanged: (value) {
-                        setState(() {
-                          if (BusTypeSelected.contains("micro"))
-                            BusTypeSelected.remove("micro");
-                          else
-                            BusTypeSelected.add("micro");
-                          isC = !isC;
-                        });
-                      },
-                      activeColor: Color(0xFF781B1B), // Change to red
-                    ),
-                  ),
-                  Text(
-                    'Micro Bus',
-                    style: TextStyle(
-                      fontSize: 16.0,
+                    child: TextFormField(
+                      controller: DestinationController,
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        hintText: 'Enter destination',
+                        hintStyle:
+                            TextStyle(color: Colors.grey.withOpacity(0.8)),
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
                   SizedBox(
-                    width: 30.0,
+                    height: 30.0,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Checkbox(
-                      value: isD,
-                      onChanged: (value) {
-                        setState(() {
-                          if (BusTypeSelected.contains("mini"))
-                            BusTypeSelected.remove("mini");
-                          else
-                            BusTypeSelected.add("mini");
-                          isD = !isD;
-                        });
-                      },
-                      activeColor: Color(0xFF781B1B), // Change to red
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.0),
+                      border: Border.all(color: Colors.grey.withOpacity(0.1)),
+                    ),
+                    child: TextFormField(
+                      controller: DescribeController,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: 'Detailed Description ',
+                        hintStyle:
+                            TextStyle(color: Colors.grey.withOpacity(0.8)),
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
-                  Text(
-                    'Mini Bus',
-                    style: TextStyle(
-                      fontSize: 16.0,
+                  SizedBox(height: 16.0),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        print("clicked");
+                        bool success = await submitRequisition();
+                        if (success) _showConfirmationDialog();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF781B1B),
+                      ),
+                      child: Text('Submit Requisition',
+                          style: const TextStyle(
+                            color: Colors.white,
+                          )),
                     ),
                   ),
                 ],
-              ),
-              SizedBox(
-                height: 30.0,
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: Colors.grey.withOpacity(0.1)),
-                ),
-                child: TextFormField(
-                  controller: LocationController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: 'Enter detailed location here ',
-                    hintStyle: TextStyle(color: Colors.grey.withOpacity(0.8)),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 30.0,
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: Colors.grey.withOpacity(0.1)),
-                ),
-                child: TextFormField(
-                  controller: RequestController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: 'Subject ',
-                    hintStyle: TextStyle(color: Colors.grey.withOpacity(0.8)),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 30.0,
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: Colors.grey.withOpacity(0.1)),
-                ),
-                child: TextFormField(
-                  controller: DescribeController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: 'Description ',
-                    hintStyle: TextStyle(color: Colors.grey.withOpacity(0.8)),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              SizedBox(height: 16.0),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    print("clicked");
-                    bool success = await submitRequisition();
-                    if (success) _showConfirmationDialog();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF781B1B),
-                  ),
-                  child: Text('Submit Requisition',
-                      style: const TextStyle(
-                        color: Colors.white,
-                      )),
-                ),
               ),
             ],
           ),

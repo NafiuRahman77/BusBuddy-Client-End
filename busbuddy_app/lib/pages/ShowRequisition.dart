@@ -12,12 +12,13 @@ class ShowRequisition extends StatefulWidget {
 }
 
 class _ShowRequisitionState extends State<ShowRequisition> {
-  List<String> time_list = [];
-  List<String> subject_list = [];
-  List<String> description_list = [];
-  List<String> approved_list = [];
-  List<String> route_list = [];
-  List<String> bus_type_list = [];
+  List<String> timeList = [];
+  List<String> reasonList = [];
+  List<String> descriptionList = [];
+  List<String> approvedList = [];
+  List<String> routeList = [];
+  List<String> bustypeList = [];
+  List<String> sourceList = [];
 
   @override
   void initState() {
@@ -38,19 +39,17 @@ class _ShowRequisitionState extends State<ShowRequisition> {
 
     setState(() {
       for (int i = 0; i < json.length; i++) {
-        time_list.add(json[i]['timestamp']);
-        route_list.add(json[i]['destination']);
-        description_list.add(json[i]['text']);
-        subject_list.add(json[i]['subject']);
-        bus_type_list.add(json[i]['bus_type']);
+        timeList.add(json[i]['timestamp']);
+        routeList.add(json[i]['destination']);
+        descriptionList.add(json[i]['text']);
+        reasonList.add(json[i]['subject']);
+        bustypeList.add(json[i]['bus_type']);
         if (json[i]['approved_by'] != null)
-          approved_list.add(json[i]['approved_by']);
+          approvedList.add(json[i]['approved_by']);
         else
-          approved_list.add('');
+          approvedList.add('');
+        sourceList.add(json[i]['source']);
       }
-    });
-    subject_list.forEach((element) {
-      print(element);
     });
     context.loaderOverlay.hide();
   }
@@ -60,16 +59,17 @@ class _ShowRequisitionState extends State<ShowRequisition> {
     return Scaffold(
       body: Center(
         child: ListView.builder(
-          itemCount: description_list.length,
+          itemCount: descriptionList.length,
           itemBuilder: (context, index) {
             return Req_CollapsibleCard(
-              subject: subject_list[index],
-              shortMessage: description_list[index],
-              fullMessage: description_list[index],
-              verdict: approved_list[index].isEmpty ? '' : approved_list[index],
-              date: time_list[index].substring(0, 10),
-              location: route_list[index],
-              bus_type: bus_type_list[index],
+              subject: reasonList[index],
+              shortMessage: descriptionList[index],
+              fullMessage: descriptionList[index],
+              verdict: approvedList[index].isEmpty ? '' : approvedList[index],
+              date: timeList[index].substring(0, 10),
+              location: routeList[index],
+              bus_type: bustypeList[index],
+              source: sourceList[index],
             );
           },
         ),

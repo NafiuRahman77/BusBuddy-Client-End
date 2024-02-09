@@ -8,6 +8,7 @@ class Req_CollapsibleCard extends StatefulWidget {
   final String shortMessage;
   final String fullMessage;
   final String verdict;
+  final String source;
 
   Req_CollapsibleCard({
     required this.subject,
@@ -16,6 +17,7 @@ class Req_CollapsibleCard extends StatefulWidget {
     required this.date,
     required this.location,
     required this.bus_type,
+    required this.source,
     this.verdict = "",
   });
 
@@ -26,16 +28,19 @@ class Req_CollapsibleCard extends StatefulWidget {
 class _ReqCollapsibleCardState extends State<Req_CollapsibleCard> {
   bool isExpanded = false;
   String send_modify(String str) {
-    // JALAL BOL BACKEND E KI DISOS NAME :") , OI VAABE CNG KORISH EGULA .
-
-    if (str == "single_decker")
-      return "Single Decker";
+    print(str);
+    if (str == "car")
+      return "Car - 4 seats";
     else if (str == "mini")
-      return "Mini Bus";
-    else if (str == "double_decker")
-      return "Double Decker";
-    else if (str == "micro") return "Micro Bus";
-    return "Bus issue";
+      return "Mini Bus - 30 seats";
+    else if (str == "normal")
+      return "Bus - 52 seats";
+    else if (str == "micro-8")
+      return "Micro Bus - 8 seats";
+    else if (str == "micro-12")
+      return "Micro Bus - 12 seats";
+    else if (str == "micro-15") return "Micro Bus - 15 seats";
+    return "Bus - 52 seats";
   }
 
   @override
@@ -51,11 +56,10 @@ class _ReqCollapsibleCardState extends State<Req_CollapsibleCard> {
 
     return Card(
       margin: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
-      color: Colors.white, // Set the card background color to white
+      color: backgroundColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8.0),
-        side: BorderSide(
-            color: Colors.grey.withOpacity(0.3)), // Add a gray border
+        side: BorderSide(color: Colors.grey.withOpacity(0.5)),
       ),
       child: InkWell(
         onTap: () {
@@ -68,12 +72,9 @@ class _ReqCollapsibleCardState extends State<Req_CollapsibleCard> {
           children: [
             ListTile(
               title: Padding(
-                padding: EdgeInsets.only(
-                    top: 8.0,
-                    bottom: 8.0), // Add space at the bottom of the title
+                padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
                 child: Padding(
-                  padding: EdgeInsets.only(
-                      left: 4.0), // Add left padding to the title
+                  padding: EdgeInsets.only(left: 4.0),
                   child: Text(
                     widget.subject,
                     style: TextStyle(
@@ -88,50 +89,101 @@ class _ReqCollapsibleCardState extends State<Req_CollapsibleCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(
-                        bottom: 4.0), // Add space at the bottom of the date
+                    padding: EdgeInsets.only(bottom: 4.0),
                     child: Padding(
-                      padding: EdgeInsets.only(
-                          left: 4.0), // Add left padding to the date
-                      child: Text(
-                        widget.date,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                          fontSize: 14,
-                        ),
+                      padding: EdgeInsets.only(left: 4.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.date_range,
+                            color: Colors.black,
+                            size: 16,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            widget.date,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(
-                        bottom: 4.0), // Add space at the bottom of the date
+                    padding: EdgeInsets.only(bottom: 4.0),
                     child: Padding(
-                      padding: EdgeInsets.only(
-                          left: 4.0), // Add left padding to the date
-                      child: Text(
-                        widget.location,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                          fontSize: 14,
-                        ),
+                      padding: EdgeInsets.only(left: 4.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.place,
+                            color: Colors.black,
+                            size: 16,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            "Destination : " + widget.location,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(
-                        bottom: 4.0), // Add space at the bottom of the date
+                    padding: EdgeInsets.only(bottom: 4.0),
                     child: Padding(
-                      padding: EdgeInsets.only(
-                          left: 4.0), // Add left padding to the date
-                      child: Text(
-                        conc_btype,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                          fontSize: 14,
-                        ),
+                      padding: EdgeInsets.only(left: 4.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            color: Colors.black,
+                            size: 16,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            "Source : " + widget.source,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 4.0),
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 4.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.directions_bus,
+                            color: Colors.black,
+                            size: 16,
+                          ),
+                          SizedBox(
+                            width:
+                                5, // Adjust the spacing between the Icon and Text as needed
+                          ),
+                          Text(
+                            conc_btype,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
