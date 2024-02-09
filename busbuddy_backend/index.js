@@ -498,21 +498,18 @@ app.post('/api/updateProfile', (req,res) => {
 });
 
 app.post('/api/getRoutes', (req,res) => {
-    consoleLogger.info("sending route data");
     dbclient.query("SELECT id, terminal_point FROM route").then(qres => {
         res.send(qres.rows);
     }).catch(e => errLogger.error(e.stack));
 });
 
 app.post('/api/getStations', (req,res) => {
-    consoleLogger.info("sending station data");
     dbclient.query("SELECT id, name, coords FROM station").then(qres => {
         res.send(qres.rows);
     }).catch(e => errLogger.error(e.stack));
 });
 
 app.post('/api/getRouteStations', (req,res) => {
-    consoleLogger.info("sending route station data");
     dbclient.query("SELECT id, name FROM station where id in (select unnest(points) from route where id = $1)",
 		   [ req.body.route]).then(qres => {
         res.send(qres.rows);
