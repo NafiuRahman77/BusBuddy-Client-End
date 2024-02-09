@@ -364,9 +364,8 @@ app.post('/api/getProfileStatic', (req, res) => {
                         success: false,
                     });
                 } else {
-                    let response = "", ex = await util.fileExists ("../../busbuddy_storage/"+req.session.userid);
-                    if (ex)
-                        response = await fs.readFile("../../busbuddy_storage/"+req.session.userid).toString('base64');
+                    let response;
+                    response = await fs.readFile("../../busbuddy_storage/"+req.session.userid).toString('base64');
                     res.send({
                         ...qres.rows[0],
                         success: true,
