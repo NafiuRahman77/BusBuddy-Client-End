@@ -1035,7 +1035,7 @@ app.post('/api/startTrip', (req,res) => {
                         console.log("trying to get list for notif");
                         dbclient.query(
                             `select array(select distinct s.sess->>'fcm_id' from session s, student st 
-                            where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_route=$1)`, [route_id]
+                            where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_route=$1)`, [newTrip.route]
                         ).then(qres => {
                             console.log(qres);
                             if (notif_list) {
