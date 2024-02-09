@@ -1240,7 +1240,10 @@ app.post('/api/broadcastNotification', (req,res) => {
                 notification:{
                   title : req.body.nTitle,
                   body : req.body.nBody,
-                }
+                },
+                android: {
+                    priority: 'high',
+                },
             };
             FCM.sendToMultipleToken(message, tokenList, function(err, response) {
                   if (err) {
