@@ -369,7 +369,7 @@ app.post('/api/getProfileStatic', (req, res) => {
                         let data = await fs.readFile("../../busbuddy_storage/" + req.session.userid);
                         response = data.toString('base64');
                     } catch (e) {
-                        errLogger.error(e);
+                        if (e.code != 'ENOENT') errLogger.error(e);
                     };
                     res.send({
                         ...qres.rows[0],
