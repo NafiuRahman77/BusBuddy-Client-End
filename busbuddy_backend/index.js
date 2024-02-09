@@ -50,6 +50,7 @@ const readline = require('readline');
 const reqLogger = (req, res, next) => {
     consoleLogger.info (`Request at ${req.originalUrl} from ` + 
                         req.session? (req.session.userid? req.session.userid : "") : "" + ` (${req.ip})`);
+    next();
 };
 
 dotenv.config();
