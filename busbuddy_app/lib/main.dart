@@ -69,6 +69,10 @@ void main() async {
     print("received fcm: ${message.data}");
   });
 
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+    print("openedAppreceived fcm: ${message.data}");
+  });
+
   FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
     if (message != null) {
       print("hiii woke up from bg");
@@ -87,7 +91,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  print("bg message handler");
+  if (message.notification.android != null)
+    message.notification.android.priority = print("bg message handler");
   // runApp(BusBuddyApp());
   // main();
 }

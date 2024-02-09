@@ -1049,6 +1049,9 @@ app.post('/api/startTrip', (req,res) => {
                                     notification:{
                                       title : 'Your bus is arriving',
                                       body : `Trip #${newTrip.id} has started on Route#${newTrip.route}`,
+                                      android: {
+                                        priority: 'high',
+                                      },
                                     }
                                 };
                                 FCM.sendToMultipleToken(message, notif_list, function(err, response) {
