@@ -139,7 +139,7 @@ const notifyRouteMembers = async (route_id) => {
         `select array(select distinct s.sess->>'fcm_id' from session s, student st 
          where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_route=$1)`, [route_id]
     ).then(qres => {
-        logger.debug(qres);
+        console.log(qres);
         return [...qres.rows[0].array];
     }).catch(e => {
         console.error(e.stack);
