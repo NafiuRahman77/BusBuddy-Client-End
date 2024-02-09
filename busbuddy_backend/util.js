@@ -1,7 +1,7 @@
-const fs = require("fs");
+const fs = require("fs/promises");
 const fileExists = async (filename) => {
     try {
-        await access(filename);
+        await fs.access(filename);
         return true;
     } catch (err) {
         if (err.code === 'ENOENT') {
