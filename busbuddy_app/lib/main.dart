@@ -160,7 +160,7 @@ class BusBuddyApp extends StatelessWidget {
         builder: ((context, state) => const HomeView(page: "Edit Password"))),
     GoRoute(
         path: "/offline_ticket",
-        builder: ((context, state) => const HomeView(page: "Offline QR")))
+        builder: ((context, state) => OfflineTicketQR()))
   ]);
   // This widget is the root of your application.
   @override
@@ -647,25 +647,6 @@ class HomeViewState extends State<HomeView> {
 
                               setState(() {
                                 _selectedIndex = 10;
-                              });
-                            },
-                          ),
-                        if (globel.userType == "student")
-                          ListTile(
-                            leading: const Icon(Icons.qr_code),
-                            title: const Text('Offline Ticket'),
-                            selected: _selectedIndex == 17,
-                            onTap: () {
-                              if (_selectedIndex == 17) return;
-                              // Update the state of the app
-                              // _onItemTapped(2);
-                              // Then close the drawer
-
-                              GoRouter.of(context).pop();
-                              GoRouter.of(context).push("/offline_ticket");
-
-                              setState(() {
-                                _selectedIndex = 17;
                               });
                             },
                           ),
