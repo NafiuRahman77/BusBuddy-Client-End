@@ -164,6 +164,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
           'route': selectedRouteId,
           'submission_timestamp': DateTime.now().toIso8601String(),
           'timestamp': timestampStr,
+          //  'shift': selectedShift, // JALAL ETA BACKEND E ADD KORO
           'text': feedbackController.text,
           'subject': jsonEncode(selectedSubject),
         },
@@ -388,8 +389,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
               ),
               SizedBox(height: 16.0),
               Container(
-                margin: const EdgeInsets.only(
-                    left: 10.0, top: 16.0, bottom: 5), // Add top padding
+                margin: const EdgeInsets.only(left: 10.0, top: 16.0, bottom: 5),
                 child: Text(
                   'Select Shift',
                   style: TextStyle(
@@ -399,31 +399,26 @@ class _FeedbackFormState extends State<FeedbackForm> {
                   ),
                 ),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: Colors.grey.withOpacity(0.6)),
-                ),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.only(left: 10, bottom: 5, right: 10),
-                  child: DropdownButtonFormField<String>(
-                    value: selectedShift,
-                    onChanged: (value) {
-                      setState(() {
-                        // Handle dropdown selection
-                        selectedShift = value!;
-                        // print(selectedOption);
-                      });
-                    },
-                    items:
-                        shiftList.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10, bottom: 5, right: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: shiftList.map((String value) {
+                    return Row(
+                      children: [
+                        Radio<String>(
+                          value: value,
+                          groupValue: selectedShift,
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedShift = newValue!;
+                            });
+                          },
+                        ),
+                        Text(value),
+                      ],
+                    );
+                  }).toList(),
                 ),
               ),
               SizedBox(height: 30),
