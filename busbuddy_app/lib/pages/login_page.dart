@@ -413,6 +413,7 @@ class _LoginPageState extends State<LoginPage> {
       overlayColor: Color.fromARGB(150, 200, 200, 200),
       child: Scaffold(
         body: SingleChildScrollView(
+          // Add this line
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
