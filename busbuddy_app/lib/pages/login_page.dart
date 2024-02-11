@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
         //when going to the background
         foregroundNotificationConfig: const ForegroundNotificationConfig(
           notificationText:
-              "Example app will continue to receive your location even when you aren't using it",
+              "BusBuddy app will continue to receive your location even when you aren't using it",
           notificationTitle: "Running in Background",
           enableWakeLock: true,
         ));
@@ -125,7 +125,11 @@ class _LoginPageState extends State<LoginPage> {
           Requests.getHostname(globel.serverIp), 'connect.sid', c);
 
       context.loaderOverlay.show();
-      var r = await Requests.post(globel.serverIp + 'sessionCheck');
+      var r = await Requests.post(globel.serverIp + 'sessionCheck',
+          body: {
+            'fcm_id': globel.fcmId,
+          },
+          bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
       r.raiseForStatus();
       dynamic json = r.json();
