@@ -39,7 +39,7 @@ import 'package:loader_overlay/loader_overlay.dart';
 
 import 'globel.dart' as globel;
 
-@pragma('vm:entry-point')
+// @pragma('vm:entry-point')
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 

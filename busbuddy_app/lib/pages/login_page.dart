@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
         //when going to the background
         foregroundNotificationConfig: const ForegroundNotificationConfig(
           notificationText:
-              "Example app will continue to receive your location even when you aren't using it",
+              "BusBuddy app will continue to receive your location even when you aren't using it",
           notificationTitle: "Running in Background",
           enableWakeLock: true,
         ));
