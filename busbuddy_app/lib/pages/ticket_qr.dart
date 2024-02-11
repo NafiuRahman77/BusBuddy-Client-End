@@ -20,6 +20,7 @@ class _TicketQRState extends State<TicketQR> {
   String studentPhone = "";
   String studentEmail = "";
   String ticket_id = "BLANK_TICKET";
+  bool isTicketPresent = false;
 
   Future<void> getTicketInfo() async {
     context.loaderOverlay.show();
@@ -32,6 +33,7 @@ class _TicketQRState extends State<TicketQR> {
     if (json['success'] == true) {
       setState(() {
         ticket_id = json['ticket_id'];
+        isTicketPresent = true;
       });
     } else {
       Fluttertoast.showToast(
@@ -42,6 +44,10 @@ class _TicketQRState extends State<TicketQR> {
           backgroundColor: Color.fromARGB(118, 244, 67, 54),
           textColor: Colors.white,
           fontSize: 16.0);
+      setState(() {
+        ticket_id = "BLANK_TICKET";
+        isTicketPresent = false;
+      });
     }
     print(ticket_id);
     context.loaderOverlay.hide();
@@ -58,14 +64,27 @@ class _TicketQRState extends State<TicketQR> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: QrImageView(
-          data: ticket_id,
-          version: QrVersions.auto,
-          size: 350.0,
-        ),
-      ),
-    );
+    return (isTicketPresent == true)
+        ? Scaffold(
+            body: Center(
+              child: QrImageView(
+                data: ticket_id,
+                version: QrVersions.auto,
+                size: 350.0,
+              ),
+            ),
+          )
+        : Scaffold(
+            body: Center(
+              child: Text(
+                "No ticket found. Please try again.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 20,
+                  // You can also specify other text properties like color, font weight, etc. here.
+                ),
+              ),
+            ),
+          );
   }
 }

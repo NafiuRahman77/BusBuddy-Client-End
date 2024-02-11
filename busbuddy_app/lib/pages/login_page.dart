@@ -314,15 +314,15 @@ class _LoginPageState extends State<LoginPage> {
           // });
           print(ticketIds.isNotEmpty.toString() + "..........");
         } else {
-          Fluttertoast.showToast(
-            msg: 'Failed to load data.',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Color.fromARGB(118, 244, 67, 54),
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
+          // Fluttertoast.showToast(
+          //   msg: 'Failed to load data.',
+          //   toastLength: Toast.LENGTH_SHORT,
+          //   gravity: ToastGravity.CENTER,
+          //   timeInSecForIosWeb: 1,
+          //   backgroundColor: Color.fromARGB(118, 244, 67, 54),
+          //   textColor: Colors.white,
+          //   fontSize: 16.0,
+          // );
         }
         context.loaderOverlay.hide();
       }
