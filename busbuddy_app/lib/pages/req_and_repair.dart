@@ -1,6 +1,4 @@
-
 import 'package:flutter/material.dart';
-
 
 import 'package:go_router/go_router.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -14,53 +12,57 @@ class ReqRepair extends StatefulWidget {
 }
 
 class _ReqRepairState extends State<ReqRepair> {
-  String SelectedBus = "Mirpur 2"  ;
-  List<String> BusList = [] ;  
+  String SelectedBus = "Mirpur 2";
+  List<String> BusList = [];
   TextEditingController RepairController = TextEditingController();
-  String SelectedParts = "Mirpur 2" ; 
-  List<String> Partslist = [] ; 
+  String SelectedParts = "Mirpur 2";
+  List<String> Partslist = [];
 
   @override
   void initState() {
     super.initState();
-    getBus() ; 
-    getParts() ; 
+    getBus();
+    getParts();
   }
-Future<void> getBus() async {
-  context.loaderOverlay.show();
-  var r1 = await Requests.post(globel.serverIp + 'getRoutes');
-  r1.raiseForStatus();
-  List<dynamic> json1 = r1.json();
-  setState(() {
-    for (int i = 0; i < json1.length; i++) {
-      BusList.add(json1[i]['terminal_point']);
-    }
-  });
-  BusList.forEach((element) {
-      print(element); });
-   context.loaderOverlay.hide();
-}
 
-Future<bool> submitRequest() async {
+  Future<void> getBus() async {
+    context.loaderOverlay.show();
+
+    var r1 = await Requests.post(globel.serverIp + 'getRoutes');
+    r1.raiseForStatus();
+    List<dynamic> json1 = r1.json();
+    setState(() {
+      for (int i = 0; i < json1.length; i++) {
+        BusList.add(json1[i]['terminal_point']);
+      }
+    });
+    BusList.forEach((element) {
+      print(element);
+    });
+    context.loaderOverlay.hide();
+  }
+
+  Future<bool> submitRequest() async {
     context.loaderOverlay.show();
     context.loaderOverlay.hide();
     return true;
-    
-}
-Future<void> getParts() async {
-  context.loaderOverlay.show();
-  var r1 = await Requests.post(globel.serverIp + 'getRoutes');
-  r1.raiseForStatus();
-  List<dynamic> json1 = r1.json();
-  setState(() {
-    for (int i = 0; i < json1.length; i++) {
-      Partslist.add(json1[i]['terminal_point']);
-    }
-  });
-  Partslist.forEach((element) {
-      print(element); });
-   context.loaderOverlay.hide();
-}
+  }
+
+  Future<void> getParts() async {
+    context.loaderOverlay.show();
+    var r1 = await Requests.post(globel.serverIp + 'getRoutes');
+    r1.raiseForStatus();
+    List<dynamic> json1 = r1.json();
+    setState(() {
+      for (int i = 0; i < json1.length; i++) {
+        Partslist.add(json1[i]['terminal_point']);
+      }
+    });
+    Partslist.forEach((element) {
+      print(element);
+    });
+    context.loaderOverlay.hide();
+  }
 
   void _showConfirmationDialog() {
     showDialog(
@@ -82,102 +84,102 @@ Future<void> getParts() async {
       },
     );
   }
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.only(left: 12.0, bottom: 6.0),
-                child: Text(
-                  'Select Bus Number',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.withOpacity(0.9),
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 12.0, bottom: 6.0),
+                  child: Text(
+                    'Select Bus Number',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.withOpacity(0.9),
+                    ),
                   ),
                 ),
               ),
-            ),
-
-            Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(color: Colors.grey.withOpacity(0.5)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: DropdownButtonFormField<String>(
-                  value: SelectedBus,
-                  onChanged: (value) {
-                    setState(() {
-                      // Handle dropdown selection
-                      SelectedBus = value!;
-                      // print(selectedOption);
-                    });
-                    //onRouteSelect(SelectedBusIndex);
-                  },
-                  items: BusList.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+              Container(
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(color: Colors.grey.withOpacity(0.5)),
                 ),
-              ),
-            ),
-            SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.only(left: 12.0, bottom: 6.0),
-                child: Text(
-                  'Select Parts',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.withOpacity(0.9),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: DropdownButtonFormField<String>(
+                    value: SelectedBus,
+                    onChanged: (value) {
+                      setState(() {
+                        // Handle dropdown selection
+                        SelectedBus = value!;
+                        // print(selectedOption);
+                      });
+                      //onRouteSelect(SelectedBusIndex);
+                    },
+                    items:
+                        BusList.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
                   ),
                 ),
               ),
-            ),
-
-            Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(color: Colors.grey.withOpacity(0.5)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: DropdownButtonFormField<String>(
-                  value: SelectedParts,
-                  onChanged: (value) {
-                    setState(() {
-                      // Handle dropdown selection
-                      SelectedParts = value!;
-                      // print(selectedOption);
-                    });
-                    //onRouteSelect(SelectedBusIndex);
-                  },
-                  items: Partslist.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+              SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 12.0, bottom: 6.0),
+                  child: Text(
+                    'Select Parts',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.withOpacity(0.9),
+                    ),
+                  ),
                 ),
               ),
-            ),
-
-            SizedBox(height: 16),
-                          Container(
+              Container(
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: DropdownButtonFormField<String>(
+                    value: SelectedParts,
+                    onChanged: (value) {
+                      setState(() {
+                        // Handle dropdown selection
+                        SelectedParts = value!;
+                        // print(selectedOption);
+                      });
+                      //onRouteSelect(SelectedBusIndex);
+                    },
+                    items:
+                        Partslist.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+              Container(
                 margin: const EdgeInsets.only(
                     left: 10.0, top: 16.0), // Add top padding
                 child: Text(
@@ -210,7 +212,7 @@ Widget build(BuildContext context) {
                 ),
               ),
               SizedBox(height: 16),
-                          Container(
+              Container(
                 margin: const EdgeInsets.only(
                     left: 10.0, top: 16.0), // Add top padding
                 child: Text(
@@ -259,10 +261,10 @@ Widget build(BuildContext context) {
                       )),
                 ),
               ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
-} 

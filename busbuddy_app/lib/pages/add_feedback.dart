@@ -24,8 +24,10 @@ class _FeedbackFormState extends State<FeedbackForm> {
   TextEditingController feedbackController = TextEditingController();
   String defaultRoute = "";
   String defaultRouteName = "";
-  String selectedRouteName = "";
+  String selectedRouteName = globel.userDefaultRouteName;
   String selectedRouteId = "";
+  String selectedShift = "Morning";
+  List<String> shiftList = ["Morning", "Afternoon", "Evening"];
   @override
   void initState() {
     super.initState();
@@ -383,6 +385,46 @@ class _FeedbackFormState extends State<FeedbackForm> {
                     ),
                   ),
                 ],
+              ),
+              SizedBox(height: 16.0),
+              Container(
+                margin: const EdgeInsets.only(
+                    left: 10.0, top: 16.0, bottom: 5), // Add top padding
+                child: Text(
+                  'Select Shift',
+                  style: TextStyle(
+                    color: Color(0xFF781B1B),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12.0,
+                  ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(color: Colors.grey.withOpacity(0.6)),
+                ),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 10, bottom: 5, right: 10),
+                  child: DropdownButtonFormField<String>(
+                    value: selectedShift,
+                    onChanged: (value) {
+                      setState(() {
+                        // Handle dropdown selection
+                        selectedShift = value!;
+                        // print(selectedOption);
+                      });
+                    },
+                    items:
+                        shiftList.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
               ),
               SizedBox(height: 30),
               Container(
