@@ -1201,14 +1201,16 @@ app.post('/api/updateStaffLocation', (req,res) => {
 });
 
 app.post('/api/staffScanTicket', (req,res) => {
-    
     if (req.session.userid && req.session.user_type=="bus_staff") {
         consoleLogger.info(req.body);
         let t_id = tracking.busStaffMap.get(req.session.userid);
         dbclient.query(
-            `update ticket set trip_id=$1, is_used=true, scanned_by=$2 
-             where id=$3 and is_used=false returning student_id`, 
-             [t_id, req.session.user_id, req.body.ticket_id]
+            `with tk as (
+                update ticket set trip_id=$1, is_used=true, scanned_by=$2 
+                where id=$3 and is_used=false returning student_id
+            ) select student_id, 
+            array(select s.sess->>'fcm_id' from tk, session s where s.sess->>'userid' = tk.student_id) from tk`, 
+            [t_id, req.session.user_id, req.body.ticket_id]
         ).then(qres => {
             if (qres.rowCount === 1) {
                 let td = tracking.runningTrips.get(t_id);
@@ -1220,6 +1222,30 @@ app.post('/api/staffScanTicket', (req,res) => {
                     passenger_count: td.passenger_count.toString(),
                 });
                 
+                let notif_list = qres.rows[0].array;
+                if (notif_list) {
+                    consoleLogger.info(notif_list);
+                    let message = {
+                        // data: {
+                        //   score: '850',
+                        //   time: '2:45'
+                        // },
+                        notification:{
+                          title : 'Your bus is arriving',
+                          body : `Trip #${newTrip.id} has started on Route#${newTrip.route}`,
+                        },
+                        android: {
+                            notification: {
+                              channel_id: "busbuddy_broadcast",
+                              default_sound: true,
+                            }
+                        },
+                    };
+                    FCM.sendToMultipleToken (message, notif_list, function(err, response) {
+                        if (err) errLogger.error (err);
+                        else historyLogger.debug (response);
+                    });
+                };
             } else if (qres.rowCount === 0) {
                 res.send({
                     success: false,
