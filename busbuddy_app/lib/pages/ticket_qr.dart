@@ -1,6 +1,9 @@
 // a page containing the QR code only
 
+import 'dart:async';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -21,6 +24,8 @@ class _TicketQRState extends State<TicketQR> {
   String studentPhone = "";
   String studentEmail = "";
   String ticket_id = "BLANK_TICKET";
+
+  StreamSubscription? _messageSubscription;
 
   Future<void> getTicketInfo() async {
     context.loaderOverlay.show();
@@ -52,15 +57,26 @@ class _TicketQRState extends State<TicketQR> {
   void initState() {
     super.initState();
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-      print("received ticket fcm: ${message.data}");
-      print(message.data);
+    _messageSubscription =
+        FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      // print("received ticket fcm: ${message.data}");
+      if (message.data['nType'] == "ticket_used") {
+        print("ticket got used");
+        GoRouter.of(context).go("/show_profile");
+      }
     });
 
     getTicketInfo();
     // setState(() {
     //   ticketController.text = '20';
     // });
+  }
+
+  @override
+  void dispose() {
+    _messageSubscription
+        ?.cancel(); // Cancel the subscription when the page is disposed
+    super.dispose();
   }
 
   @override

@@ -1248,6 +1248,37 @@ app.post('/api/staffScanTicket', (req,res) => {
                         else historyLogger.debug (response);
                     });
                 };
+
+                dbclient.query(
+                    `select count(*) from ticket where student_id=$1 and is_used = false`, 
+                    [qres.rows[0].student_id,]
+                ).then(qres2 => {
+                    historyLogger.debug(qres2);
+                    if (qres2.rowCount === 1) { 
+                        let count = qres2.rows[0].count;
+                        if (count < 10) {
+                            let warning = {
+                                data: {
+                                  nType: 'ticket_low_warning',
+                                },
+                                notification:{
+                                  title : 'WARNING: Tickets running low!',
+                                  body : `You have less than 10 tickets remaining. Please buy more tickets to continue using the bus service.`,
+                                },
+                                android: {
+                                    notification: {
+                                      channel_id: "busbuddy_broadcast",
+                                      default_sound: true,
+                                    }
+                                },
+                            };
+                            FCM.sendToMultipleToken (warning, notif_list, function(err, response) {
+                                if (err) errLogger.error (err);
+                                else historyLogger.debug (response);
+                            });
+                        };
+                    };
+                }).catch(e => errLogger.error(e.stack));
             } else if (qres.rowCount === 0) {
                 res.send({
                     success: false,
@@ -1281,7 +1312,6 @@ app.post('/api/broadcastNotification', (req,res) => {
                 }
             },
         };
-
         FCM.sendToMultipleToken (message, tokenList, function(err, response) {
             if (err) errLogger.error (err);
             else historyLogger.debug (response);
