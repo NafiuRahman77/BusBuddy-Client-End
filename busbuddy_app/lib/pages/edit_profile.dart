@@ -34,9 +34,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String residence = "";
   List<String> station_ids = [];
   List<String> station_names = [];
-  String selectedOption = "";
+  String selectedOption = globel.userDefaultRouteName;
   String selectedId = "";
-  String selectedStationOption = "";
+  String selectedStationOption = globel.userDefaultStationName;
   String selectedStationId = "";
   @override
   void initState() {

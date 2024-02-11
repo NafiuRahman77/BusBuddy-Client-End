@@ -27,7 +27,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
   List<int> route_st_cnt = [];
   String defaultRoute = "";
   String defaultRouteName = "";
-  String selectedRouteName = "";
+  String selectedRouteName = globel.userDefaultRouteName;
   String selectedRouteId = "";
   List<dynamic> routeTimeData = [];
   List<dynamic> rejectedData = [];
