@@ -1064,7 +1064,7 @@ app.post('/api/startTrip', (req,res) => {
                                     },
                                 };
                         
-                                FCM.sendToMultipleToken (message, tokenList, function(err, response) {
+                                FCM.sendToMultipleToken (message, notif_list, function(err, response) {
                                     if (err) errLogger.error (err);
                                     else historyLogger.debug (response);
                                 });
