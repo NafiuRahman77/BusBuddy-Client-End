@@ -1186,7 +1186,7 @@ app.post('/api/updateStaffLocation', (req,res) => {
                 let dist = geolib.getDistance(p_coords, r_coord);
                 historyLogger.debug(dist);               
                 if (dist <= 180) {
-                    consoleLogger.info(trip.route);
+                    consoleLogger.info(trip.id + " reached " + trip.route);
                     tp.time = new Date();
                 };
             });
