@@ -20,7 +20,6 @@ const tracking = require('./tracking.js');
 const { createHttpTerminator } = require('http-terminator');
 const bcrypt = require('bcryptjs');
 const bcryptSaltRounds = 12;
-const util = require('./util.js');
 const admin = require("firebase-admin");
 const serviceAccount = require("./busbuddy-user-end-firebase-adminsdk.json");
 admin.initializeApp({
@@ -1063,10 +1062,9 @@ app.post('/api/startTrip', (req,res) => {
                                           default_sound: true,
                                         }
                                     },
-                                    token : token
                                 };
                         
-                                FCM.send(message, function(err, response) {
+                                FCM.sendToMultipleToken (message, tokenList, function(err, response) {
                                     if (err) errLogger.error (err);
                                     else historyLogger.debug (response);
                                 });
