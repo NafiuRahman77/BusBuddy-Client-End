@@ -1204,6 +1204,7 @@ app.post('/api/staffScanTicket', (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         consoleLogger.info(req.body);
         let t_id = tracking.busStaffMap.get(req.session.userid);
+        let route = tracking.runningTrips.get(t_id).route;
         dbclient.query(
             `with tk as (
                 update ticket set trip_id=$1, is_used=true, scanned_by=$2 
@@ -1231,8 +1232,8 @@ app.post('/api/staffScanTicket', (req,res) => {
                         //   time: '2:45'
                         // },
                         notification:{
-                          title : 'Your bus is arriving',
-                          body : `Trip #${newTrip.id} has started on Route#${newTrip.route}`,
+                          title : 'Ticket scanned successfully',
+                          body : `Your was scanned during Trip#${t_id} on Route#${route}`,
                         },
                         android: {
                             notification: {
