@@ -1253,10 +1253,9 @@ app.post('/api/broadcastNotification', (req,res) => {
                   default_sound: true,
                 }
             },
-            token : token
         };
 
-        FCM.send(message, function(err, response) {
+        FCM.sendToMultipleToken (message, tokenList, function(err, response) {
             if (err) errLogger.error (err);
             else historyLogger.debug (response);
         });
