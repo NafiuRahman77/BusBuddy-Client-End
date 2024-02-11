@@ -1204,7 +1204,7 @@ app.post('/api/updateStaffLocation', (req,res) => {
                                 let message = {
                                     notification:{
                                       title : 'Your bus is very close to your stop.',
-                                      body : `Trip #${newTrip.id} has crossed ${tp.station} and is approaching ${nextStation}`,
+                                      body : `Trip #${trip.id} has crossed ${tp.station} and is approaching ${nextStation}`,
                                     },
                                     android: {
                                         notification: {
