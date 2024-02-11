@@ -124,7 +124,7 @@ class _trackingState extends State<Tracking> {
                       },
                     ),
                     Text(
-                      'Route and Bus',
+                      'Route',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -199,49 +199,6 @@ class _trackingState extends State<Tracking> {
               ),
               SizedBox(
                 height: 10,
-              ),
-              Align(
-                alignment: Alignment.topLeft,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    'Select Bus',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.withOpacity(0.9),
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: Colors.grey.withOpacity(0.5)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: DropdownButtonFormField<String>(
-                    value: selectedRouteName,
-                    onChanged: (value) {
-                      setState(() {
-                        // Handle dropdown selection
-                        selectedRouteName = value!;
-                        int idx = globel.routeNames.indexOf(selectedRouteName);
-                        selectedRouteId = globel.routeIDs[idx];
-                      });
-                      onRouteSelect(selectedRouteId);
-                    },
-                    items: globel.routeNames
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                ),
               ),
               SizedBox(
                 height: 15,
