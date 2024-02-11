@@ -1,5 +1,6 @@
 // a page containing the QR code only
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -50,6 +51,12 @@ class _TicketQRState extends State<TicketQR> {
   @override
   void initState() {
     super.initState();
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      print("received ticket fcm: ${message.data}");
+      print(message.data);
+    });
+
     getTicketInfo();
     // setState(() {
     //   ticketController.text = '20';

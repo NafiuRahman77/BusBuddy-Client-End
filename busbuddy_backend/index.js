@@ -1229,10 +1229,9 @@ app.post('/api/staffScanTicket', (req,res) => {
                 if (notif_list) {
                     consoleLogger.info(notif_list);
                     let message = {
-                        // data: {
-                        //   score: '850',
-                        //   time: '2:45'
-                        // },
+                        data: {
+                          nType: 'ticket_used',
+                        },
                         notification:{
                           title : 'Ticket scanned successfully',
                           body : `Your was scanned during Trip#${t_id} on Route#${route}`,
