@@ -1036,14 +1036,20 @@ app.post('/api/startTrip', (req,res) => {
                         tracking.runningTrips.set (newTrip.id, newTrip);
                         tracking.busStaffMap.set (newTrip.driver, newTrip.id);
                         tracking.busStaffMap.set (newTrip.helper, newTrip.id);
+
+                        res.send({ 
+                            success: true,
+                            ...tracking.runningTrips.get(newTrip.id),
+                        });
+
                         let notif_list;  
                         // consoleLogger.info("trying to get list for notif");
                         dbclient.query(
                             `select array(select distinct s.sess->>'fcm_id' from session s, student st 
                             where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_route=$1)`, [newTrip.route]
-                        ).then(qres => {
-                            historyLogger.debug(qres);
-                            notif_list = [...qres.rows[0].array];
+                        ).then(qres3 => {
+                            historyLogger.debug(qres3);
+                            notif_list = [...qres3.rows[0].array];
                             if (notif_list) {
                                 consoleLogger.info(notif_list);
                                 let message = {
@@ -1069,10 +1075,6 @@ app.post('/api/startTrip', (req,res) => {
                                     else historyLogger.debug (response);
                                 });
                             };
-                            res.send({ 
-                                success: true,
-                                ...tracking.runningTrips.get(newTrip.id),
-                            });
                         }).catch(e => {
                             errLogger.error(e.stack);
                             return null;
