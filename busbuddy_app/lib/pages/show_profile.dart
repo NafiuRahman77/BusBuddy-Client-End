@@ -152,10 +152,34 @@ class _ShowProfileState extends State<ShowProfile> {
             style: TextStyle(fontSize: 16.0),
           ),
           SizedBox(height: 12.0),
-          Text(
-            '${globel.userType}',
-            style: TextStyle(fontSize: 16.0),
-          ),
+          if (globel.userType == "student")
+            // Text(
+            //   'Student',
+            //   style: TextStyle(fontSize: 16.0),
+            // ),
+            // show student icon
+            Icon(
+              Icons.school,
+              size: 30.0,
+              color: Color.fromARGB(255, 5, 101, 146),
+            ),
+          if (globel.userType == "buet_staff")
+
+            // show teacher icon
+            Icon(
+              // office related icon
+              Icons.cases_sharp,
+              size: 30.0,
+              color: Color.fromARGB(255, 5, 101, 146),
+            ),
+          if (globel.userType == "bus_staff")
+
+            // show bus staff icon
+            Icon(
+              Icons.directions_bus,
+              size: 30.0,
+              color: Color.fromARGB(255, 5, 101, 146),
+            ),
           SizedBox(height: 40.0),
           userCard,
         ],
