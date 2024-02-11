@@ -1181,13 +1181,14 @@ app.post('/api/updateStaffLocation', (req,res) => {
                 latitude: req.body.latitude, 
                 longitude: req.body.longitude
             };
-            trip.time_list.forEach( async tp => {
+            trip.time_list.forEach( async (tp, i, arr) => {
                 let p_coords = tracking.stationCoords.get(tp.station);
                 let dist = geolib.getDistance(p_coords, r_coord);
                 historyLogger.debug(dist);               
                 if (dist <= 180 && tp.time == null) {
                     consoleLogger.info(trip.id + " reached " + tp.station);
                     tp.time = new Date();
+                    if (i < arr.length-2) consoleLogger.info(arr[i+1]);
                 };
             });
             trip.path.push(r_coord);
