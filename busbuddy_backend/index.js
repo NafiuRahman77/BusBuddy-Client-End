@@ -1335,11 +1335,11 @@ process.stdin.on('keypress', async (chunk, key) => {
             //     title : 'Title of notification',
             //     body : 'Body of notification'
             // },
-            // android: {
-            //     notification: {
-            //       channel_id: "busbuddy_broadcast"
-            //     }
-            // },
+            android: {
+                notification: {
+                  channel_id: "busbuddy_broadcast"
+                }
+            },
             token : token
         };
 
