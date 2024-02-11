@@ -32,13 +32,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String phoneNo = "";
   String id = "";
   String residence = "";
-  List<String> route_ids = [];
-  List<String> route_names = [];
   List<String> station_ids = [];
   List<String> station_names = [];
-  String selectedOption = "";
+  String selectedOption = globel.userDefaultRouteName;
   String selectedId = "";
-  String selectedStationOption = "";
+  String selectedStationOption = globel.userDefaultStationName;
   String selectedStationId = "";
   @override
   void initState() {
@@ -108,25 +106,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           fontSize: 16.0);
     }
     //print(r.content());
-    var r1 = await Requests.post(globel.serverIp + 'getRoutes');
 
-    r1.raiseForStatus();
-    List<dynamic> json1 = r1.json();
-    // print(r1.content());
-    // json1.forEach((element) {
-    //   routes.add(new Route(element['id'], element['terminal_point']));
-    // });
-    setState(() {
-      for (int i = 0; i < json1.length; i++) {
-        route_ids.add(json1[i]['id']);
-        route_names.add(json1[i]['terminal_point']);
-        if (json1[i]['id'] == defaultRoute) {
-          selectedId = route_ids[i];
-          selectedOption = route_names[i];
-        }
+    for (int i = 0; i < globel.routeIDs.length; i++) {
+      if (globel.routeIDs[i] == globel.userDefaultRouteId) {
+        selectedId = globel.routeIDs[i];
+        selectedOption = globel.routeNames[i];
       }
-    });
-
+    }
     context.loaderOverlay.hide();
     onRouteSelect(defaultRoute);
   }
@@ -252,7 +238,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       globel.userPhone = phn_no;
       globel.userDefaultRouteId = def_route;
       globel.userDefaultStationId = stn;
-      globel.userDefaultRouteName = route_names[route_ids.indexOf(def_route)];
+      globel.userDefaultRouteName =
+          globel.routeNames[globel.routeIDs.indexOf(def_route)];
       globel.userDefaultStationName = station_names[station_ids.indexOf(stn)];
     }
     if (globel.userType == "bus_staff") {
@@ -327,8 +314,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         setState(() {
                           selectedOption = value!;
                           // print(selectedOption);
-                          int idx = route_names.indexOf(selectedOption);
-                          selectedId = route_ids[idx];
+                          int idx = globel.routeNames.indexOf(selectedOption);
+                          selectedId = globel.routeIDs[idx];
                           station_ids.clear();
                           station_names.clear();
                         });
@@ -339,7 +326,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           selectedStationOption = station_names[0];
                         });
                       },
-                      items: route_names
+                      items: globel.routeNames
                           .map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,

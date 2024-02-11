@@ -20,7 +20,6 @@ class _trackingState extends State<Tracking> {
   List<dynamic> trackingData = [];
   List<dynamic> station_coords = [];
   bool loadedRouteTimeData = false;
-  List<String> route_ids = [], route_names = [];
   String selectedRouteName = "";
   String selectedRouteId = "";
   String choice = "0";
@@ -36,25 +35,15 @@ class _trackingState extends State<Tracking> {
     if (globel.userType != "student") {
       globel.userDefaultRouteId = "4";
       globel.userDefaultRouteName =
-          route_names[route_ids.indexOf(globel.userDefaultRouteId)];
+          globel.routeNames[globel.routeIDs.indexOf(globel.userDefaultRouteId)];
     }
 
-    var r1 = await Requests.post(globel.serverIp + 'getRoutes');
-    r1.raiseForStatus();
-    List<dynamic> json1 = r1.json();
-    setState(() {
-      for (int i = 0; i < json1.length; i++) {
-        route_ids.add(json1[i]['id']);
-        route_names.add(json1[i]['terminal_point']);
-        if (json1[i]['id'] == globel.userDefaultRouteId) {
-          selectedRouteId = route_ids[i];
-          selectedRouteName = route_names[i];
-        }
+    for (int i = 0; i < globel.routeIDs.length; i++) {
+      if (globel.routeIDs[i] == globel.userDefaultRouteId) {
+        selectedRouteId = globel.routeIDs[i];
+        selectedRouteName = globel.routeNames[i];
       }
-    });
-    route_names.forEach((element) {
-      print(element);
-    });
+    }
 
     var r2 = await Requests.post(globel.serverIp + 'getStations');
     r2.raiseForStatus();
@@ -135,7 +124,7 @@ class _trackingState extends State<Tracking> {
                       },
                     ),
                     Text(
-                      'Route and Bus',
+                      'Route',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -193,12 +182,12 @@ class _trackingState extends State<Tracking> {
                       setState(() {
                         // Handle dropdown selection
                         selectedRouteName = value!;
-                        int idx = route_names.indexOf(selectedRouteName);
-                        selectedRouteId = route_ids[idx];
+                        int idx = globel.routeNames.indexOf(selectedRouteName);
+                        selectedRouteId = globel.routeIDs[idx];
                       });
                       onRouteSelect(selectedRouteId);
                     },
-                    items: route_names
+                    items: globel.routeNames
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
@@ -210,49 +199,6 @@ class _trackingState extends State<Tracking> {
               ),
               SizedBox(
                 height: 10,
-              ),
-              Align(
-                alignment: Alignment.topLeft,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    'Select Bus',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.withOpacity(0.9),
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: Colors.grey.withOpacity(0.5)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: DropdownButtonFormField<String>(
-                    value: selectedRouteName,
-                    onChanged: (value) {
-                      setState(() {
-                        // Handle dropdown selection
-                        selectedRouteName = value!;
-                        int idx = route_names.indexOf(selectedRouteName);
-                        selectedRouteId = route_ids[idx];
-                      });
-                      onRouteSelect(selectedRouteId);
-                    },
-                    items: route_names
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                ),
               ),
               SizedBox(
                 height: 15,

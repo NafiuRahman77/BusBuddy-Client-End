@@ -22,12 +22,12 @@ class _FeedbackFormState extends State<FeedbackForm> {
   bool confirmation = false;
   DateTime? selectedDate;
   TextEditingController feedbackController = TextEditingController();
-  List<String> route_ids = [];
-  List<String> route_names = [];
   String defaultRoute = "";
   String defaultRouteName = "";
-  String selectedRouteName = "";
+  String selectedRouteName = globel.userDefaultRouteName;
   String selectedRouteId = "";
+  String selectedShift = "Morning";
+  List<String> shiftList = ["Morning", "Afternoon", "Evening"];
   @override
   void initState() {
     super.initState();
@@ -46,6 +46,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
 
   Future<void> onCalendarMount() async {
     context.loaderOverlay.show();
+    globel.printWarning("hello");
+    print(globel.routeNames);
     var r = await Requests.post(globel.serverIp + 'getDefaultRoute');
 
     r.raiseForStatus();
@@ -71,29 +73,14 @@ class _FeedbackFormState extends State<FeedbackForm> {
       }
     }
     print(r.content());
-    var r1 = await Requests.post(globel.serverIp + 'getRoutes');
 
-    r1.raiseForStatus();
-    List<dynamic> json1 = r1.json();
-    // json1.forEach((element) {
-    //   routes.add(new Route(element['id'], element['terminal_point']));
-    // });
-    setState(() {
-      route_ids.add("");
-      route_names.add("Select...");
-      for (int i = 0; i < json1.length; i++) {
-        route_ids.add(json1[i]['id']);
-        route_names.add(json1[i]['terminal_point']);
-        if (json1[i]['id'] == defaultRoute) {
-          selectedRouteId = route_ids[i];
-          selectedRouteName = route_names[i];
-        }
+    for (int i = 0; i < globel.routeIDs.length; i++) {
+      if (globel.routeIDs[i] == globel.userDefaultRouteId) {
+        selectedRouteId = globel.routeIDs[i];
+        selectedRouteName = globel.routeNames[i];
       }
-    });
+    }
 
-    route_names.forEach((element) {
-      print(element);
-    });
     // If the server did return a 201 CREATED response,
     // then parse the JSON.
     //print('bb: ${jsonDecode(response.body)['email']}');
@@ -139,8 +126,6 @@ class _FeedbackFormState extends State<FeedbackForm> {
 
   Future<bool> submitFeedback() async {
     context.loaderOverlay.show();
-    print("hello");
-
     String timestampStr;
     if (selectedDate == null)
       timestampStr = '';
@@ -179,6 +164,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
           'route': selectedRouteId,
           'submission_timestamp': DateTime.now().toIso8601String(),
           'timestamp': timestampStr,
+          //  'shift': selectedShift, // JALAL ETA BACKEND E ADD KORO
           'text': feedbackController.text,
           'subject': jsonEncode(selectedSubject),
         },
@@ -350,11 +336,11 @@ class _FeedbackFormState extends State<FeedbackForm> {
                         // Handle dropdown selection
                         selectedRouteName = value!;
                         // print(selectedOption);
-                        int idx = route_names.indexOf(selectedRouteName);
-                        selectedRouteId = route_ids[idx];
+                        int idx = globel.routeNames.indexOf(selectedRouteName);
+                        selectedRouteId = globel.routeIDs[idx];
                       });
                     },
-                    items: route_names
+                    items: globel.routeNames
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
@@ -400,6 +386,40 @@ class _FeedbackFormState extends State<FeedbackForm> {
                     ),
                   ),
                 ],
+              ),
+              SizedBox(height: 16.0),
+              Container(
+                margin: const EdgeInsets.only(left: 10.0, top: 16.0, bottom: 5),
+                child: Text(
+                  'Select Shift',
+                  style: TextStyle(
+                    color: Color(0xFF781B1B),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12.0,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10, bottom: 5, right: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: shiftList.map((String value) {
+                    return Row(
+                      children: [
+                        Radio<String>(
+                          value: value,
+                          groupValue: selectedShift,
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedShift = newValue!;
+                            });
+                          },
+                        ),
+                        Text(value),
+                      ],
+                    );
+                  }).toList(),
+                ),
               ),
               SizedBox(height: 30),
               Container(
