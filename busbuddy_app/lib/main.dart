@@ -73,7 +73,7 @@ void main() async {
     'busbuddy_broadcast',
     'Notice Broadcasts',
     description: 'Receive regular announcements and updates.',
-    importance: Importance.high,
+    importance: Importance.max,
   );
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
@@ -89,19 +89,19 @@ void main() async {
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
     print("received fcm: ${message.data}");
-    // if (message.notification != null) {
-    //   const AndroidNotificationDetails androidNotificationDetails =
-    //       AndroidNotificationDetails('busbuddy_broadcast', 'Broadcast Notices',
-    //           channelDescription: 'Receive regular announcements and updates.',
-    //           importance: Importance.max,
-    //           priority: Priority.high,
-    //           ticker: 'ticker');
-    //   const NotificationDetails notificationDetails =
-    //       NotificationDetails(android: androidNotificationDetails);
-    //   await flutterLocalNotificationsPlugin.show(
-    //       0, message.data['title'], message.data['body'], notificationDetails,
-    //       payload: 'item x');
-    // }
+    if (message.notification != null) {
+      const AndroidNotificationDetails androidNotificationDetails =
+          AndroidNotificationDetails('busbuddy_broadcast', 'Notice Broadcasts',
+              channelDescription: 'Receive regular announcements and updates.',
+              importance: Importance.max,
+              priority: Priority.high,
+              ticker: 'ticker');
+      const NotificationDetails notificationDetails =
+          NotificationDetails(android: androidNotificationDetails);
+      await flutterLocalNotificationsPlugin.show(0, message.notification?.title,
+          message.notification?.body, notificationDetails,
+          payload: 'item x');
+    }
   });
 
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {

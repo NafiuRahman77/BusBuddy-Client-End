@@ -1337,7 +1337,8 @@ process.stdin.on('keypress', async (chunk, key) => {
             },
             android: {
                 notification: {
-                  channel_id: "busbuddy_broadcast"
+                  channel_id: "busbuddy_broadcast",
+                  default_sound: true,
                 }
             },
             token : token
