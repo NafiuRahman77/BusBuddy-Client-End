@@ -153,11 +153,6 @@ class _ShowProfileState extends State<ShowProfile> {
           ),
           SizedBox(height: 12.0),
           if (globel.userType == "student")
-            // Text(
-            //   'Student',
-            //   style: TextStyle(fontSize: 16.0),
-            // ),
-            // show student icon
             Icon(
               Icons.school,
               size: 30.0,
