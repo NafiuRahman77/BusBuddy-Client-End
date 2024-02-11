@@ -10,6 +10,7 @@ import 'package:busbuddy_app/pages/ticket_qr.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'firebase_options.dart';
 import 'package:path_provider/path_provider.dart';
@@ -38,25 +39,36 @@ import 'package:loader_overlay/loader_overlay.dart';
 
 import 'globel.dart' as globel;
 
+@pragma('vm:entry-point')
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
 @pragma(
     'vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
 void main() async {
   initializeShurjopay(environment: "sandbox");
   Requests.setStoredCookies(globel.serverAddr, globel.cookieJar);
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  NotificationSettings settings =
-      await FirebaseMessaging.instance.requestPermission(
+  await FirebaseMessaging.instance.requestPermission(
     alert: true,
-    announcement: false,
+    announcement: true,
     badge: true,
     carPlay: false,
     criticalAlert: false,
     provisional: false,
     sound: true,
   );
+
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/launcher_icon');
+  final InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
   FirebaseMessaging.instance.getToken().then((value) {
     print("token: $value");
@@ -67,6 +79,19 @@ void main() async {
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
     print("received fcm: ${message.data}");
+    if (message.notification != null) {
+      const AndroidNotificationDetails androidNotificationDetails =
+          AndroidNotificationDetails('busbuddy_broadcast', 'Broadcast Notices',
+              channelDescription: 'Receive regular announcements and updates.',
+              importance: Importance.max,
+              priority: Priority.high,
+              ticker: 'ticker');
+      const NotificationDetails notificationDetails =
+          NotificationDetails(android: androidNotificationDetails);
+      await flutterLocalNotificationsPlugin.show(0, message.notification?.title,
+          message.notification?.body, notificationDetails,
+          payload: 'item x');
+    }
   });
 
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
@@ -94,6 +119,19 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("bg message handler");
   // runApp(BusBuddyApp());
   // main();
+  if (message.notification != null) {
+    const AndroidNotificationDetails androidNotificationDetails =
+        AndroidNotificationDetails('busbuddy_broadcast', 'Broadcast Notices',
+            channelDescription: 'Receive regular announcements and updates.',
+            importance: Importance.max,
+            priority: Priority.high,
+            ticker: 'ticker');
+    const NotificationDetails notificationDetails =
+        NotificationDetails(android: androidNotificationDetails);
+    await flutterLocalNotificationsPlugin.show(0, message.notification?.title,
+        message.notification?.body, notificationDetails,
+        payload: 'item x');
+  }
 }
 
 class BusBuddyApp extends StatelessWidget {
