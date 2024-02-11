@@ -800,7 +800,7 @@ app.post('/api/getTrackingData', async (req, res) => {
 });
 
 // app.post('/api/sendRepairRequest', (req,res) => {
-//     //send a dummy response
+//     
 //     consoleLogger.info(req.body);
 //     res.send({
 //         success: true,
@@ -808,7 +808,7 @@ app.post('/api/getTrackingData', async (req, res) => {
 // });
 
 // app.post('/api/getRepairRequest', (req,res) => {
-//     //send a dummy response
+//     
 //     consoleLogger.info(req.body);
 //     res.send({
 //         success: true,
@@ -855,7 +855,7 @@ app.post('/api/getTrackingData', async (req, res) => {
 // }
 // );
 // app.post('/api/getNotifications', (req,res) => {
-//     //send a dummy response
+//     
 //     consoleLogger.info(req.body);
 //     res.send({
 //         success: true,
@@ -874,7 +874,7 @@ app.post('/api/getTrackingData', async (req, res) => {
 // });
 // //send real time notification api
 // app.post('/api/sendNotification', (req,res) => {
-//     //send a dummy response
+//     
 //     consoleLogger.info(req.body);
 //     res.send({
 //         success: true,
@@ -883,7 +883,7 @@ app.post('/api/getTrackingData', async (req, res) => {
 
 // // Teacher bill payment api
 // app.post('/api/payBill', (req,res) => {
-//     //send a dummy response
+//     
 //     consoleLogger.info(req.body);
 //     res.send({
 //         success: true,
@@ -893,7 +893,7 @@ app.post('/api/getTrackingData', async (req, res) => {
 
 // // Teacher bill history api
 // app.post('/api/getBillHistory', (req,res) => {
-//     //send a dummy response
+//     
 //     consoleLogger.info(req.body);
 //     res.send({
 //         success: true,
@@ -916,7 +916,7 @@ app.post('/api/getTrackingData', async (req, res) => {
 //get route details
 //get nearest station
 app.post('/api/getNearestStation', (req,res) => {
-    //send a dummy response
+    
     consoleLogger.info(req.body);
     let minDist = 1000000, nearestId, nearestCoord;
     tracking.stationCoords.forEach( async (st, st_id) => {
@@ -937,7 +937,7 @@ app.post('/api/getNearestStation', (req,res) => {
 });
 
 // app.post('/api/getRouteFromStation', (req,res) => {
-//     //send a dummy response
+//     
 //     consoleLogger.info(req.body);
 //     res.send([
 //     {"id":"00000451","start_timestamp":"2023-09-11T00:40:00.000Z","route":"3","array_to_json":[{"station":"17","time":"2023-09-11T06:40:00+06:00"},{"station":"18","time":"2023-09-11T06:42:00+06:00"},{"station":"19","time":"2023-09-11T06:44:00+06:00"},{"station":"20","time":"2023-09-11T06:46:00+06:00"},{"station":"21","time":"2023-09-11T06:48:00+06:00"},{"station":"22","time":"2023-09-11T06:50:00+06:00"},{"station":"23","time":"2023-09-11T06:52:00+06:00"},{"station":"24","time":"2023-09-11T06:54:00+06:00"},{"station":"25","time":"2023-09-11T06:57:00+06:00"},{"station":"26","time":"2023-09-11T07:00:00+06:00"},{"station":"70","time":"2023-09-11T07:15:00+06:00"}],"bus":"Ba-24-8518"},
@@ -971,7 +971,7 @@ app.post('/api/checkStaffRunningTrip', async (req,res) => {
   
 //get trip data
 app.post('/api/getStaffTrips', (req,res) => {
-    //send a dummy response
+    
     if (req.session.userid && req.session.user_type=="bus_staff") {
         consoleLogger.info(req.body);
         dbclient.query(
@@ -1038,12 +1038,12 @@ app.post('/api/startTrip', (req,res) => {
                         tracking.busStaffMap.set (newTrip.driver, newTrip.id);
                         tracking.busStaffMap.set (newTrip.helper, newTrip.id);
                         let notif_list;  
-                        consoleLogger.info("trying to get list for notif");
+                        // consoleLogger.info("trying to get list for notif");
                         dbclient.query(
                             `select array(select distinct s.sess->>'fcm_id' from session s, student st 
                             where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_route=$1)`, [newTrip.route]
                         ).then(qres => {
-                            consoleLogger.info('why -_-   ' + qres);
+                            historyLogger.debug(qres);
                             notif_list = [...qres.rows[0].array];
                             if (notif_list) {
                                 consoleLogger.info(notif_list);
@@ -1055,17 +1055,20 @@ app.post('/api/startTrip', (req,res) => {
                                     notification:{
                                       title : 'Your bus is arriving',
                                       body : `Trip #${newTrip.id} has started on Route#${newTrip.route}`,
-                                      android: {
-                                        priority: 'high',
-                                      },
-                                    }
+                                    },
+
+                                    android: {
+                                        notification: {
+                                          channel_id: "busbuddy_broadcast",
+                                          default_sound: true,
+                                        }
+                                    },
+                                    token : token
                                 };
-                                FCM.sendToMultipleToken(message, notif_list, function(err, response) {
-                                      if (err) {
-                                          consoleLogger.info('err--', err);
-                                      } else {
-                                          consoleLogger.info('response-----', response);
-                                      };
+                        
+                                FCM.send(message, function(err, response) {
+                                    if (err) errLogger.error (err);
+                                    else historyLogger.debug (response);
                                 });
                             };
                             res.send({ 
@@ -1168,7 +1171,7 @@ app.post('/api/endTrip', async (req,res) => {
 // });
 
 app.post('/api/updateStaffLocation', (req,res) => {
-    //send a dummy response
+    
     if (req.session.userid && req.session.user_type=="bus_staff") {
         consoleLogger.info(req.body);
         let t_id = tracking.busStaffMap.get(req.session.userid);
@@ -1200,7 +1203,7 @@ app.post('/api/updateStaffLocation', (req,res) => {
 });
 
 app.post('/api/staffScanTicket', (req,res) => {
-    //send a dummy response
+    
     if (req.session.userid && req.session.user_type=="bus_staff") {
         consoleLogger.info(req.body);
         let t_id = tracking.busStaffMap.get(req.session.userid);
@@ -1233,7 +1236,7 @@ app.post('/api/staffScanTicket', (req,res) => {
 });
 
 app.post('/api/broadcastNotification', (req,res) => {
-    //send a dummy response
+    
     consoleLogger.info(req.body);
     dbclient.query(
         `select array(select distinct sess->>'fcm_id' from session where sess->>'fcm_id' is not null)`, 
@@ -1244,17 +1247,18 @@ app.post('/api/broadcastNotification', (req,res) => {
                 title: req.body.nTitle,
                 body: req.body.nBody,
             },
-            // android: {
-            //     priority: 'high',
-            //     notification: {
-            //         icon: 'stock_ticker_update',
-            //         color: '#7b7b7b',
-            //     },
-            // },
+            android: {
+                notification: {
+                  channel_id: "busbuddy_broadcast",
+                  default_sound: true,
+                }
+            },
+            token : token
         };
-        FCM.sendToMultipleToken(message, tokenList, function(err, response) {
-            if (err) errLogger.error(err);
-            else historyLogger.debug(response);
+
+        FCM.send(message, function(err, response) {
+            if (err) errLogger.error (err);
+            else historyLogger.debug (response);
         });
     }).then(r => {
         res.send({
