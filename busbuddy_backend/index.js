@@ -1328,13 +1328,13 @@ process.stdin.on('keypress', async (chunk, key) => {
         var token = 'dVj_grVZT82cpXtN9RZUEr:APA91bHjgnFIoOTDcMO4h6Ma7dXNbBQMVbEkMnjy_8rBhPyfTJQwmxASrat1UPDyc5zLoaRIOR57gMVZH9G5LyeuIjcGBmMgkNE-rCsDni_vkPh1i-0xlwzaiYeoVz3L9KxuCrluaiuV';
         var message = {
             data: {    //This is only optional, you can send any data
-                score: 'nnnnnn',
-                time: (new Date()).toLocaleTimeString(),
-            },
-            notification:{
                 title : 'Title of notification',
                 body : 'Body of notification'
             },
+            // notification:{
+            //     title : 'Title of notification',
+            //     body : 'Body of notification'
+            // },
             // android: {
             //     notification: {
             //       channel_id: "busbuddy_broadcast"

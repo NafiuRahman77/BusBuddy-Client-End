@@ -88,8 +88,8 @@ void main() async {
               ticker: 'ticker');
       const NotificationDetails notificationDetails =
           NotificationDetails(android: androidNotificationDetails);
-      await flutterLocalNotificationsPlugin.show(0, message.notification?.title,
-          message.notification?.body, notificationDetails,
+      await flutterLocalNotificationsPlugin.show(
+          0, message.data['title'], message.data['body'], notificationDetails,
           payload: 'item x');
     }
   });
@@ -117,8 +117,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   print("bg message handler");
-  // runApp(BusBuddyApp());
-  // main();
   if (message.notification != null) {
     const AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails('busbuddy_broadcast', 'Broadcast Notices',
@@ -128,8 +126,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
             ticker: 'ticker');
     const NotificationDetails notificationDetails =
         NotificationDetails(android: androidNotificationDetails);
-    await flutterLocalNotificationsPlugin.show(0, message.notification?.title,
-        message.notification?.body, notificationDetails,
+    await flutterLocalNotificationsPlugin.show(
+        0, message.data['title'], message.data['body'], notificationDetails,
         payload: 'item x');
   }
 }
