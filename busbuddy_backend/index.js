@@ -1186,9 +1186,44 @@ app.post('/api/updateStaffLocation', (req,res) => {
                 let dist = geolib.getDistance(p_coords, r_coord);
                 historyLogger.debug(dist);               
                 if (dist <= 180 && tp.time == null) {
-                    consoleLogger.info(trip.id + " reached " + tp.station);
+                    consoleLogger.info(trip.id + " crossed " + tp.station);
                     tp.time = new Date();
-                    if (i < arr.length-2) consoleLogger.info(arr[i+1]);
+                    if (i < arr.length-2) {
+                        nextStation = arr[i+1].station;
+                        consoleLogger.info("coming up next: " + nextStation);
+                        let notif_list;  
+                        // consoleLogger.info("trying to get list for notif");
+                        dbclient.query(
+                            `select array(select distinct s.sess->>'fcm_id' from session s, student st 
+                            where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_station=$1)`, [nextStation]
+                        ).then(qres3 => {
+                            historyLogger.debug(qres3);
+                            notif_list = [...qres3.rows[0].array];
+                            if (notif_list) {
+                                consoleLogger.info(notif_list);
+                                let message = {
+                                    notification:{
+                                      title : 'Your bus is very close to your stop.',
+                                      body : `Trip #${newTrip.id} has crossed ${tp.station} and is approaching ${nextStation}`,
+                                    },
+                                    android: {
+                                        notification: {
+                                          channel_id: "busbuddy_broadcast",
+                                          default_sound: true,
+                                        }
+                                    },
+                                };
+                        
+                                FCM.sendToMultipleToken (message, notif_list, function(err, response) {
+                                    if (err) errLogger.error (err);
+                                    else historyLogger.debug (response);
+                                });
+                            };
+                        }).catch(e => {
+                            errLogger.error(e.stack);
+                            return null;
+                        });
+                    };
                 };
             });
             trip.path.push(r_coord);
