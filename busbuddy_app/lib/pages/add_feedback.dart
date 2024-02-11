@@ -46,6 +46,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
 
   Future<void> onCalendarMount() async {
     context.loaderOverlay.show();
+    globel.printWarning("hello");
+    print(globel.routeNames);
     var r = await Requests.post(globel.serverIp + 'getDefaultRoute');
 
     r.raiseForStatus();
@@ -124,8 +126,6 @@ class _FeedbackFormState extends State<FeedbackForm> {
 
   Future<bool> submitFeedback() async {
     context.loaderOverlay.show();
-    print("hello");
-
     String timestampStr;
     if (selectedDate == null)
       timestampStr = '';

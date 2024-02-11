@@ -141,19 +141,35 @@ class _CollapsibleCardState extends State<CollapsibleCard> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Admin Response',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF781B1B),
-                                  fontSize: 20,
-                                ),
+                              Row(
+                                children: [
+                                  Icon(Icons.admin_panel_settings,
+                                      color: Color(0xFF781B1B)),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Admin Response',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF781B1B),
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                widget.responseMessage,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16,
+                              SizedBox(height: 8),
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Color(0xFF781B1B), width: 1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: EdgeInsets.all(16),
+                                child: Text(
+                                  widget.responseMessage,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ),
                             ],
