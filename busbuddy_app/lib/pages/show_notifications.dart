@@ -8,29 +8,6 @@ class Notifications extends StatefulWidget {
 }
 
 class _NotificationsState extends State<Notifications> {
-  // JALAL BACKEND THEKE PATHABE
-  List<Map<String, dynamic>> notifications = [
-    {
-      'title': 'Track a Bus',
-      'message': 'Your requested bus is 5 mins away from your location.',
-      'date': '2024-02-07',
-      'icon': Icons.directions_bus,
-    },
-    {
-      'title': 'Calendar Schedule',
-      'message': 'The bus schedule for tomorrow has been changed.',
-      'date': '2024-02-07',
-      'icon': Icons.event,
-    },
-    {
-      'title': 'Ticket Purchase',
-      'message':
-          'Your ticket purchase has been confirmed. Please check for the ticket details.',
-      'date': '2024-02-07',
-      'icon': Icons.confirmation_number,
-    },
-  ];
-
   List<String> notificationTitle = [];
   List<String> notificationBody = [];
   List<String> notificationTime = [];
