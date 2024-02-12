@@ -19,6 +19,11 @@ class _ShowRequisitionState extends State<ShowRequisition> {
   List<String> routeList = [];
   List<String> bustypeList = [];
   List<String> sourceList = [];
+  List<String> responseList = [];
+  List<String> isApproved = [];
+  List<String> approvedDrivers = [];
+  List<String> approvedHelpers = [];
+  List<String> approvedBus = [];
 
   @override
   void initState() {
@@ -49,6 +54,24 @@ class _ShowRequisitionState extends State<ShowRequisition> {
         else
           approvedList.add('');
         sourceList.add(json[i]['source']);
+        if (json[i]['remarks'] == null)
+          responseList.add('');
+        else
+          responseList.add(json[i]['remarks']);
+        if (json[i]['is_approved'] == null)
+          isApproved.add('');
+        else
+          isApproved
+              .add(json[i]['is_approved'] == true ? 'Approved' : 'Rejected');
+        if (json[i]['driver'] == null) {
+          approvedDrivers.add('');
+          approvedHelpers.add('');
+          approvedBus.add('');
+        } else {
+          approvedDrivers.add(json[i]['driver']);
+          approvedHelpers.add(json[i]['helper']);
+          approvedBus.add(json[i]['bus']);
+        }
       }
     });
     context.loaderOverlay.hide();
@@ -65,11 +88,16 @@ class _ShowRequisitionState extends State<ShowRequisition> {
               subject: reasonList[index],
               shortMessage: descriptionList[index],
               fullMessage: descriptionList[index],
-              verdict: approvedList[index].isEmpty ? '' : approvedList[index],
+              verdict: approvedList[index],
               date: timeList[index].substring(0, 10),
               location: routeList[index],
               bus_type: bustypeList[index],
               source: sourceList[index],
+              isApproved: isApproved[index],
+              response: responseList[index],
+              driver: approvedDrivers[index],
+              helper: approvedHelpers[index],
+              bus: approvedBus[index],
             );
           },
         ),

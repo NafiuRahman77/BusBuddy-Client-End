@@ -8,7 +8,12 @@ class Req_CollapsibleCard extends StatefulWidget {
   final String shortMessage;
   final String fullMessage;
   final String verdict;
+  final String response;
   final String source;
+  final String isApproved;
+  final String driver;
+  final String helper;
+  final String bus;
 
   Req_CollapsibleCard({
     required this.subject,
@@ -19,6 +24,11 @@ class Req_CollapsibleCard extends StatefulWidget {
     required this.bus_type,
     required this.source,
     this.verdict = "",
+    this.response = "",
+    required this.isApproved,
+    required this.driver,
+    required this.helper,
+    required this.bus,
   });
 
   @override
@@ -43,10 +53,85 @@ class _ReqCollapsibleCardState extends State<Req_CollapsibleCard> {
     return "Bus - 52 seats";
   }
 
+  Widget _buildResponseBox(String isApproved, String response) {
+    Color textColor = isApproved == "Approved" ? Colors.green : Colors.red;
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: textColor),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            response,
+            style: TextStyle(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8.0),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(),
+              ),
+              Text(
+                isApproved == "Rejected"
+                    ? 'Rejected By: ${widget.verdict}'
+                    : 'Approved By: ${widget.verdict}',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          if (isApproved == "Approved") ...[
+            SizedBox(height: 8.0),
+            Text(
+              'Driver: ${widget.driver}',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            Text(
+              'Helper: ${widget.helper}',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            Text(
+              'Bus: ${widget.bus}',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool hasResponse = widget.verdict.isNotEmpty;
-    Color? backgroundColor = hasResponse ? Colors.green[50] : Colors.red[50];
+    print(widget.isApproved);
+    Color? backgroundColor;
+    if (widget.isApproved != "") {
+      bool hasResponse = widget.isApproved == "Approved" ? true : false;
+      backgroundColor = hasResponse ? Colors.green[50] : Colors.red[50];
+    } else
+      backgroundColor = Colors.white;
+
     String conc_btype = '';
     List<String> stringList =
         widget.bus_type.replaceAll('{', '').replaceAll('}', '').split(',');
@@ -187,7 +272,8 @@ class _ReqCollapsibleCardState extends State<Req_CollapsibleCard> {
                       ),
                     ),
                   ),
-                  if (hasResponse)
+                  if (widget.isApproved != "" &&
+                      widget.isApproved == "Approved")
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -202,7 +288,7 @@ class _ReqCollapsibleCardState extends State<Req_CollapsibleCard> {
                               ),
                               SizedBox(width: 8),
                               Text(
-                                'Response Provided',
+                                'Request Status : Approved',
                                 style: TextStyle(
                                   color: Colors.green,
                                   fontSize: 16,
@@ -211,19 +297,16 @@ class _ReqCollapsibleCardState extends State<Req_CollapsibleCard> {
                             ],
                           ),
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 4.0),
-                          child: Text(
-                            'Approved By : ${widget.verdict}',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                        )
+                        SizedBox(
+                          height: 10,
+                        ),
+                        _buildResponseBox(
+                          "Approved",
+                          widget.response,
+                        ),
                       ],
                     )
-                  else
+                  else if (widget.isApproved == "")
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -247,6 +330,39 @@ class _ReqCollapsibleCardState extends State<Req_CollapsibleCard> {
                             ],
                           ),
                         )
+                      ],
+                    )
+                  else
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 4.0, left: 4.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.circle,
+                                color: Colors.red,
+                                size: 10,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'Request Status : Rejected',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        _buildResponseBox(
+                          "Rejected",
+                          widget.response,
+                        ),
                       ],
                     ),
                 ],
