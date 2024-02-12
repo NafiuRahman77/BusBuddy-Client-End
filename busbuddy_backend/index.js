@@ -713,8 +713,12 @@ app.post('/api/getUserRequisition', (req, res) => {
     historyLogger.debug(req.session);
     if (req.session.userid) {
         dbclient.query(
-           `select r.*, a.driver, a.helper, a.bus from requisition r, allocation a 
-           where r.requestor_id = $1 and a.id = r.allocation_id;`, [req.session.userid]
+           `
+           select r.*, a.driver, a.helper, a.bus from requisition r, allocation a 
+           where r.requestor_id = $1 and (a.id = r.allocation_id )
+           union
+           select *, null as driver, null as helper, null as bus from requisition 
+           where requestor_id=$1 and allocation_id is null`, [req.session.userid]
         ).then(qres => {
             historyLogger.debug(qres);
             res.send(qres.rows);
