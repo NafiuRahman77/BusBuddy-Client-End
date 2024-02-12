@@ -225,6 +225,15 @@ class _LoginPageState extends State<LoginPage> {
 
     if (json['success'] == true) {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+      String pref_id = prefs.getString("student_id") ?? "";
+      if (pref_id != "") {
+        if (id != pref_id) {
+          prefs.setStringList('noti_title', []);
+          prefs.setStringList('noti_body', []);
+        }
+      }
+      // set student id to shared pref
+      prefs.setString('student_id', id);
       print("..........");
       CookieJar cj = await Requests.getStoredCookies(
           Requests.getHostname(globel.serverIp));

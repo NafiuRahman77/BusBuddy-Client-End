@@ -98,7 +98,7 @@ class _NotificationsState extends State<Notifications> {
                               notification_title,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12.0,
+                                fontSize: 14.0,
                                 color: Colors.black, // Text color
                               ),
                             ),
@@ -108,7 +108,7 @@ class _NotificationsState extends State<Notifications> {
                         Text(
                           notification_body ?? '',
                           style: TextStyle(
-                            fontSize: 14.0,
+                            fontSize: 12.0,
                             color: Colors.black, // Text color
                           ),
                         ),

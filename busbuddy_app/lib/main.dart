@@ -863,8 +863,8 @@ class HomeViewState extends State<HomeView> {
                                   textColor: Colors.white,
                                   fontSize: 16.0);
                             }
-                            GoRouter.of(context).go("/login");
                             context.loaderOverlay.hide();
+                            GoRouter.of(context).go("/login");
                           },
                         ),
                       ],
