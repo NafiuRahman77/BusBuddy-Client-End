@@ -713,7 +713,12 @@ app.post('/api/getUserRequisition', (req, res) => {
     historyLogger.debug(req.session);
     if (req.session.userid) {
         dbclient.query(
-           `select * from requisition where requestor_id = $1`, [req.session.userid]
+           `
+           select r.*, a.driver, a.helper, a.bus from requisition r, allocation a 
+           where r.requestor_id = $1 and (a.id = r.allocation_id )
+           union
+           select *, null as driver, null as helper, null as bus from requisition 
+           where requestor_id=$1 and allocation_id is null`, [req.session.userid]
         ).then(qres => {
             historyLogger.debug(qres);
             res.send(qres.rows);
@@ -1036,14 +1041,20 @@ app.post('/api/startTrip', (req,res) => {
                         tracking.runningTrips.set (newTrip.id, newTrip);
                         tracking.busStaffMap.set (newTrip.driver, newTrip.id);
                         tracking.busStaffMap.set (newTrip.helper, newTrip.id);
+
+                        res.send({ 
+                            success: true,
+                            ...tracking.runningTrips.get(newTrip.id),
+                        });
+
                         let notif_list;  
                         // consoleLogger.info("trying to get list for notif");
                         dbclient.query(
                             `select array(select distinct s.sess->>'fcm_id' from session s, student st 
                             where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_route=$1)`, [newTrip.route]
-                        ).then(qres => {
-                            historyLogger.debug(qres);
-                            notif_list = [...qres.rows[0].array];
+                        ).then(qres3 => {
+                            historyLogger.debug(qres3);
+                            notif_list = [...qres3.rows[0].array];
                             if (notif_list) {
                                 consoleLogger.info(notif_list);
                                 let message = {
@@ -1051,6 +1062,9 @@ app.post('/api/startTrip', (req,res) => {
                                     //   score: '850',
                                     //   time: '2:45'
                                     // },
+                                    data: {
+                                        nType: 'route_started',
+                                    },
                                     notification:{
                                       title : 'Your bus is arriving',
                                       body : `Trip #${newTrip.id} has started on Route#${newTrip.route}`,
@@ -1069,10 +1083,6 @@ app.post('/api/startTrip', (req,res) => {
                                     else historyLogger.debug (response);
                                 });
                             };
-                            res.send({ 
-                                success: true,
-                                ...tracking.runningTrips.get(newTrip.id),
-                            });
                         }).catch(e => {
                             errLogger.error(e.stack);
                             return null;
@@ -1179,13 +1189,52 @@ app.post('/api/updateStaffLocation', (req,res) => {
                 latitude: req.body.latitude, 
                 longitude: req.body.longitude
             };
-            trip.time_list.forEach( async tp => {
+            trip.time_list.forEach( async (tp, i, arr) => {
                 let p_coords = tracking.stationCoords.get(tp.station);
                 let dist = geolib.getDistance(p_coords, r_coord);
                 historyLogger.debug(dist);               
-                if (dist <= 180) {
-                    consoleLogger.info(trip.route);
+                if (dist <= 180 && tp.time == null) {
+                    consoleLogger.info(trip.id + " crossed " + tp.station);
                     tp.time = new Date();
+                    if (i < arr.length-2) {
+                        nextStation = arr[i+1].station;
+                        consoleLogger.info("coming up next: " + nextStation);
+                        let notif_list;  
+                        // consoleLogger.info("trying to get list for notif");
+                        dbclient.query(
+                            `select array(select distinct s.sess->>'fcm_id' from session s, student st 
+                            where st.id=sess->>'userid' and s.sess->>'fcm_id' is not null and st.default_station=$1)`, [nextStation]
+                        ).then(qres3 => {
+                            historyLogger.debug(qres3);
+                            notif_list = [...qres3.rows[0].array];
+                            if (notif_list) {
+                                consoleLogger.info(notif_list);
+                                let message = {
+                                    data: {
+                                        nType: 'station_approaching',
+                                    },
+                                    notification:{
+                                      title : 'Your bus is very close to your stop.',
+                                      body : `Trip #${trip.id} has crossed ${tp.station} and is approaching ${nextStation}`,
+                                    },
+                                    android: {
+                                        notification: {
+                                          channel_id: "busbuddy_broadcast",
+                                          default_sound: true,
+                                        }
+                                    },
+                                };
+                        
+                                FCM.sendToMultipleToken (message, notif_list, function(err, response) {
+                                    if (err) errLogger.error (err);
+                                    else historyLogger.debug (response);
+                                });
+                            };
+                        }).catch(e => {
+                            errLogger.error(e.stack);
+                            return null;
+                        });
+                    };
                 };
             });
             trip.path.push(r_coord);
@@ -1201,14 +1250,17 @@ app.post('/api/updateStaffLocation', (req,res) => {
 });
 
 app.post('/api/staffScanTicket', (req,res) => {
-    
     if (req.session.userid && req.session.user_type=="bus_staff") {
         consoleLogger.info(req.body);
         let t_id = tracking.busStaffMap.get(req.session.userid);
+        let route = tracking.runningTrips.get(t_id).route;
         dbclient.query(
-            `update ticket set trip_id=$1, is_used=true, scanned_by=$2 
-             where id=$3 and is_used=false returning student_id`, 
-             [t_id, req.session.user_id, req.body.ticket_id]
+            `with tk as (
+                update ticket set trip_id=$1, is_used=true, scanned_by=$2 
+                where id=$3 and is_used=false returning student_id
+            ) select student_id, 
+            array(select s.sess->>'fcm_id' from tk, session s where s.sess->>'userid' = tk.student_id) from tk`, 
+            [t_id, req.session.user_id, req.body.ticket_id]
         ).then(qres => {
             if (qres.rowCount === 1) {
                 let td = tracking.runningTrips.get(t_id);
@@ -1220,6 +1272,60 @@ app.post('/api/staffScanTicket', (req,res) => {
                     passenger_count: td.passenger_count.toString(),
                 });
                 
+                let notif_list = qres.rows[0].array;
+                if (notif_list) {
+                    consoleLogger.info(notif_list);
+                    let message = {
+                        data: {
+                          nType: 'ticket_used',
+                        },
+                        notification:{
+                          title : 'Ticket scanned successfully',
+                          body : `Your was scanned during Trip#${t_id} on Route#${route}`,
+                        },
+                        android: {
+                            notification: {
+                              channel_id: "busbuddy_broadcast",
+                              default_sound: true,
+                            }
+                        },
+                    };
+                    FCM.sendToMultipleToken (message, notif_list, function(err, response) {
+                        if (err) errLogger.error (err);
+                        else historyLogger.debug (response);
+                    });
+                };
+
+                dbclient.query(
+                    `select count(*) from ticket where student_id=$1 and is_used = false`, 
+                    [qres.rows[0].student_id,]
+                ).then(qres2 => {
+                    historyLogger.debug(qres2);
+                    if (qres2.rowCount === 1) { 
+                        let count = qres2.rows[0].count;
+                        if (count < 10) {
+                            let warning = {
+                                data: {
+                                  nType: 'ticket_low_warning',
+                                },
+                                notification:{
+                                  title : 'WARNING: Tickets running low!',
+                                  body : `You have less than 10 tickets remaining. Please buy more tickets to continue using the bus service.`,
+                                },
+                                android: {
+                                    notification: {
+                                      channel_id: "busbuddy_broadcast",
+                                      default_sound: true,
+                                    }
+                                },
+                            };
+                            FCM.sendToMultipleToken (warning, notif_list, function(err, response) {
+                                if (err) errLogger.error (err);
+                                else historyLogger.debug (response);
+                            });
+                        };
+                    };
+                }).catch(e => errLogger.error(e.stack));
             } else if (qres.rowCount === 0) {
                 res.send({
                     success: false,
@@ -1242,6 +1348,9 @@ app.post('/api/broadcastNotification', (req,res) => {
     ).then(qres => {
         let tokenList = [...qres.rows[0].array];
         let message = {
+            data: {
+                nType: 'broadcast',
+            },
             notification: {
                 title: req.body.nTitle,
                 body: req.body.nBody,
@@ -1253,7 +1362,6 @@ app.post('/api/broadcastNotification', (req,res) => {
                 }
             },
         };
-
         FCM.sendToMultipleToken (message, tokenList, function(err, response) {
             if (err) errLogger.error (err);
             else historyLogger.debug (response);
