@@ -21,6 +21,9 @@ class _ShowRequisitionState extends State<ShowRequisition> {
   List<String> sourceList = [];
   List<String> responseList = [];
   List<String> isApproved = [];
+  List<String> approvedDrivers = [];
+  List<String> approvedHelpers = [];
+  List<String> approvedBus = [];
 
   @override
   void initState() {
@@ -60,6 +63,15 @@ class _ShowRequisitionState extends State<ShowRequisition> {
         else
           isApproved
               .add(json[i]['is_approved'] == true ? 'Approved' : 'Rejected');
+        if (json[i]['driver'] == null) {
+          approvedDrivers.add('');
+          approvedHelpers.add('');
+          approvedBus.add('');
+        } else {
+          approvedDrivers.add(json[i]['driver']);
+          approvedHelpers.add(json[i]['helper']);
+          approvedBus.add(json[i]['bus']);
+        }
       }
     });
     context.loaderOverlay.hide();
@@ -83,6 +95,9 @@ class _ShowRequisitionState extends State<ShowRequisition> {
               source: sourceList[index],
               isApproved: isApproved[index],
               response: responseList[index],
+              driver: approvedDrivers[index],
+              helper: approvedHelpers[index],
+              bus: approvedBus[index],
             );
           },
         ),

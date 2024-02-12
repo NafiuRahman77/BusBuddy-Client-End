@@ -11,6 +11,9 @@ class Req_CollapsibleCard extends StatefulWidget {
   final String response;
   final String source;
   final String isApproved;
+  final String driver;
+  final String helper;
+  final String bus;
 
   Req_CollapsibleCard({
     required this.subject,
@@ -23,6 +26,9 @@ class Req_CollapsibleCard extends StatefulWidget {
     this.verdict = "",
     this.response = "",
     required this.isApproved,
+    required this.driver,
+    required this.helper,
+    required this.bus,
   });
 
   @override
@@ -74,8 +80,8 @@ class _ReqCollapsibleCardState extends State<Req_CollapsibleCard> {
               ),
               Text(
                 isApproved == "Rejected"
-                    ? 'Rejected By : ${widget.verdict}'
-                    : 'Approved By : ${widget.verdict}',
+                    ? 'Rejected By: ${widget.verdict}'
+                    : 'Approved By: ${widget.verdict}',
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
@@ -84,6 +90,33 @@ class _ReqCollapsibleCardState extends State<Req_CollapsibleCard> {
               ),
             ],
           ),
+          if (isApproved == "Approved") ...[
+            SizedBox(height: 8.0),
+            Text(
+              'Driver: ${widget.driver}',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            Text(
+              'Helper: ${widget.helper}',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            Text(
+              'Bus: ${widget.bus}',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ],
         ],
       ),
     );
