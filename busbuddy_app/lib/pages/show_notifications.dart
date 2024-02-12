@@ -33,6 +33,7 @@ class _NotificationsState extends State<Notifications> {
 
   List<String> notificationTitle = [];
   List<String> notificationBody = [];
+  List<String> notificationTime = [];
 
   Color evenColor = Color.fromARGB(255, 253, 221, 221);
   Color oddColor = Color(0xFFfaebeb);
@@ -47,9 +48,11 @@ class _NotificationsState extends State<Notifications> {
     var prefs = await SharedPreferences.getInstance();
     List<String> notificationTitle_ = prefs.getStringList('noti_title') ?? [];
     List<String> notificationBody_ = prefs.getStringList('noti_body') ?? [];
+    List<String> notificationTime_ = prefs.getStringList('noti_time') ?? [];
     setState(() {
       notificationTitle = notificationTitle_;
       notificationBody = notificationBody_;
+      notificationTime = notificationTime_;
     });
   }
 
@@ -65,6 +68,7 @@ class _NotificationsState extends State<Notifications> {
         itemBuilder: (context, index) {
           final notification_title = notificationTitle[index];
           final notification_body = notificationBody[index];
+          final notification_time = notificationTime[index];
           return Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(0),
@@ -99,6 +103,15 @@ class _NotificationsState extends State<Notifications> {
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14.0,
+                                color: Colors.black, // Text color
+                              ),
+                            ),
+                            Spacer(), // Pushes the time to the right corner
+                            Text(
+                              notification_time ?? '',
+                              style: TextStyle(
+                                fontSize: 12.0,
+                                fontStyle: FontStyle.italic, // Set to italic
                                 color: Colors.black, // Text color
                               ),
                             ),

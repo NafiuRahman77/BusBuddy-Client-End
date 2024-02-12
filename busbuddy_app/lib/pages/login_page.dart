@@ -230,6 +230,7 @@ class _LoginPageState extends State<LoginPage> {
         if (id != pref_id) {
           prefs.setStringList('noti_title', []);
           prefs.setStringList('noti_body', []);
+          prefs.setStringList("noti_time", []);
         }
       }
       // set student id to shared pref

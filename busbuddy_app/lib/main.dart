@@ -110,10 +110,13 @@ void main() async {
       print(message.notification?.body);
       List<String> noti_title = prefs.getStringList('noti_title') ?? [];
       List<String> noti_body = prefs.getStringList('noti_body') ?? [];
+      List<String> noti_time = prefs.getStringList('noti_time') ?? [];
+      noti_time.add((message.sentTime).toString() ?? "");
       noti_title.add(message.notification?.title ?? "");
       noti_body.add(message.notification?.body ?? "");
       prefs.setStringList('noti_title', noti_title);
       prefs.setStringList('noti_body', noti_body);
+      prefs.setStringList('noti_time', noti_time);
     }
   });
 
@@ -124,10 +127,13 @@ void main() async {
     print(message.notification?.body);
     List<String> noti_title = prefs.getStringList('noti_title') ?? [];
     List<String> noti_body = prefs.getStringList('noti_body') ?? [];
+    List<String> noti_time = prefs.getStringList('noti_time') ?? [];
+    noti_time.add((message.sentTime).toString() ?? "");
     noti_title.add(message.notification?.title ?? "");
     noti_body.add(message.notification?.body ?? "");
     prefs.setStringList('noti_title', noti_title);
     prefs.setStringList('noti_body', noti_body);
+    prefs.setStringList('noti_time', noti_time);
   });
 
   FirebaseMessaging.instance
@@ -142,10 +148,13 @@ void main() async {
       print(message.notification?.body);
       List<String> noti_title = prefs.getStringList('noti_title') ?? [];
       List<String> noti_body = prefs.getStringList('noti_body') ?? [];
+      List<String> noti_time = prefs.getStringList('noti_time') ?? [];
+      noti_time.add((message.sentTime).toString() ?? "");
       noti_title.add(message.notification?.title ?? "");
       noti_body.add(message.notification?.body ?? "");
       prefs.setStringList('noti_title', noti_title);
       prefs.setStringList('noti_body', noti_body);
+      prefs.setStringList('noti_time', noti_time);
     }
   });
 
@@ -165,10 +174,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print(message.notification?.body);
   List<String> noti_title = prefs.getStringList('noti_title') ?? [];
   List<String> noti_body = prefs.getStringList('noti_body') ?? [];
+  List<String> noti_time = prefs.getStringList('noti_time') ?? [];
+  noti_time.add((message.sentTime).toString() ?? "");
   noti_title.add(message.notification?.title ?? "");
   noti_body.add(message.notification?.body ?? "");
   prefs.setStringList('noti_title', noti_title);
   prefs.setStringList('noti_body', noti_body);
+  prefs.setStringList('noti_time', noti_time);
   // runApp(BusBuddyApp());
   // main();
   // if (message.notification != null) {
