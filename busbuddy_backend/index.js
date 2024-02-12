@@ -1057,6 +1057,9 @@ app.post('/api/startTrip', (req,res) => {
                                     //   score: '850',
                                     //   time: '2:45'
                                     // },
+                                    data: {
+                                        nType: 'route_started',
+                                    },
                                     notification:{
                                       title : 'Your bus is arriving',
                                       body : `Trip #${newTrip.id} has started on Route#${newTrip.route}`,
@@ -1202,6 +1205,9 @@ app.post('/api/updateStaffLocation', (req,res) => {
                             if (notif_list) {
                                 consoleLogger.info(notif_list);
                                 let message = {
+                                    data: {
+                                        nType: 'station_approaching',
+                                    },
                                     notification:{
                                       title : 'Your bus is very close to your stop.',
                                       body : `Trip #${trip.id} has crossed ${tp.station} and is approaching ${nextStation}`,
@@ -1337,6 +1343,9 @@ app.post('/api/broadcastNotification', (req,res) => {
     ).then(qres => {
         let tokenList = [...qres.rows[0].array];
         let message = {
+            data: {
+                nType: 'broadcast',
+            },
             notification: {
                 title: req.body.nTitle,
                 body: req.body.nBody,
