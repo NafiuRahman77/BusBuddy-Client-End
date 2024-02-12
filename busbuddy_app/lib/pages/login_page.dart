@@ -67,8 +67,10 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  bool isConnected = false;
+  bool isConnected = true;
   bool flagforofflinebutton = false;
+  bool loaderShowing = false;
+  bool netChecked = false;
 
   @override
   void initState() {
@@ -79,26 +81,12 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> onLoginMount() async {
     print('Checking internet connection... 1');
     bool result = await InternetConnectionChecker().hasConnection;
-
     final SharedPreferences prefs1 = await SharedPreferences.getInstance();
     List<String> ticketIds = prefs1.getStringList('ticketIds') ?? [];
-    print(result);
-    if (result == true) {
-      globel.routeIDs.clear();
-      globel.routeNames.clear();
-      var r1 = await Requests.post(globel.serverIp + 'getRoutes');
-      r1.raiseForStatus();
-      List<dynamic> json1 = r1.json();
-      setState(() {
-        for (int i = 0; i < json1.length; i++) {
-          globel.routeIDs.add(json1[i]['id']);
-          globel.routeNames.add(json1[i]['terminal_point']);
-        }
-      });
+    print("connected: $result");
 
-      print(globel.routeNames);
-    }
-
+    context.loaderOverlay.show();
+    loaderShowing = true;
     setState(() {
       if (result == true) {
         isConnected = true;
@@ -117,16 +105,35 @@ class _LoginPageState extends State<LoginPage> {
       }
       flagforofflinebutton = ticketIds.isNotEmpty;
     });
+    netChecked = true;
     if (!isConnected) {
+      context.loaderOverlay.hide();
       return;
     }
+
+    // if (isConnected == true) {
+    globel.routeIDs.clear();
+    globel.routeNames.clear();
+    var r1 = await Requests.post(globel.serverIp + 'getRoutes');
+    r1.raiseForStatus();
+    List<dynamic> json1 = r1.json();
+    setState(() {
+      for (int i = 0; i < json1.length; i++) {
+        globel.routeIDs.add(json1[i]['id']);
+        globel.routeNames.add(json1[i]['terminal_point']);
+      }
+    });
+
+    print(globel.routeNames);
+    // }
+
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? c = await prefs.getString('connect.sid');
     if (c != null) {
       await Requests.addCookie(
           Requests.getHostname(globel.serverIp), 'connect.sid', c);
 
-      context.loaderOverlay.show();
+      // context.loaderOverlay.show();
       var r = await Requests.post(globel.serverIp + 'sessionCheck',
           body: {
             'fcm_id': globel.fcmId,
@@ -201,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
           }
         }
         if (globel.userType == 'student') {
-          context.loaderOverlay.show();
+          // context.loaderOverlay.show();
           var r = await Requests.post(globel.serverIp + 'getTicketList');
 
           r.raiseForStatus();
@@ -229,13 +236,17 @@ class _LoginPageState extends State<LoginPage> {
             //   fontSize: 16.0,
             // );
           }
-          context.loaderOverlay.hide();
+          // context.loaderOverlay.hide();
         }
         await onProfileReady();
         await onProfileMount();
 
+        loaderShowing = false;
+        context.loaderOverlay.hide();
         GoRouter.of(context).go("/show_profile");
       }
+    }
+    if (loaderShowing == true) {
       context.loaderOverlay.hide();
     }
   }
@@ -339,7 +350,7 @@ class _LoginPageState extends State<LoginPage> {
         }
       }
       if (globel.userType == 'student') {
-        context.loaderOverlay.show();
+        // context.loaderOverlay.show();
         var r = await Requests.post(globel.serverIp + 'getTicketList');
 
         r.raiseForStatus();
@@ -366,7 +377,7 @@ class _LoginPageState extends State<LoginPage> {
           //   fontSize: 16.0,
           // );
         }
-        context.loaderOverlay.hide();
+        // context.loaderOverlay.hide();
       }
       // print(globel.userType);
       Fluttertoast.showToast(
@@ -467,12 +478,14 @@ class _LoginPageState extends State<LoginPage> {
     return LoaderOverlay(
       overlayColor: Color.fromARGB(150, 200, 200, 200),
       child: Scaffold(
+        backgroundColor: Color.fromARGB(255, 21, 21, 21),
         body: SingleChildScrollView(
           // Add this line
           child: Container(
+            height: MediaQuery.of(context).size.height,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFEB2A2A)!, Color.fromARGB(255, 21, 21, 21)!],
+                colors: [Color(0xFFEB2A2A), Color.fromARGB(255, 21, 21, 21)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -480,7 +493,7 @@ class _LoginPageState extends State<LoginPage> {
             child: SafeArea(
               child: Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const SizedBox(height: 50),
                     Image(
@@ -497,20 +510,13 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 25),
                     const SizedBox(height: 50),
-                    Text(
-                      'Login',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
+
                     Visibility(
-                      visible: isConnected,
+                      visible: netChecked && isConnected,
                       child: Column(
                         children: [
                           // username textfield
+
                           MyTextField(
                             controller: usernameController,
                             hintText: 'Username',
@@ -535,16 +541,18 @@ class _LoginPageState extends State<LoginPage> {
                               if (lgin == true) {
                                 await onProfileReady();
                                 await onProfileMount();
+                                context.loaderOverlay.hide();
                                 GoRouter.of(context).go("/show_profile");
+                              } else {
+                                context.loaderOverlay.hide();
                               }
-                              context.loaderOverlay.hide();
                             },
                           ),
                         ],
                       ),
                     ),
                     Visibility(
-                      visible: !isConnected,
+                      visible: netChecked && !isConnected,
                       child: Column(
                         children: [
                           const SizedBox(height: 70),
@@ -564,7 +572,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 20),
                           Visibility(
-                            visible: flagforofflinebutton,
+                            visible: netChecked && flagforofflinebutton,
                             child: ElevatedButton(
                               onPressed: () {
                                 GoRouter.of(context).push("/offline_ticket");
@@ -578,19 +586,22 @@ class _LoginPageState extends State<LoginPage> {
 
                     const SizedBox(height: 70),
                     // forgot password?
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Forgot Password?',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
+                    Visibility(
+                      visible: netChecked && isConnected,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Forgot Password?',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 50),
+
                     const SizedBox(height: 50),
                   ],
                 ),
