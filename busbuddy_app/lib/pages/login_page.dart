@@ -225,6 +225,16 @@ class _LoginPageState extends State<LoginPage> {
 
     if (json['success'] == true) {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+      String pref_id = prefs.getString("student_id") ?? "";
+      if (pref_id != "") {
+        if (id != pref_id) {
+          prefs.setStringList('noti_title', []);
+          prefs.setStringList('noti_body', []);
+          prefs.setStringList("noti_time", []);
+        }
+      }
+      // set student id to shared pref
+      prefs.setString('student_id', id);
       print("..........");
       CookieJar cj = await Requests.getStoredCookies(
           Requests.getHostname(globel.serverIp));
@@ -314,15 +324,15 @@ class _LoginPageState extends State<LoginPage> {
           // });
           print(ticketIds.isNotEmpty.toString() + "..........");
         } else {
-          Fluttertoast.showToast(
-            msg: 'Failed to load data.',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Color.fromARGB(118, 244, 67, 54),
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
+          // Fluttertoast.showToast(
+          //   msg: 'Failed to load data.',
+          //   toastLength: Toast.LENGTH_SHORT,
+          //   gravity: ToastGravity.CENTER,
+          //   timeInSecForIosWeb: 1,
+          //   backgroundColor: Color.fromARGB(118, 244, 67, 54),
+          //   textColor: Colors.white,
+          //   fontSize: 16.0,
+          // );
         }
         context.loaderOverlay.hide();
       }
