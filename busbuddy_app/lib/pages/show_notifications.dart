@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Notifications extends StatefulWidget {
   @override
@@ -29,70 +30,50 @@ class _NotificationsState extends State<Notifications> {
       'icon': Icons.confirmation_number,
     },
   ];
-  Color evenColor = Color(0xFFffd5d6);
+
+  List<String> notificationTitle = [];
+  List<String> notificationBody = [];
+
+  Color evenColor = Color.fromARGB(255, 253, 221, 221);
   Color oddColor = Color(0xFFfaebeb);
+
+  @override
+  void initState() {
+    super.initState();
+    getNotifications();
+  }
+
+  Future<void> getNotifications() async {
+    var prefs = await SharedPreferences.getInstance();
+    List<String> notificationTitle_ = prefs.getStringList('noti_title') ?? [];
+    List<String> notificationBody_ = prefs.getStringList('noti_body') ?? [];
+    setState(() {
+      notificationTitle = notificationTitle_;
+      notificationBody = notificationBody_;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(
-          'Notifications',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF781B1B),
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(40.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  //JALAL BACKEND LEKHO
-                },
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF781B1B),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 40, vertical: 15)),
-                child: Text('All', style: TextStyle(color: Colors.white)),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  // JALAL BACKEND LEKHO
-                },
-                style: ElevatedButton.styleFrom(
-                    primary: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 40, vertical: 15)),
-                child: Text('Unread', style: TextStyle(color: Colors.red)),
-              ),
-              SizedBox(height: 30),
-            ],
-          ),
-        ),
+        toolbarHeight: 0,
       ),
       body: ListView.builder(
-        itemCount: notifications.length,
+        itemCount: notificationTitle.length,
         itemBuilder: (context, index) {
-          final notification = notifications[index];
+          final notification_title = notificationTitle[index];
+          final notification_body = notificationBody[index];
           return Container(
-            margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: index.isEven ? evenColor : oddColor,
+              borderRadius: BorderRadius.circular(0),
+              color: index.isEven
+                  ? Color.fromARGB(255, 253, 229, 229)
+                  : Color(0xFFfaebeb),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(16.0), // Adjust padding as needed
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -100,12 +81,12 @@ class _NotificationsState extends State<Notifications> {
                     backgroundColor: Colors.transparent,
                     radius: 30,
                     child: Icon(
-                      notification['icon'],
+                      Icons.notifications_active,
                       size: 30,
                       color: Colors.black,
                     ),
                   ),
-                  SizedBox(width: 10.0),
+                  SizedBox(width: 10.0), // Add space between avatar and text
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,19 +95,10 @@ class _NotificationsState extends State<Notifications> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              notification['title'] ?? '',
+                              notification_title,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12.0,
-                                color: Colors.black, // Text color
-                              ),
-                            ),
-                            Text(
-                              DateFormat('yyyy-MM-dd').format(
-                                DateTime.parse(notification['date'] ?? ''),
-                              ),
-                              style: TextStyle(
-                                fontSize: 14.0,
                                 color: Colors.black, // Text color
                               ),
                             ),
@@ -134,7 +106,7 @@ class _NotificationsState extends State<Notifications> {
                         ),
                         SizedBox(height: 8.0),
                         Text(
-                          notification['message'] ?? '',
+                          notification_body ?? '',
                           style: TextStyle(
                             fontSize: 14.0,
                             color: Colors.black, // Text color

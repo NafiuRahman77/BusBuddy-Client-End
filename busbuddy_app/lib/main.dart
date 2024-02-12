@@ -12,6 +12,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'package:path_provider/path_provider.dart';
 import 'pages/tracking.dart';
@@ -101,18 +102,50 @@ void main() async {
       await flutterLocalNotificationsPlugin.show(0, message.notification?.title,
           message.notification?.body, notificationDetails,
           payload: 'item x');
+
+      //save message.notification?.title, message.notification?.body to shared preferences as an array
+      var prefs = await SharedPreferences.getInstance();
+      // print message.notification?.title and message.notification?.body
+      print(message.notification?.title);
+      print(message.notification?.body);
+      List<String> noti_title = prefs.getStringList('noti_title') ?? [];
+      List<String> noti_body = prefs.getStringList('noti_body') ?? [];
+      noti_title.add(message.notification?.title ?? "");
+      noti_body.add(message.notification?.body ?? "");
+      prefs.setStringList('noti_title', noti_title);
+      prefs.setStringList('noti_body', noti_body);
     }
   });
 
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
     print("openedAppreceived fcm: ${message.data}");
+    var prefs = await SharedPreferences.getInstance();
+    print(message.notification?.title);
+    print(message.notification?.body);
+    List<String> noti_title = prefs.getStringList('noti_title') ?? [];
+    List<String> noti_body = prefs.getStringList('noti_body') ?? [];
+    noti_title.add(message.notification?.title ?? "");
+    noti_body.add(message.notification?.body ?? "");
+    prefs.setStringList('noti_title', noti_title);
+    prefs.setStringList('noti_body', noti_body);
   });
 
-  FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+  FirebaseMessaging.instance
+      .getInitialMessage()
+      .then((RemoteMessage? message) async {
     if (message != null) {
       print("hiii woke up from bg");
 
       print(message.data);
+      var prefs = await SharedPreferences.getInstance();
+      print(message.notification?.title);
+      print(message.notification?.body);
+      List<String> noti_title = prefs.getStringList('noti_title') ?? [];
+      List<String> noti_body = prefs.getStringList('noti_body') ?? [];
+      noti_title.add(message.notification?.title ?? "");
+      noti_body.add(message.notification?.body ?? "");
+      prefs.setStringList('noti_title', noti_title);
+      prefs.setStringList('noti_body', noti_body);
     }
   });
 
@@ -127,6 +160,15 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   print("bg message handler");
+  var prefs = await SharedPreferences.getInstance();
+  print(message.notification?.title);
+  print(message.notification?.body);
+  List<String> noti_title = prefs.getStringList('noti_title') ?? [];
+  List<String> noti_body = prefs.getStringList('noti_body') ?? [];
+  noti_title.add(message.notification?.title ?? "");
+  noti_body.add(message.notification?.body ?? "");
+  prefs.setStringList('noti_title', noti_title);
+  prefs.setStringList('noti_body', noti_body);
   // runApp(BusBuddyApp());
   // main();
   // if (message.notification != null) {
