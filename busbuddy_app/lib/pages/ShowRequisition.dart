@@ -19,6 +19,8 @@ class _ShowRequisitionState extends State<ShowRequisition> {
   List<String> routeList = [];
   List<String> bustypeList = [];
   List<String> sourceList = [];
+  List<String> responseList = [];
+  List<String> isApproved = [];
 
   @override
   void initState() {
@@ -49,6 +51,15 @@ class _ShowRequisitionState extends State<ShowRequisition> {
         else
           approvedList.add('');
         sourceList.add(json[i]['source']);
+        if (json[i]['remarks'] == null)
+          responseList.add('');
+        else
+          responseList.add(json[i]['remarks']);
+        if (json[i]['is_approved'] == null)
+          isApproved.add('');
+        else
+          isApproved
+              .add(json[i]['is_approved'] == true ? 'Approved' : 'Rejected');
       }
     });
     context.loaderOverlay.hide();
@@ -65,11 +76,13 @@ class _ShowRequisitionState extends State<ShowRequisition> {
               subject: reasonList[index],
               shortMessage: descriptionList[index],
               fullMessage: descriptionList[index],
-              verdict: approvedList[index].isEmpty ? '' : approvedList[index],
+              verdict: approvedList[index],
               date: timeList[index].substring(0, 10),
               location: routeList[index],
               bus_type: bustypeList[index],
               source: sourceList[index],
+              isApproved: isApproved[index],
+              response: responseList[index],
             );
           },
         ),
