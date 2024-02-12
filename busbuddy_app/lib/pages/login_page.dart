@@ -67,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  bool isConnected = true;
+  bool isConnected = false;
   bool flagforofflinebutton = false;
 
   @override
@@ -83,19 +83,21 @@ class _LoginPageState extends State<LoginPage> {
     final SharedPreferences prefs1 = await SharedPreferences.getInstance();
     List<String> ticketIds = prefs1.getStringList('ticketIds') ?? [];
     print(result);
-    globel.routeIDs.clear();
-    globel.routeNames.clear();
-    var r1 = await Requests.post(globel.serverIp + 'getRoutes');
-    r1.raiseForStatus();
-    List<dynamic> json1 = r1.json();
-    setState(() {
-      for (int i = 0; i < json1.length; i++) {
-        globel.routeIDs.add(json1[i]['id']);
-        globel.routeNames.add(json1[i]['terminal_point']);
-      }
-    });
+    if (result == true) {
+      globel.routeIDs.clear();
+      globel.routeNames.clear();
+      var r1 = await Requests.post(globel.serverIp + 'getRoutes');
+      r1.raiseForStatus();
+      List<dynamic> json1 = r1.json();
+      setState(() {
+        for (int i = 0; i < json1.length; i++) {
+          globel.routeIDs.add(json1[i]['id']);
+          globel.routeNames.add(json1[i]['terminal_point']);
+        }
+      });
 
-    print(globel.routeNames);
+      print(globel.routeNames);
+    }
 
     setState(() {
       if (result == true) {
@@ -198,7 +200,37 @@ class _LoginPageState extends State<LoginPage> {
             }
           }
         }
+        if (globel.userType == 'student') {
+          context.loaderOverlay.show();
+          var r = await Requests.post(globel.serverIp + 'getTicketList');
 
+          r.raiseForStatus();
+          dynamic json = r.json();
+          print(json);
+
+          if (json['success'] == true) {
+            List<String> ticketIds = List<String>.from(json['ticket_list']);
+
+            final SharedPreferences prefs =
+                await SharedPreferences.getInstance();
+            prefs.setStringList('ticketIds', ticketIds);
+            // setState(() {
+            //   flagforofflinebutton = ticketIds.isNotEmpty;
+            // });
+            print(ticketIds.isNotEmpty.toString() + "..........");
+          } else {
+            // Fluttertoast.showToast(
+            //   msg: 'Failed to load data.',
+            //   toastLength: Toast.LENGTH_SHORT,
+            //   gravity: ToastGravity.CENTER,
+            //   timeInSecForIosWeb: 1,
+            //   backgroundColor: Color.fromARGB(118, 244, 67, 54),
+            //   textColor: Colors.white,
+            //   fontSize: 16.0,
+            // );
+          }
+          context.loaderOverlay.hide();
+        }
         await onProfileReady();
         await onProfileMount();
 
