@@ -148,6 +148,22 @@ dbclient.query("SELECT id, coords FROM station").then(qres => {
     // consoleLogger.info(tracking.stationCoords);
 }).catch(e => errLogger.error(e.stack));
 
+dbclient.query("SELECT id, name FROM station").then(qres => {
+    // consoleLogger.info(qres.rows);
+    qres.rows.forEach( (st)  =>  {
+        tracking.stationNames.set(st.id, st.name);
+    });
+    // consoleLogger.info(tracking.stationCoords);
+}).catch(e => errLogger.error(e.stack));
+
+dbclient.query("SELECT id, terminal_point FROM route").then(qres => {
+    // consoleLogger.info(qres.rows);
+    qres.rows.forEach( (r)  =>  {
+        tracking.routeNames.set(r.id, r.terminal_point);
+    });
+    // consoleLogger.info(tracking.stationCoords);
+}).catch(e => errLogger.error(e.stack));
+
 app.post('/api/login', (req, res) => {
     // consoleLogger.info(req.body);
     dbclient.query(

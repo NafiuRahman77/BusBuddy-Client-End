@@ -1,5 +1,7 @@
 const runningTrips = new Map();
 const stationCoords = new Map();
+const stationNames = new Map();
+const routeNames = new Map();
 const busStaffMap = new Map();
 
 class RunningTrip {
@@ -42,4 +44,4 @@ class RunningTrip {
     };
 };
 
-module.exports = {RunningTrip, runningTrips, stationCoords, busStaffMap}
+module.exports = {RunningTrip, runningTrips, stationCoords, stationNames, routeNames, busStaffMap}
