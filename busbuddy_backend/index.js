@@ -201,6 +201,7 @@ app.post('/api/login', (req, res) => {
                                     req.session.userid = req.body.id;
                                     req.session.user_type = "bus_staff";
                                     req.session.bus_role = qres3.rows[0].role;
+                                    req.session.fcm_id = req.body.fcm_id;
                                     res.send({
                                         success: true,
                                         name: qres3.rows[0].name,
@@ -223,6 +224,7 @@ app.post('/api/login', (req, res) => {
                     if (verif === true) {
                         req.session.userid = req.body.id;
                         req.session.user_type = "buet_staff";
+                        req.session.fcm_id = req.body.fcm_id;
                         res.send({
                             success: true,
                             name: qres2.rows[0].name,
