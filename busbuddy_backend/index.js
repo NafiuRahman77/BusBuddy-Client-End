@@ -1083,7 +1083,7 @@ app.post('/api/startTrip', (req,res) => {
                                     },
                                     notification:{
                                       title : 'Your bus is arriving',
-                                      body : `Trip #${newTrip.id} has started on Route#${tracking.routeNames(newTrip.route)}`,
+                                      body : `Trip #${newTrip.id} has started on Route#${tracking.routeNames.get(newTrip.route)}`,
                                     },
 
                                     android: {
@@ -1231,7 +1231,8 @@ app.post('/api/updateStaffLocation', (req,res) => {
                                     },
                                     notification:{
                                       title : 'Your bus is very close to your stop.',
-                                      body : `Trip #${trip.id} has crossed ${tracking.stationNames(tp.station)} and is approaching ${tracking.stationNames(nextStation)}`,
+                                      body  : `Trip #${trip.id} has crossed ${tracking.stationNames.get(tp.station)} and` + 
+                                              ` is approaching ${tracking.stationNames.get(nextStation)}`,
                                     },
                                     android: {
                                         notification: {
