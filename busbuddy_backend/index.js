@@ -272,6 +272,7 @@ app.post('/api/sessionCheck', (req, res) => {
             relogin: false,
             user_type: req.session.user_type,
             user_id: req.session.userid,
+            bus_role: req.session.bus_role,
         });
     } else {
         res.send({
