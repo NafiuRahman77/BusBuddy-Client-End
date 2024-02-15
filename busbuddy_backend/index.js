@@ -1208,7 +1208,7 @@ app.post('/api/endTrip', async (req,res) => {
                     },
                     notification: {
                         title: "Your assigned trip has ended.",
-                        body: `Trip #${newTrip.id} on route ${tracking.routeNames.get(newTrip.route)} has been ended by ${newTrip.driver}.`,
+                        body: `Trip #${trip.id} on route ${tracking.routeNames.get(trip.route)} has been ended by ${trip.driver}.`,
                     },
                     android: {
                         notification: {
