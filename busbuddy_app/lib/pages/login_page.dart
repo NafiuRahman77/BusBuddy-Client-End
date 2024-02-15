@@ -146,6 +146,7 @@ class _LoginPageState extends State<LoginPage> {
       if (json['recognized'] == true) {
         globel.userType = json['user_type'];
         if (globel.userType == 'bus_staff') {
+          globel.staffRole = json['bus_role'];
           if (json['relogin'] == true) {
             Fluttertoast.showToast(
                 msg:
@@ -165,7 +166,6 @@ class _LoginPageState extends State<LoginPage> {
           dynamic rt = r4.json();
           if (rt['success']) {
             globel.runningTripId = rt['id'];
-            globel.staffRole = rt['bus_role'];
             if (globel.staffRole == 'driver') {
               bool isLocationServiceEnabled =
                   await Geolocator.isLocationServiceEnabled();
@@ -291,8 +291,8 @@ class _LoginPageState extends State<LoginPage> {
         await (prefs.setString(key, value.value));
       });
       globel.userType = json['user_type'];
-
       if (globel.userType == 'bus_staff') {
+        globel.staffRole = json['bus_role'];
         if (json['relogin'] == true) {
           Fluttertoast.showToast(
               msg:
@@ -311,7 +311,6 @@ class _LoginPageState extends State<LoginPage> {
         dynamic rt = r4.json();
         if (rt['success']) {
           globel.runningTripId = rt['id'];
-          globel.staffRole = rt['bus_role'];
           if (globel.staffRole == 'driver') {
             bool isLocationServiceEnabled =
                 await Geolocator.isLocationServiceEnabled();
