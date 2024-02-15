@@ -1195,6 +1195,35 @@ app.post('/api/endTrip', async (req,res) => {
             tracking.busStaffMap.delete (trip.driver);
             tracking.busStaffMap.delete (trip.helper);
             tracking.runningTrips.delete (t_id);
+            dbclient.query(
+                `select distinct sess->>'fcm_id' as fcm_id from session 
+                 where sess->>'fcm_id' is not null and sess->>'userid' = $1`, 
+                 [newTrip.helper]
+            ).then(qres => {
+                let token = qres.rows[0].fcm_id;
+                let message = {
+                    token: token,
+                    data: {
+                        nType: 'helper_trip_end',
+                    },
+                    notification: {
+                        title: "Your assigned trip has ended.",
+                        body: `Trip #${newTrip.id} on route ${tracking.routeNames.get(newTrip.route)} has been ended by ${newTrip.driver}.`,
+                    },
+                    android: {
+                        notification: {
+                          channel_id: "busbuddy_broadcast",
+                          default_sound: true,
+                        }
+                    },
+                };
+                FCM.send (message, function(err, response) {
+                    if (err) errLogger.error (err);
+                    else historyLogger.debug (response);
+                });
+            }).catch(e => {
+                errLogger.error(e.stack);
+            });
         } else {
             dbclient.query(
                 `update trip set end_timestamp=current_timestamp, is_live=false where id=$1 and (driver=$2 or helper=$2)`, 
