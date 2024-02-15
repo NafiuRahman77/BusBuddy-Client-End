@@ -1198,7 +1198,7 @@ app.post('/api/endTrip', async (req,res) => {
             dbclient.query(
                 `select distinct sess->>'fcm_id' as fcm_id from session 
                  where sess->>'fcm_id' is not null and sess->>'userid' = $1`, 
-                 [newTrip.helper]
+                 [trip.helper]
             ).then(qres => {
                 let token = qres.rows[0].fcm_id;
                 let message = {
