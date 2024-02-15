@@ -165,45 +165,49 @@ class _LoginPageState extends State<LoginPage> {
           dynamic rt = r4.json();
           if (rt['success']) {
             globel.runningTripId = rt['id'];
-            bool isLocationServiceEnabled =
-                await Geolocator.isLocationServiceEnabled();
+            globel.staffRole = rt['bus_role'];
+            if (globel.staffRole == 'driver') {
+              bool isLocationServiceEnabled =
+                  await Geolocator.isLocationServiceEnabled();
 
-            // Workmanager()
-            //     .registerOneOffTask("bus", "sojib")
-            if (!isLocationServiceEnabled) {
-              // Handle the case where location services are not enabled
-              // You may want to show a toast or display a message
-              print('Location services are not enabled.');
-              Fluttertoast.showToast(
-                msg: "Please enable location services.",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                backgroundColor: Colors.red,
-                textColor: Colors.white,
-                fontSize: 16.0,
-              );
-              SystemNavigator.pop();
-            }
-
-            // Check if the app has location permission
-            LocationPermission permission = await Geolocator.checkPermission();
-            if (permission == LocationPermission.denied) {
-              // Request location permission
-              permission = await Geolocator.requestPermission();
-              if (permission != LocationPermission.whileInUse &&
-                  permission != LocationPermission.always) {
-                // Handle the case where the user denied location permission
-                print('User denied location permission.');
+              // Workmanager()
+              //     .registerOneOffTask("bus", "sojib")
+              if (!isLocationServiceEnabled) {
+                // Handle the case where location services are not enabled
+                // You may want to show a toast or display a message
+                print('Location services are not enabled.');
+                Fluttertoast.showToast(
+                  msg: "Please enable location services.",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
                 SystemNavigator.pop();
               }
-            }
-            try {
-              await startLocationStream();
-              // return true;
-            } catch (e) {
-              print("Error getting location: $e");
-              SystemNavigator.pop();
+
+              // Check if the app has location permission
+              LocationPermission permission =
+                  await Geolocator.checkPermission();
+              if (permission == LocationPermission.denied) {
+                // Request location permission
+                permission = await Geolocator.requestPermission();
+                if (permission != LocationPermission.whileInUse &&
+                    permission != LocationPermission.always) {
+                  // Handle the case where the user denied location permission
+                  print('User denied location permission.');
+                  SystemNavigator.pop();
+                }
+              }
+              try {
+                await startLocationStream();
+                // return true;
+              } catch (e) {
+                print("Error getting location: $e");
+                SystemNavigator.pop();
+              }
             }
           }
         }
@@ -307,45 +311,48 @@ class _LoginPageState extends State<LoginPage> {
         dynamic rt = r4.json();
         if (rt['success']) {
           globel.runningTripId = rt['id'];
-          bool isLocationServiceEnabled =
-              await Geolocator.isLocationServiceEnabled();
+          globel.staffRole = rt['bus_role'];
+          if (globel.staffRole == 'driver') {
+            bool isLocationServiceEnabled =
+                await Geolocator.isLocationServiceEnabled();
 
-          // Workmanager()
-          //     .registerOneOffTask("bus", "sojib")
-          if (!isLocationServiceEnabled) {
-            // Handle the case where location services are not enabled
-            // You may want to show a toast or display a message
-            print('Location services are not enabled.');
-            Fluttertoast.showToast(
-              msg: "Please enable location services.",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              fontSize: 16.0,
-            );
-            return false;
-          }
-
-          // Check if the app has location permission
-          LocationPermission permission = await Geolocator.checkPermission();
-          if (permission == LocationPermission.denied) {
-            // Request location permission
-            permission = await Geolocator.requestPermission();
-            if (permission != LocationPermission.whileInUse &&
-                permission != LocationPermission.always) {
-              // Handle the case where the user denied location permission
-              print('User denied location permission.');
+            // Workmanager()
+            //     .registerOneOffTask("bus", "sojib")
+            if (!isLocationServiceEnabled) {
+              // Handle the case where location services are not enabled
+              // You may want to show a toast or display a message
+              print('Location services are not enabled.');
+              Fluttertoast.showToast(
+                msg: "Please enable location services.",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
               return false;
             }
-          }
-          try {
-            await startLocationStream();
-            return true;
-          } catch (e) {
-            print("Error getting location: $e");
-            return false;
+
+            // Check if the app has location permission
+            LocationPermission permission = await Geolocator.checkPermission();
+            if (permission == LocationPermission.denied) {
+              // Request location permission
+              permission = await Geolocator.requestPermission();
+              if (permission != LocationPermission.whileInUse &&
+                  permission != LocationPermission.always) {
+                // Handle the case where the user denied location permission
+                print('User denied location permission.');
+                return false;
+              }
+            }
+            try {
+              await startLocationStream();
+              return true;
+            } catch (e) {
+              print("Error getting location: $e");
+              return false;
+            }
           }
         }
       }

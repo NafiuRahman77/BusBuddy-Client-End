@@ -347,10 +347,11 @@ class _TripCardState extends State<TripCard>
               Center(
                 child: // show the button only if title is "Upcoming Trip" or title is "Ongoing trip" and islive is true
 
-                    ((widget.title == "Start Trip" &&
-                                globel.runningTripId == "") ||
-                            (widget.title == "End Trip" &&
-                                widget.islive == true))
+                    (globel.staffRole == 'driver' &&
+                            ((widget.title == "Start Trip" &&
+                                    globel.runningTripId == "") ||
+                                (widget.title == "End Trip" &&
+                                    widget.islive == true)))
                         ? ElevatedButton(
                             onPressed: () async {
                               // Check if location services are enabled
