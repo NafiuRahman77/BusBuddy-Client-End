@@ -177,7 +177,7 @@ app.post('/api/login', (req, res) => {
                 // consoleLogger.info(qres);
                 if (qres2.rows.length === 0) {
                     dbclient.query(
-                        `SELECT name, password FROM bus_staff WHERE id=$1`, [req.body.id]
+                        `SELECT name, password, role FROM bus_staff WHERE id=$1`, [req.body.id]
                     ).then (async qres3 => {
                         historyLogger.debug(qres3);
                         if (qres3.rows.length === 0) {
@@ -200,6 +200,7 @@ app.post('/api/login', (req, res) => {
                                     };
                                     req.session.userid = req.body.id;
                                     req.session.user_type = "bus_staff";
+                                    req.session.bus_role = qres3.rows[0].role;
                                     res.send({
                                         success: true,
                                         name: qres3.rows[0].name,
@@ -1022,7 +1023,7 @@ app.post('/api/getStaffTrips', (req,res) => {
 
 app.post('/api/startTrip', (req,res) => {
     consoleLogger.info(req.body);
-    if (req.session.userid && req.session.user_type=="bus_staff") {
+    if (req.session.userid && req.session.user_type=="bus_staff" && req.session.bus_role=="driver") {
         let ronin = tracking.busStaffMap.has(req.session.userid);
         if (!ronin) {
             dbclient.query(
@@ -1083,7 +1084,7 @@ app.post('/api/startTrip', (req,res) => {
                                     },
                                     notification:{
                                       title : 'Your bus is arriving',
-                                      body : `Trip #${newTrip.id} has started on Route#${tracking.routeNames.get(newTrip.route)}`,
+                                      body : `Trip #${newTrip.id} has started on route ${tracking.routeNames.get(newTrip.route)}`,
                                     },
 
                                     android: {
@@ -1119,7 +1120,7 @@ app.post('/api/startTrip', (req,res) => {
 });
 
 app.post('/api/endTrip', async (req,res) => {
-    if (req.session.userid && req.session.user_type=="bus_staff") {
+    if (req.session.userid && req.session.user_type=="bus_staff" && req.session.bus_role=="driver") {
         consoleLogger.info(req.body);
         let t_id = await tracking.busStaffMap.get(req.session.userid);
         let trip = await tracking.runningTrips.get(t_id);
@@ -1196,7 +1197,7 @@ app.post('/api/endTrip', async (req,res) => {
 
 app.post('/api/updateStaffLocation', (req,res) => {
     
-    if (req.session.userid && req.session.user_type=="bus_staff") {
+    if (req.session.userid && req.session.user_type=="bus_staff" && req.session.bus_role=="driver") {
         consoleLogger.info(req.body);
         let t_id = tracking.busStaffMap.get(req.session.userid);
         let trip = tracking.runningTrips.get(t_id);
@@ -1270,90 +1271,92 @@ app.post('/api/staffScanTicket', (req,res) => {
     if (req.session.userid && req.session.user_type=="bus_staff") {
         consoleLogger.info(req.body);
         let t_id = tracking.busStaffMap.get(req.session.userid);
-        let route = tracking.runningTrips.get(t_id).route;
-        dbclient.query(
-            `with tk as (
-                update ticket set trip_id=$1, is_used=true, scanned_by=$2 
-                where id=$3 and is_used=false returning student_id
-            ) select student_id, 
-            array(select s.sess->>'fcm_id' from tk, session s where s.sess->>'userid' = tk.student_id) from tk`, 
-            [t_id, req.session.user_id, req.body.ticket_id]
-        ).then(qres => {
-            if (qres.rowCount === 1) {
-                let td = tracking.runningTrips.get(t_id);
-                td.passenger_count += 1;
-                historyLogger.debug(qres);
-                res.send({ 
-                    success: true,
-                    student_id: qres.rows[0].student_id,
-                    passenger_count: td.passenger_count.toString(),
-                });
-                
-                let notif_list = qres.rows[0].array;
-                if (notif_list) {
-                    consoleLogger.info(notif_list);
-                    let message = {
-                        data: {
-                          nType: 'ticket_used',
-                        },
-                        notification:{
-                          title : 'Ticket scanned successfully',
-                          body : `Your was scanned during Trip#${t_id} on Route#${route}`,
-                        },
-                        android: {
-                            notification: {
-                              channel_id: "busbuddy_broadcast",
-                              default_sound: true,
-                            }
-                        },
+        if (t_id) {
+            let route = tracking.runningTrips.get(t_id).route;
+            dbclient.query(
+                `with tk as (
+                    update ticket set trip_id=$1, is_used=true, scanned_by=$2 
+                    where id=$3 and is_used=false returning student_id
+                ) select student_id, 
+                array(select s.sess->>'fcm_id' from tk, session s where s.sess->>'userid' = tk.student_id) from tk`, 
+                [t_id, req.session.user_id, req.body.ticket_id]
+            ).then(qres => {
+                if (qres.rowCount === 1) {
+                    let td = tracking.runningTrips.get(t_id);
+                    td.passenger_count += 1;
+                    historyLogger.debug(qres);
+                    res.send({ 
+                        success: true,
+                        student_id: qres.rows[0].student_id,
+                        passenger_count: td.passenger_count.toString(),
+                    });
+                    
+                    let notif_list = qres.rows[0].array;
+                    if (notif_list) {
+                        consoleLogger.info(notif_list);
+                        let message = {
+                            data: {
+                            nType: 'ticket_used',
+                            },
+                            notification:{
+                            title : 'Ticket scanned successfully',
+                            body : `Your was scanned during Trip#${t_id} on Route#${route}`,
+                            },
+                            android: {
+                                notification: {
+                                channel_id: "busbuddy_broadcast",
+                                default_sound: true,
+                                }
+                            },
+                        };
+                        FCM.sendToMultipleToken (message, notif_list, function(err, response) {
+                            if (err) errLogger.error (err);
+                            else historyLogger.debug (response);
+                        });
                     };
-                    FCM.sendToMultipleToken (message, notif_list, function(err, response) {
-                        if (err) errLogger.error (err);
-                        else historyLogger.debug (response);
+
+                    dbclient.query(
+                        `select count(*) from ticket where student_id=$1 and is_used = false`, 
+                        [qres.rows[0].student_id,]
+                    ).then(qres2 => {
+                        historyLogger.debug(qres2);
+                        if (qres2.rowCount === 1) { 
+                            let count = qres2.rows[0].count;
+                            if (count < 10) {
+                                let warning = {
+                                    data: {
+                                    nType: 'ticket_low_warning',
+                                    },
+                                    notification:{
+                                    title : 'WARNING: Tickets running low!',
+                                    body : `You have less than 10 tickets remaining. Please buy more tickets to continue using the bus service.`,
+                                    },
+                                    android: {
+                                        notification: {
+                                        channel_id: "busbuddy_broadcast",
+                                        default_sound: true,
+                                        }
+                                    },
+                                };
+                                FCM.sendToMultipleToken (warning, notif_list, function(err, response) {
+                                    if (err) errLogger.error (err);
+                                    else historyLogger.debug (response);
+                                });
+                            };
+                        };
+                    }).catch(e => errLogger.error(e.stack));
+                } else if (qres.rowCount === 0) {
+                    res.send({
+                        success: false,
                     });
                 };
-
-                dbclient.query(
-                    `select count(*) from ticket where student_id=$1 and is_used = false`, 
-                    [qres.rows[0].student_id,]
-                ).then(qres2 => {
-                    historyLogger.debug(qres2);
-                    if (qres2.rowCount === 1) { 
-                        let count = qres2.rows[0].count;
-                        if (count < 10) {
-                            let warning = {
-                                data: {
-                                  nType: 'ticket_low_warning',
-                                },
-                                notification:{
-                                  title : 'WARNING: Tickets running low!',
-                                  body : `You have less than 10 tickets remaining. Please buy more tickets to continue using the bus service.`,
-                                },
-                                android: {
-                                    notification: {
-                                      channel_id: "busbuddy_broadcast",
-                                      default_sound: true,
-                                    }
-                                },
-                            };
-                            FCM.sendToMultipleToken (warning, notif_list, function(err, response) {
-                                if (err) errLogger.error (err);
-                                else historyLogger.debug (response);
-                            });
-                        };
-                    };
-                }).catch(e => errLogger.error(e.stack));
-            } else if (qres.rowCount === 0) {
+            }).catch(e => {
+                errLogger.error(e.stack);
                 res.send({
                     success: false,
                 });
-            };
-        }).catch(e => {
-            errLogger.error(e.stack);
-            res.send({
-                success: false,
             });
-        });
+        };
     };
 });
 
