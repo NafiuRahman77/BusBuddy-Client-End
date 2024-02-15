@@ -995,9 +995,8 @@ app.post('/api/checkStaffRunningTrip', async (req,res) => {
   
 //get trip data
 app.post('/api/getStaffTrips', (req,res) => {
-    
     if (req.session.userid && req.session.user_type=="bus_staff") {
-        consoleLogger.info(req.body);
+        // consoleLogger.info(req.body);
         dbclient.query(
             `select * from allocation where is_done=false and (driver=$1 or helper=$1) order by start_timestamp asc`, 
             [req.session.userid]
@@ -1134,15 +1133,8 @@ app.post('/api/startTrip', (req,res) => {
                                 if (err) errLogger.error (err);
                                 else historyLogger.debug (response);
                             });
-                        }).then(r => {
-                            res.send({
-                                success: true,
-                            });
                         }).catch(e => {
                             errLogger.error(e.stack);
-                            res.send({
-                                success: false,
-                            });
                         });
                     } else {
                         res.send({
