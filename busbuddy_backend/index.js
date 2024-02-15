@@ -1423,81 +1423,106 @@ app.post('/api/staffScanTicket', (req,res) => {
 });
 
 app.post('/api/broadcastNotification', (req,res) => {
-    
     consoleLogger.info(req.body);
     dbclient.query(
-        `select array(select distinct sess->>'fcm_id' from session where sess->>'fcm_id' is not null)`, 
-    ).then(qres => {
-        let tokenList = [...qres.rows[0].array];
-        let message = {
-            data: {
-                nType: 'broadcast',
-            },
-            notification: {
-                title: req.body.nTitle,
-                body: req.body.nBody,
-            },
-            android: {
-                notification: {
-                  channel_id: "busbuddy_broadcast",
-                  default_sound: true,
-                }
-            },
+        `INSERT INTO broadcast_notification (title, body, timestamp) 
+         values ($1, $2, current_timestamp)`, 
+        [req.body.nTitle, req.body.nBody]
+    ).then(qres2 => {
+        historyLogger.debug(qres2);
+        if (qres2.rowCount === 1) {
+            dbclient.query(
+                `select array(select distinct sess->>'fcm_id' from session where sess->>'fcm_id' is not null)`, 
+            ).then(qres => {
+                let tokenList = [...qres.rows[0].array];
+                let message = {
+                    data: {
+                        nType: 'broadcast',
+                    },
+                    notification: {
+                        title: req.body.nTitle,
+                        body: req.body.nBody,
+                    },
+                    android: {
+                        notification: {
+                          channel_id: "busbuddy_broadcast",
+                          default_sound: true,
+                        },
+                    },
+                };
+                FCM.sendToMultipleToken (message, tokenList, function(err, response) {
+                    if (err) errLogger.error (err);
+                    else historyLogger.debug (response);
+                });
+            }).then(r => {
+                res.send({
+                    success: true,
+                });
+            }).catch(e => {
+                errLogger.error(e.stack);
+                res.send({
+                    success: false,
+                });
+            });
+        } else if (qres2.rowCount === 0) {
+            res.send({
+                success: false,
+            });
         };
-        FCM.sendToMultipleToken (message, tokenList, function(err, response) {
-            if (err) errLogger.error (err);
-            else historyLogger.debug (response);
-        });
-    }).then(r => {
-        res.send({
-            success: true,
-        });
-    }).catch(e => {
-        errLogger.error(e.stack);
-        res.send({
-            success: false,
-        });
-    });
+    }).catch(e => errLogger.error(e.stack));
 });
 
 
 app.post('/api/personalNotification', (req,res) => {
     consoleLogger.info(req.body);
     dbclient.query(
-        `select array(select distinct sess->>'fcm_id' from session 
-         where sess->>'fcm_id' is not null and sess->>'userid' = $1)`, 
-         [req.body.user_id]
-    ).then(qres => {
-        let tokenList = [...qres.rows[0].array];
-        let message = {
-            data: {
-                nType: 'personal',
-            },
-            notification: {
-                title: req.body.nTitle,
-                body: req.body.nBody,
-            },
-            android: {
-                notification: {
-                  channel_id: "busbuddy_broadcast",
-                  default_sound: true,
-                }
-            },
+        `INSERT INTO personal_notification (title, body, user_id, timestamp) 
+         values ($1, $2, $3, current_timestamp)`, 
+        [req.body.nTitle, req.body.nBody, req.body.user_id]
+    ).then(qres2 => {
+        historyLogger.debug(qres2);
+        if (qres2.rowCount === 1) {
+            dbclient.query(
+                `select array(select distinct sess->>'fcm_id' from session 
+                 where sess->>'fcm_id' is not null and sess->>'userid' = $1)`, 
+                 [req.body.user_id]
+            ).then(qres => {
+                let tokenList = [...qres.rows[0].array];
+                let message = {
+                    data: {
+                        nType: 'personal',
+                    },
+                    notification: {
+                        title: req.body.nTitle,
+                        body: req.body.nBody,
+                    },
+                    android: {
+                        notification: {
+                          channel_id: "busbuddy_broadcast",
+                          default_sound: true,
+                        }
+                    },
+                };
+                FCM.sendToMultipleToken (message, tokenList, function(err, response) {
+                    if (err) errLogger.error (err);
+                    else historyLogger.debug (response);
+                });
+            }).then(r => {
+                res.send({
+                    success: true,
+                });
+            }).catch(e => {
+                errLogger.error(e.stack);
+                res.send({
+                    success: false,
+                });
+            });
+        } else if (qres2.rowCount === 0) {
+            res.send({
+                success: false,
+            });
         };
-        FCM.sendToMultipleToken (message, tokenList, function(err, response) {
-            if (err) errLogger.error (err);
-            else historyLogger.debug (response);
-        });
-    }).then(r => {
-        res.send({
-            success: true,
-        });
-    }).catch(e => {
-        errLogger.error(e.stack);
-        res.send({
-            success: false,
-        });
-    });
+    }).catch(e => errLogger.error(e.stack));
 });
 
 
