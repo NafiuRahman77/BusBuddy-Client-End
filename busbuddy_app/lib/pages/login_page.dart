@@ -111,22 +111,6 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // if (isConnected == true) {
-    globel.routeIDs.clear();
-    globel.routeNames.clear();
-    var r1 = await Requests.post(globel.serverIp + 'getRoutes');
-    r1.raiseForStatus();
-    List<dynamic> json1 = r1.json();
-    setState(() {
-      for (int i = 0; i < json1.length; i++) {
-        globel.routeIDs.add(json1[i]['id']);
-        globel.routeNames.add(json1[i]['terminal_point']);
-      }
-    });
-
-    print(globel.routeNames);
-    // }
-
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? c = await prefs.getString('connect.sid');
     if (c != null) {
@@ -145,6 +129,23 @@ class _LoginPageState extends State<LoginPage> {
       print(json);
       if (json['recognized'] == true) {
         globel.userType = json['user_type'];
+
+        // if (isConnected == true) {
+        globel.routeIDs.clear();
+        globel.routeNames.clear();
+        var r1 = await Requests.post(globel.serverIp + 'getRoutes');
+        r1.raiseForStatus();
+        List<dynamic> json1 = r1.json();
+        setState(() {
+          for (int i = 0; i < json1.length; i++) {
+            globel.routeIDs.add(json1[i]['id']);
+            globel.routeNames.add(json1[i]['terminal_point']);
+          }
+        });
+
+        print(globel.routeNames);
+        // }
+
         if (globel.userType == 'bus_staff') {
           globel.staffRole = json['bus_role'];
           if (json['relogin'] == true) {
@@ -291,6 +292,23 @@ class _LoginPageState extends State<LoginPage> {
         await (prefs.setString(key, value.value));
       });
       globel.userType = json['user_type'];
+
+      // if (isConnected == true) {
+      globel.routeIDs.clear();
+      globel.routeNames.clear();
+      var r1 = await Requests.post(globel.serverIp + 'getRoutes');
+      r1.raiseForStatus();
+      List<dynamic> json1 = r1.json();
+      setState(() {
+        for (int i = 0; i < json1.length; i++) {
+          globel.routeIDs.add(json1[i]['id']);
+          globel.routeNames.add(json1[i]['terminal_point']);
+        }
+      });
+
+      print(globel.routeNames);
+      // }
+
       if (globel.userType == 'bus_staff') {
         globel.staffRole = json['bus_role'];
         if (json['relogin'] == true) {
