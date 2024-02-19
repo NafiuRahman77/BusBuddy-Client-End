@@ -31,7 +31,7 @@ class _NotificationsState extends State<Notifications> {
 
     for (int i = 0; i < notificationTime_.length; i++) {
       DateTime time = DateTime.parse(notificationTime_[i]);
-      String formattedTime = DateFormat.jm().format(time);
+      String formattedTime = DateFormat("dd MMM h:mm a").format(time);
       notificationTime_[i] = formattedTime;
     }
 
@@ -106,7 +106,8 @@ class _NotificationsState extends State<Notifications> {
                   : Color(0xFFfaebeb),
             ),
             child: Padding(
-              padding: EdgeInsets.all(16.0), // Adjust padding as needed
+              padding:
+                  EdgeInsets.fromLTRB(4, 15, 5, 15), // Adjust padding as needed
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -114,7 +115,7 @@ class _NotificationsState extends State<Notifications> {
                       backgroundColor: Colors.transparent,
                       radius: 30,
                       child: _buildNotificationIcon(notificationType[index])),
-                  SizedBox(width: 10.0), // Add space between avatar and text
+                  SizedBox(width: 5.0), // Add space between avatar and text
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
