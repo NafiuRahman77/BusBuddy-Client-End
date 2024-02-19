@@ -102,38 +102,50 @@ void main() async {
       await flutterLocalNotificationsPlugin.show(0, message.notification?.title,
           message.notification?.body, notificationDetails,
           payload: 'item x');
+      print(message);
 
       //save message.notification?.title, message.notification?.body to shared preferences as an array
       var prefs = await SharedPreferences.getInstance();
       // print message.notification?.title and message.notification?.body
       print(message.notification?.title);
       print(message.notification?.body);
+      print(message.data.runtimeType);
+      print(message.data['nType'].toString());
       List<String> noti_title = prefs.getStringList('noti_title') ?? [];
       List<String> noti_body = prefs.getStringList('noti_body') ?? [];
       List<String> noti_time = prefs.getStringList('noti_time') ?? [];
+      List<String> noti_type = prefs.getStringList('noti_type') ?? [];
       noti_time.add((message.sentTime).toString() ?? "");
       noti_title.add(message.notification?.title ?? "");
       noti_body.add(message.notification?.body ?? "");
+      noti_type.add(message.data['nType'].toString() ?? "");
       prefs.setStringList('noti_title', noti_title);
       prefs.setStringList('noti_body', noti_body);
       prefs.setStringList('noti_time', noti_time);
+      prefs.setStringList('noti_type', noti_type);
     }
   });
 
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
     print("openedAppreceived fcm: ${message.data}");
     var prefs = await SharedPreferences.getInstance();
+    print(message);
     print(message.notification?.title);
     print(message.notification?.body);
+    print(message.data.runtimeType);
+    print(message.data['nType'].toString());
     List<String> noti_title = prefs.getStringList('noti_title') ?? [];
     List<String> noti_body = prefs.getStringList('noti_body') ?? [];
     List<String> noti_time = prefs.getStringList('noti_time') ?? [];
+    List<String> noti_type = prefs.getStringList('noti_type') ?? [];
     noti_time.add((message.sentTime).toString() ?? "");
     noti_title.add(message.notification?.title ?? "");
     noti_body.add(message.notification?.body ?? "");
+    noti_type.add(message.data['nType'].toString() ?? "");
     prefs.setStringList('noti_title', noti_title);
     prefs.setStringList('noti_body', noti_body);
     prefs.setStringList('noti_time', noti_time);
+    prefs.setStringList('noti_type', noti_type);
   });
 
   FirebaseMessaging.instance
@@ -142,19 +154,25 @@ void main() async {
     if (message != null) {
       print("hiii woke up from bg");
 
-      print(message.data);
+      //print(message.data);
       var prefs = await SharedPreferences.getInstance();
+
       print(message.notification?.title);
       print(message.notification?.body);
+      print(message.data.runtimeType);
+      print(message.data['nType'].toString());
       List<String> noti_title = prefs.getStringList('noti_title') ?? [];
       List<String> noti_body = prefs.getStringList('noti_body') ?? [];
       List<String> noti_time = prefs.getStringList('noti_time') ?? [];
+      List<String> noti_type = prefs.getStringList('noti_type') ?? [];
       noti_time.add((message.sentTime).toString() ?? "");
       noti_title.add(message.notification?.title ?? "");
       noti_body.add(message.notification?.body ?? "");
+      noti_type.add(message.data['nType'].toString() ?? "");
       prefs.setStringList('noti_title', noti_title);
       prefs.setStringList('noti_body', noti_body);
       prefs.setStringList('noti_time', noti_time);
+      prefs.setStringList('noti_type', noti_type);
     }
   });
 
@@ -170,17 +188,22 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   );
   print("bg message handler");
   var prefs = await SharedPreferences.getInstance();
+  print(message);
   print(message.notification?.title);
   print(message.notification?.body);
+  print(message.data['nType'].toString());
   List<String> noti_title = prefs.getStringList('noti_title') ?? [];
   List<String> noti_body = prefs.getStringList('noti_body') ?? [];
   List<String> noti_time = prefs.getStringList('noti_time') ?? [];
+  List<String> noti_type = prefs.getStringList('noti_type') ?? [];
   noti_time.add((message.sentTime).toString() ?? "");
   noti_title.add(message.notification?.title ?? "");
   noti_body.add(message.notification?.body ?? "");
+  noti_type.add(message.data['nType'].toString() ?? "");
   prefs.setStringList('noti_title', noti_title);
   prefs.setStringList('noti_body', noti_body);
   prefs.setStringList('noti_time', noti_time);
+  prefs.setStringList('noti_type', noti_type);
   // runApp(BusBuddyApp());
   // main();
   // if (message.notification != null) {
