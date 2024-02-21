@@ -815,21 +815,6 @@ class HomeViewState extends State<HomeView> {
                           ),
                         if (globel.userType == "bus_staff")
                           ListTile(
-                            leading: const Icon(Icons.dashboard),
-                            title: const Text('Dashboard'),
-                            selected: _selectedIndex == 12,
-                            onTap: () {
-                              if (_selectedIndex == 12) return;
-                              // Update the state of the app
-                              // _onItemTapped(2);
-                              // Then close the drawer
-                              setState(() {
-                                _selectedIndex = 12;
-                              });
-                            },
-                          ),
-                        if (globel.userType == "bus_staff")
-                          ListTile(
                             leading: const Icon(Icons.qr_code),
                             title: const Text('QR Code Scan'),
                             selected: _selectedIndex == 13,
