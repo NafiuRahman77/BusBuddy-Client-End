@@ -21,6 +21,7 @@ class RunningTrip {
     end_location;
     path = [];
     passenger_count = 0;
+    time_window = [];
 
     constructor (id, start_timestamp, route, time_type, 
                  travel_direction, bus, is_default,

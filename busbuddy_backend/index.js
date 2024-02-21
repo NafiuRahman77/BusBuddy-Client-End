@@ -1322,6 +1322,8 @@ app.post('/api/updateStaffLocation', (req,res) => {
                 };
             });
             trip.path.push(r_coord);
+            if (trip.time_window.length === 10) trip.time_window.shift();
+            trip.time_window.push(new Date());
             res.send({
                 success: true,
             });
