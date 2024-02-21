@@ -188,7 +188,6 @@ class _TripCardState extends State<TripCard>
 
     var r2 = await Requests.post(globel.serverIp + 'endTrip',
         body: {
-          'trip_id': tripID,
           'latitude': latitude.toString(),
           'longitude': longitude.toString(),
         },
@@ -381,7 +380,7 @@ class _TripCardState extends State<TripCard>
                                         foregroundNotificationConfig:
                                             const ForegroundNotificationConfig(
                                           notificationText:
-                                              "Example app will continue to receive your location even when you aren't using it",
+                                              "BusBuddy app will continue to receive your location even when you aren't using it",
                                           notificationTitle:
                                               "Running in Background",
                                           enableWakeLock: true,
@@ -401,7 +400,6 @@ class _TripCardState extends State<TripCard>
                                             globel.serverIp +
                                                 'updateStaffLocation',
                                             body: {
-                                              'trip_id': globel.runningTripId,
                                               'latitude':
                                                   position.latitude.toString(),
                                               'longitude':
@@ -416,6 +414,7 @@ class _TripCardState extends State<TripCard>
                                     widget.parentTabController();
                                     await widget.parentReloadCallback();
                                   } else {
+                                    globel.runningTripId = "";
                                     // fluttertoast
                                     Fluttertoast.showToast(
                                         msg: "A trip is already ongoing",

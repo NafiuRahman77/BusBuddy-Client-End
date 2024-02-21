@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
     late LocationSettings locationSettings;
 
     locationSettings = AndroidSettings(
-        accuracy: LocationAccuracy.high,
+        accuracy: LocationAccuracy.best,
         distanceFilter: globel.distanceFilter,
         forceLocationManager: true,
         intervalDuration: const Duration(seconds: 10),
@@ -56,7 +56,6 @@ class _LoginPageState extends State<LoginPage> {
       if (position != null) {
         var r2 = await Requests.post(globel.serverIp + 'updateStaffLocation',
             body: {
-              'trip_id': globel.runningTripId,
               'latitude': position.latitude.toString(),
               'longitude': position.longitude.toString(),
             },

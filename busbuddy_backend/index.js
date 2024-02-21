@@ -1113,27 +1113,29 @@ app.post('/api/startTrip', (req,res) => {
                              where sess->>'fcm_id' is not null and sess->>'userid' = $1`, 
                              [newTrip.helper]
                         ).then(qres => {
-                            let token = qres.rows[0].fcm_id;
-                            let message = {
-                                token: token,
-                                data: {
-                                    nType: 'helper_trip_start',
-                                },
-                                notification: {
-                                    title: "Your assigned trip has started.",
-                                    body: `Trip #${newTrip.id} has started on route ${tracking.routeNames.get(newTrip.route)} by ${newTrip.driver}.`,
-                                },
-                                android: {
+                            if (qres.rows.length > 0) {
+                                let token = qres.rows[0].fcm_id;
+                                let message = {
+                                    token: token,
+                                    data: {
+                                        nType: 'helper_trip_start',
+                                    },
                                     notification: {
-                                      channel_id: "busbuddy_broadcast",
-                                      default_sound: true,
-                                    }
-                                },
+                                        title: "Your assigned trip has started.",
+                                        body: `Trip #${newTrip.id} has started on route ${tracking.routeNames.get(newTrip.route)} by ${newTrip.driver}.`,
+                                    },
+                                    android: {
+                                        notification: {
+                                        channel_id: "busbuddy_broadcast",
+                                        default_sound: true,
+                                        }
+                                    },
+                                };
+                                FCM.send (message, function(err, response) {
+                                    if (err) errLogger.error (err);
+                                    else historyLogger.debug (response);
+                                });
                             };
-                            FCM.send (message, function(err, response) {
-                                if (err) errLogger.error (err);
-                                else historyLogger.debug (response);
-                            });
                         }).catch(e => {
                             errLogger.error(e.stack);
                         });
@@ -1200,27 +1202,29 @@ app.post('/api/endTrip', async (req,res) => {
                  where sess->>'fcm_id' is not null and sess->>'userid' = $1`, 
                  [trip.helper]
             ).then(qres => {
-                let token = qres.rows[0].fcm_id;
-                let message = {
-                    token: token,
-                    data: {
-                        nType: 'helper_trip_end',
-                    },
-                    notification: {
-                        title: "Your assigned trip has ended.",
-                        body: `Trip #${trip.id} on route ${tracking.routeNames.get(trip.route)} has been ended by ${trip.driver}.`,
-                    },
-                    android: {
+                if (qres.rows.length > 0) {
+                    let token = qres.rows[0].fcm_id;
+                    let message = {
+                        token: token,
+                        data: {
+                            nType: 'helper_trip_end',
+                        },
                         notification: {
-                          channel_id: "busbuddy_broadcast",
-                          default_sound: true,
-                        }
-                    },
+                            title: "Your assigned trip has ended.",
+                            body: `Trip #${trip.id} on route ${tracking.routeNames.get(trip.route)} has been ended by ${trip.driver}.`,
+                        },
+                        android: {
+                            notification: {
+                            channel_id: "busbuddy_broadcast",
+                            default_sound: true,
+                            }
+                        },
+                    };
+                    FCM.send (message, function(err, response) {
+                        if (err) errLogger.error (err);
+                        else historyLogger.debug (response);
+                    });
                 };
-                FCM.send (message, function(err, response) {
-                    if (err) errLogger.error (err);
-                    else historyLogger.debug (response);
-                });
             }).catch(e => {
                 errLogger.error(e.stack);
             });
