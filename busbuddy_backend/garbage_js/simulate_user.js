@@ -3,7 +3,7 @@ const { Readable } = require('stream');
 const { finished } = require('stream/promises');
 const streamToArray = require('stream-to-array');
 
-trips = ["2656", "2659", "2662", "2665", "2671", "2674", "2677", "2680"]
+trips = ["2656", "2610", "2662", "2665", "2670", "2673", "2676", "2680"]
 
 const getTripData = async (trip_id) => {
     console.log(trip_id);
