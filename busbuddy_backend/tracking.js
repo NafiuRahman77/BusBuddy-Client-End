@@ -1,5 +1,7 @@
 const runningTrips = new Map();
 const stationCoords = new Map();
+const stationNames = new Map();
+const routeNames = new Map();
 const busStaffMap = new Map();
 
 class RunningTrip {
@@ -19,6 +21,7 @@ class RunningTrip {
     end_location;
     path = [];
     passenger_count = 0;
+    time_window = [];
 
     constructor (id, start_timestamp, route, time_type, 
                  travel_direction, bus, is_default,
@@ -42,4 +45,4 @@ class RunningTrip {
     };
 };
 
-module.exports = {RunningTrip, runningTrips, stationCoords, busStaffMap}
+module.exports = {RunningTrip, runningTrips, stationCoords, stationNames, routeNames, busStaffMap}

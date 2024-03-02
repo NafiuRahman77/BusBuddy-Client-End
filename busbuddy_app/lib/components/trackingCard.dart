@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:requests/requests.dart';
 import '../../globel.dart' as globel;
 import './circlewidget.dart';
 
@@ -17,7 +19,7 @@ class TrackingCard extends StatefulWidget {
   final String time2;
   final String location3;
   final String time3;
-  final List<dynamic> completeInfo;
+  List<dynamic> completeInfo;
   final List<String> stationIds;
   final List<String> stationNames;
   TrackingCard({
@@ -41,6 +43,42 @@ class TrackingCard extends StatefulWidget {
 
 class _TrackingCardState extends State<TrackingCard> {
   bool isExtended = false;
+  Timer? locationUpdateTimer;
+
+  Future<void> getlocationupdate(String TripID) async {
+    var r = await Requests.post(globel.serverIp + 'getTripData',
+        body: {
+          'trip_id': TripID,
+        },
+        bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+
+    r.raiseForStatus();
+    setState(() {
+      var zz = r.json();
+      widget.completeInfo = zz["time_list"];
+      widget.pathCoords = zz['path'];
+      // get current location
+      // _getCurrentLocation();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    locationUpdateTimer =
+        Timer.periodic(Duration(seconds: 10), (Timer timer) async {
+      await getlocationupdate(widget.TripID);
+      // x = cnv(widget.pathCoords);
+    });
+  }
+
+  @override
+  void dispose() {
+    if (locationUpdateTimer != null && locationUpdateTimer!.isActive) {
+      locationUpdateTimer!.cancel();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

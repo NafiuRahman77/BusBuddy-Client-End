@@ -188,7 +188,6 @@ class _TripCardState extends State<TripCard>
 
     var r2 = await Requests.post(globel.serverIp + 'endTrip',
         body: {
-          'trip_id': tripID,
           'latitude': latitude.toString(),
           'longitude': longitude.toString(),
         },
@@ -369,10 +368,11 @@ class _TripCardState extends State<TripCard>
               Center(
                 child: // show the button only if title is "Upcoming Trip" or title is "Ongoing trip" and islive is true
 
-                    ((widget.title == "Start Trip" &&
-                                globel.runningTripId == "") ||
-                            (widget.title == "End Trip" &&
-                                widget.islive == true))
+                    (globel.staffRole == 'driver' &&
+                            ((widget.title == "Start Trip" &&
+                                    globel.runningTripId == "") ||
+                                (widget.title == "End Trip" &&
+                                    widget.islive == true)))
                         ? ElevatedButton(
                             onPressed: () async {
                               // Check if location services are enabled
@@ -402,7 +402,7 @@ class _TripCardState extends State<TripCard>
                                         foregroundNotificationConfig:
                                             const ForegroundNotificationConfig(
                                           notificationText:
-                                              "Example app will continue to receive your location even when you aren't using it",
+                                              "BusBuddy app will continue to receive your location even when you aren't using it",
                                           notificationTitle:
                                               "Running in Background",
                                           enableWakeLock: true,
@@ -422,7 +422,6 @@ class _TripCardState extends State<TripCard>
                                             globel.serverIp +
                                                 'updateStaffLocation',
                                             body: {
-                                              'trip_id': globel.runningTripId,
                                               'latitude':
                                                   position.latitude.toString(),
                                               'longitude':
@@ -437,6 +436,7 @@ class _TripCardState extends State<TripCard>
                                     widget.parentTabController();
                                     await widget.parentReloadCallback();
                                   } else {
+                                    globel.runningTripId = "";
                                     // fluttertoast
                                     Fluttertoast.showToast(
                                         msg: "A trip is already ongoing",

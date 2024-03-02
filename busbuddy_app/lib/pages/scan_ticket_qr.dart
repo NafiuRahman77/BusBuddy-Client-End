@@ -219,7 +219,6 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
     var r = await Requests.post(globel.serverIp + 'staffScanTicket',
         body: {
           'ticket_id': ticket_id,
-          'trip_id': globel.runningTripId,
         },
         bodyEncoding: RequestBodyEncoding.JSON);
 
