@@ -553,7 +553,7 @@ app.post('/api/getBusStaffData', (req,res) => {
 
 app.post('/api/getBusList', (req,res) => {
     if (req.session && req.session.user_type == "bus_staff") {
-        dbclient.query("select bus from allocation where driver=$1 or helper=$1",
+        dbclient.query("select distinct bus from allocation where driver=$1 or helper=$1",
         [req.session.userid]).then(qres => {
             res.send(qres.rows);
         }).catch(e => errLogger.error(e.stack));
