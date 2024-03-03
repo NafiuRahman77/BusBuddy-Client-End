@@ -1578,7 +1578,7 @@ process.stdin.on('keypress', async (chunk, key) => {
             consoleLogger.info("backing up " + trip.id);
             let timeWindowStr = "{";
             for (let i=0; i<trip.time_window.length; i++) {
-                timeWindowStr += `"${trip.time_window[i]}"`;
+                timeWindowStr += `"${trip.time_window[i].toISOString()}"`;
                 if (i<trip.time_window.length-1) timeWindowStr += ", ";
             };
             timeWindowStr += "}";
