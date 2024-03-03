@@ -1301,7 +1301,7 @@ app.post('/api/updateStaffLocation', (req,res) => {
                 if (dist <= 180 && tp.time == null) {
                     consoleLogger.info(trip.id + " crossed " + tp.station);
                     tp.time = new Date();
-                    if (i < arr.length-2) {
+                    if (trip.travel_direction == "to_buet" && i < arr.length-2) {
                         nextStation = arr[i+1].station;
                         consoleLogger.info("coming up next: " + nextStation);
                         let notif_list;  
