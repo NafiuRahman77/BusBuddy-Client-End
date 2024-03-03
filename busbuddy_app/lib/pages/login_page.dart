@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
     late LocationSettings locationSettings;
 
     locationSettings = AndroidSettings(
-        accuracy: LocationAccuracy.high,
+        accuracy: LocationAccuracy.best,
         distanceFilter: globel.distanceFilter,
         forceLocationManager: true,
         intervalDuration: const Duration(seconds: 10),
@@ -56,7 +56,6 @@ class _LoginPageState extends State<LoginPage> {
       if (position != null) {
         var r2 = await Requests.post(globel.serverIp + 'updateStaffLocation',
             body: {
-              'trip_id': globel.runningTripId,
               'latitude': position.latitude.toString(),
               'longitude': position.longitude.toString(),
             },
@@ -69,6 +68,8 @@ class _LoginPageState extends State<LoginPage> {
 
   bool isConnected = true;
   bool flagforofflinebutton = false;
+  bool loaderShowing = false;
+  bool netChecked = false;
 
   @override
   void initState() {
@@ -79,24 +80,12 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> onLoginMount() async {
     print('Checking internet connection... 1');
     bool result = await InternetConnectionChecker().hasConnection;
-
     final SharedPreferences prefs1 = await SharedPreferences.getInstance();
     List<String> ticketIds = prefs1.getStringList('ticketIds') ?? [];
-    print(result);
-    globel.routeIDs.clear();
-    globel.routeNames.clear();
-    var r1 = await Requests.post(globel.serverIp + 'getRoutes');
-    r1.raiseForStatus();
-    List<dynamic> json1 = r1.json();
-    setState(() {
-      for (int i = 0; i < json1.length; i++) {
-        globel.routeIDs.add(json1[i]['id']);
-        globel.routeNames.add(json1[i]['terminal_point']);
-      }
-    });
+    print("connected: $result");
 
-    print(globel.routeNames);
-
+    context.loaderOverlay.show();
+    loaderShowing = true;
     setState(() {
       if (result == true) {
         isConnected = true;
@@ -115,16 +104,19 @@ class _LoginPageState extends State<LoginPage> {
       }
       flagforofflinebutton = ticketIds.isNotEmpty;
     });
+    netChecked = true;
     if (!isConnected) {
+      context.loaderOverlay.hide();
       return;
     }
+
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? c = await prefs.getString('connect.sid');
     if (c != null) {
       await Requests.addCookie(
           Requests.getHostname(globel.serverIp), 'connect.sid', c);
 
-      context.loaderOverlay.show();
+      // context.loaderOverlay.show();
       var r = await Requests.post(globel.serverIp + 'sessionCheck',
           body: {
             'fcm_id': globel.fcmId,
@@ -136,7 +128,25 @@ class _LoginPageState extends State<LoginPage> {
       print(json);
       if (json['recognized'] == true) {
         globel.userType = json['user_type'];
+
+        // if (isConnected == true) {
+        globel.routeIDs.clear();
+        globel.routeNames.clear();
+        var r1 = await Requests.post(globel.serverIp + 'getRoutes');
+        r1.raiseForStatus();
+        List<dynamic> json1 = r1.json();
+        setState(() {
+          for (int i = 0; i < json1.length; i++) {
+            globel.routeIDs.add(json1[i]['id']);
+            globel.routeNames.add(json1[i]['terminal_point']);
+          }
+        });
+
+        print(globel.routeNames);
+        // }
+
         if (globel.userType == 'bus_staff') {
+          globel.staffRole = json['bus_role'];
           if (json['relogin'] == true) {
             Fluttertoast.showToast(
                 msg:
@@ -156,54 +166,91 @@ class _LoginPageState extends State<LoginPage> {
           dynamic rt = r4.json();
           if (rt['success']) {
             globel.runningTripId = rt['id'];
-            bool isLocationServiceEnabled =
-                await Geolocator.isLocationServiceEnabled();
+            if (globel.staffRole == 'driver') {
+              bool isLocationServiceEnabled =
+                  await Geolocator.isLocationServiceEnabled();
 
-            // Workmanager()
-            //     .registerOneOffTask("bus", "sojib")
-            if (!isLocationServiceEnabled) {
-              // Handle the case where location services are not enabled
-              // You may want to show a toast or display a message
-              print('Location services are not enabled.');
-              Fluttertoast.showToast(
-                msg: "Please enable location services.",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                backgroundColor: Colors.red,
-                textColor: Colors.white,
-                fontSize: 16.0,
-              );
-              SystemNavigator.pop();
-            }
+              // Workmanager()
+              //     .registerOneOffTask("bus", "sojib")
+              if (!isLocationServiceEnabled) {
+                // Handle the case where location services are not enabled
+                // You may want to show a toast or display a message
+                print('Location services are not enabled.');
+                Fluttertoast.showToast(
+                  msg: "Please enable location services.",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+                SystemNavigator.pop();
+              }
 
-            // Check if the app has location permission
-            LocationPermission permission = await Geolocator.checkPermission();
-            if (permission == LocationPermission.denied) {
-              // Request location permission
-              permission = await Geolocator.requestPermission();
-              if (permission != LocationPermission.whileInUse &&
-                  permission != LocationPermission.always) {
-                // Handle the case where the user denied location permission
-                print('User denied location permission.');
+              // Check if the app has location permission
+              LocationPermission permission =
+                  await Geolocator.checkPermission();
+              if (permission == LocationPermission.denied) {
+                // Request location permission
+                permission = await Geolocator.requestPermission();
+                if (permission != LocationPermission.whileInUse &&
+                    permission != LocationPermission.always) {
+                  // Handle the case where the user denied location permission
+                  print('User denied location permission.');
+                  SystemNavigator.pop();
+                }
+              }
+              try {
+                await startLocationStream();
+                // return true;
+              } catch (e) {
+                print("Error getting location: $e");
                 SystemNavigator.pop();
               }
             }
-            try {
-              await startLocationStream();
-              // return true;
-            } catch (e) {
-              print("Error getting location: $e");
-              SystemNavigator.pop();
-            }
           }
         }
+        if (globel.userType == 'student') {
+          // context.loaderOverlay.show();
+          var r = await Requests.post(globel.serverIp + 'getTicketList');
 
+          r.raiseForStatus();
+          dynamic json = r.json();
+          print(json);
+
+          if (json['success'] == true) {
+            List<String> ticketIds = List<String>.from(json['ticket_list']);
+
+            final SharedPreferences prefs =
+                await SharedPreferences.getInstance();
+            prefs.setStringList('ticketIds', ticketIds);
+            // setState(() {
+            //   flagforofflinebutton = ticketIds.isNotEmpty;
+            // });
+            print(ticketIds.isNotEmpty.toString() + "..........");
+          } else {
+            // Fluttertoast.showToast(
+            //   msg: 'Failed to load data.',
+            //   toastLength: Toast.LENGTH_SHORT,
+            //   gravity: ToastGravity.CENTER,
+            //   timeInSecForIosWeb: 1,
+            //   backgroundColor: Color.fromARGB(118, 244, 67, 54),
+            //   textColor: Colors.white,
+            //   fontSize: 16.0,
+            // );
+          }
+          // context.loaderOverlay.hide();
+        }
         await onProfileReady();
         await onProfileMount();
 
+        loaderShowing = false;
+        context.loaderOverlay.hide();
         GoRouter.of(context).go("/show_profile");
       }
+    }
+    if (loaderShowing == true) {
       context.loaderOverlay.hide();
     }
   }
@@ -231,6 +278,7 @@ class _LoginPageState extends State<LoginPage> {
           prefs.setStringList('noti_title', []);
           prefs.setStringList('noti_body', []);
           prefs.setStringList("noti_time", []);
+          prefs.setStringList("noti_type", []);
         }
       }
       // set student id to shared pref
@@ -245,7 +293,24 @@ class _LoginPageState extends State<LoginPage> {
       });
       globel.userType = json['user_type'];
 
+      // if (isConnected == true) {
+      globel.routeIDs.clear();
+      globel.routeNames.clear();
+      var r1 = await Requests.post(globel.serverIp + 'getRoutes');
+      r1.raiseForStatus();
+      List<dynamic> json1 = r1.json();
+      setState(() {
+        for (int i = 0; i < json1.length; i++) {
+          globel.routeIDs.add(json1[i]['id']);
+          globel.routeNames.add(json1[i]['terminal_point']);
+        }
+      });
+
+      print(globel.routeNames);
+      // }
+
       if (globel.userType == 'bus_staff') {
+        globel.staffRole = json['bus_role'];
         if (json['relogin'] == true) {
           Fluttertoast.showToast(
               msg:
@@ -264,50 +329,52 @@ class _LoginPageState extends State<LoginPage> {
         dynamic rt = r4.json();
         if (rt['success']) {
           globel.runningTripId = rt['id'];
-          bool isLocationServiceEnabled =
-              await Geolocator.isLocationServiceEnabled();
+          if (globel.staffRole == 'driver') {
+            bool isLocationServiceEnabled =
+                await Geolocator.isLocationServiceEnabled();
 
-          // Workmanager()
-          //     .registerOneOffTask("bus", "sojib")
-          if (!isLocationServiceEnabled) {
-            // Handle the case where location services are not enabled
-            // You may want to show a toast or display a message
-            print('Location services are not enabled.');
-            Fluttertoast.showToast(
-              msg: "Please enable location services.",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              fontSize: 16.0,
-            );
-            return false;
-          }
-
-          // Check if the app has location permission
-          LocationPermission permission = await Geolocator.checkPermission();
-          if (permission == LocationPermission.denied) {
-            // Request location permission
-            permission = await Geolocator.requestPermission();
-            if (permission != LocationPermission.whileInUse &&
-                permission != LocationPermission.always) {
-              // Handle the case where the user denied location permission
-              print('User denied location permission.');
+            // Workmanager()
+            //     .registerOneOffTask("bus", "sojib")
+            if (!isLocationServiceEnabled) {
+              // Handle the case where location services are not enabled
+              // You may want to show a toast or display a message
+              print('Location services are not enabled.');
+              Fluttertoast.showToast(
+                msg: "Please enable location services.",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                fontSize: 16.0,
+              );
               return false;
             }
-          }
-          try {
-            await startLocationStream();
-            return true;
-          } catch (e) {
-            print("Error getting location: $e");
-            return false;
+
+            // Check if the app has location permission
+            LocationPermission permission = await Geolocator.checkPermission();
+            if (permission == LocationPermission.denied) {
+              // Request location permission
+              permission = await Geolocator.requestPermission();
+              if (permission != LocationPermission.whileInUse &&
+                  permission != LocationPermission.always) {
+                // Handle the case where the user denied location permission
+                print('User denied location permission.');
+                return false;
+              }
+            }
+            try {
+              await startLocationStream();
+              return true;
+            } catch (e) {
+              print("Error getting location: $e");
+              return false;
+            }
           }
         }
       }
       if (globel.userType == 'student') {
-        context.loaderOverlay.show();
+        // context.loaderOverlay.show();
         var r = await Requests.post(globel.serverIp + 'getTicketList');
 
         r.raiseForStatus();
@@ -334,7 +401,7 @@ class _LoginPageState extends State<LoginPage> {
           //   fontSize: 16.0,
           // );
         }
-        context.loaderOverlay.hide();
+        // context.loaderOverlay.hide();
       }
       // print(globel.userType);
       Fluttertoast.showToast(
@@ -435,12 +502,14 @@ class _LoginPageState extends State<LoginPage> {
     return LoaderOverlay(
       overlayColor: Color.fromARGB(150, 200, 200, 200),
       child: Scaffold(
+        backgroundColor: Color.fromARGB(255, 21, 21, 21),
         body: SingleChildScrollView(
           // Add this line
           child: Container(
+            height: MediaQuery.of(context).size.height,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFEB2A2A)!, Color.fromARGB(255, 21, 21, 21)!],
+                colors: [Color(0xFFEB2A2A), Color.fromARGB(255, 21, 21, 21)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -448,7 +517,7 @@ class _LoginPageState extends State<LoginPage> {
             child: SafeArea(
               child: Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const SizedBox(height: 50),
                     Image(
@@ -465,20 +534,13 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 25),
                     const SizedBox(height: 50),
-                    Text(
-                      'Login',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
+
                     Visibility(
-                      visible: isConnected,
+                      visible: netChecked && isConnected,
                       child: Column(
                         children: [
                           // username textfield
+
                           MyTextField(
                             controller: usernameController,
                             hintText: 'Username',
@@ -503,16 +565,18 @@ class _LoginPageState extends State<LoginPage> {
                               if (lgin == true) {
                                 await onProfileReady();
                                 await onProfileMount();
+                                context.loaderOverlay.hide();
                                 GoRouter.of(context).go("/show_profile");
+                              } else {
+                                context.loaderOverlay.hide();
                               }
-                              context.loaderOverlay.hide();
                             },
                           ),
                         ],
                       ),
                     ),
                     Visibility(
-                      visible: !isConnected,
+                      visible: netChecked && !isConnected,
                       child: Column(
                         children: [
                           const SizedBox(height: 70),
@@ -532,7 +596,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 20),
                           Visibility(
-                            visible: flagforofflinebutton,
+                            visible: netChecked && flagforofflinebutton,
                             child: ElevatedButton(
                               onPressed: () {
                                 GoRouter.of(context).push("/offline_ticket");
@@ -546,19 +610,22 @@ class _LoginPageState extends State<LoginPage> {
 
                     const SizedBox(height: 70),
                     // forgot password?
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Forgot Password?',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
+                    Visibility(
+                      visible: netChecked && isConnected,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Forgot Password?',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 50),
+
                     const SizedBox(height: 50),
                   ],
                 ),

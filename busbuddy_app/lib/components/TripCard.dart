@@ -188,7 +188,6 @@ class _TripCardState extends State<TripCard>
 
     var r2 = await Requests.post(globel.serverIp + 'endTrip',
         body: {
-          'trip_id': tripID,
           'latitude': latitude.toString(),
           'longitude': longitude.toString(),
         },
@@ -247,24 +246,26 @@ class _TripCardState extends State<TripCard>
 
     return Card(
       margin: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
-      color: Colors.white,
+      // set color to 0xFFFFD5D6
+      color: (widget.title == "End Trip" && widget.islive == true)
+          ? Color.fromARGB(255, 222, 247, 234)
+          : Color.fromARGB(255, 255, 222, 223),
+      // add shadow to the card
+      elevation: 3,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(16.0),
         side: BorderSide(
           color: Colors.grey.withOpacity(0.3),
         ),
       ),
-      child: InkWell(
-        onTap: () {
-          // Add functionality for the tap event
-        },
+      child: Container(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.fromLTRB(26, 24, 22, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (!widget.islive && widget.EndTime != "")
-                Center(
+                Container(
                   child: buildDataTable({
                     'Route': globel
                         .routeNames[globel.routeIDs.indexOf(widget.Route)],
@@ -274,26 +275,20 @@ class _TripCardState extends State<TripCard>
                         .toString()
                         .split(' ')
                         .first,
-                    'Start Time': DateTime.parse(widget.StartTime)
-                        .toLocal()
-                        .toString()
-                        .split(' ')
-                        .last,
+                    'Start Time': DateFormat('h:mm a')
+                        .format(DateTime.parse(widget.StartTime).toLocal()),
                     'End Date': DateTime.parse(widget.EndTime!)
                         .toLocal()
                         .toString()
                         .split(' ')
                         .first,
-                    'End Time': DateTime.parse(widget.EndTime!)
-                        .toLocal()
-                        .toString()
-                        .split(' ')
-                        .last,
+                    'End Time': DateFormat('h:mm a')
+                        .format(DateTime.parse(widget.EndTime!).toLocal()),
                     'Bus No': widget.BusNo,
                   }),
                 ),
               if (widget.islive || widget.EndTime == "")
-                Center(
+                Container(
                   child: buildDataTable({
                     'Route': globel
                         .routeNames[globel.routeIDs.indexOf(widget.Route)],
@@ -303,36 +298,61 @@ class _TripCardState extends State<TripCard>
                         .toString()
                         .split(' ')
                         .first,
-                    'Start Time': DateTime.parse(widget.StartTime)
-                        .toLocal()
-                        .toString()
-                        .split(' ')
-                        .last,
+                    'Start Time': DateFormat('h:mm a')
+                        .format(DateTime.parse(widget.StartTime).toLocal()),
                     'Bus No': widget.BusNo,
                   }),
                 ),
               SizedBox(height: 16),
               if (showWarning)
-                Text(
-                  'Trip Scheduled in $start_hours hours and $start_minutes minutes from now',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.warning,
+                      color: Colors.red,
+                    ),
+                    SizedBox(
+                        width:
+                            8), // Adjust the spacing between the icon and the text as needed
+                    Expanded(
+                      child: Text(
+                        'Trip Scheduled in $start_hours hours and $start_minutes minutes from now',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               if (running_trip)
-                Text(
-                  'The trip is running currently for $start_hours hours and $start_minutes minutes',
-                  style: TextStyle(
-                    color: Color.fromARGB(255, 16, 9, 202),
-                  ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.directions_bus,
+                      color: Color.fromARGB(255, 4, 154, 94),
+                    ),
+                    SizedBox(
+                        width:
+                            8), // Adjust the spacing between the icon and the text as needed
+                    Expanded(
+                      child: Text(
+                        'The trip is running currently for $start_hours hours and $start_minutes minutes',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 4, 154, 94),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               if (ended_trip && end_minutes != 0)
                 Text(
                   'The trip is finished $end_hours hours and $end_minutes minutes ago',
                   textAlign: TextAlign.center, // Center the text
                   style: TextStyle(
-                    color: Color.fromARGB(255, 4, 154, 94),
+                    color: Color.fromARGB(255, 0, 9, 5).withOpacity(0.4),
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               if (ended_trip && end_minutes == 0)
@@ -341,16 +361,18 @@ class _TripCardState extends State<TripCard>
                   textAlign: TextAlign.center, // Center the text
                   style: TextStyle(
                     color: Color.fromARGB(255, 4, 154, 94),
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               Center(
                 child: // show the button only if title is "Upcoming Trip" or title is "Ongoing trip" and islive is true
 
-                    ((widget.title == "Start Trip" &&
-                                globel.runningTripId == "") ||
-                            (widget.title == "End Trip" &&
-                                widget.islive == true))
+                    (globel.staffRole == 'driver' &&
+                            ((widget.title == "Start Trip" &&
+                                    globel.runningTripId == "") ||
+                                (widget.title == "End Trip" &&
+                                    widget.islive == true)))
                         ? ElevatedButton(
                             onPressed: () async {
                               // Check if location services are enabled
@@ -380,7 +402,7 @@ class _TripCardState extends State<TripCard>
                                         foregroundNotificationConfig:
                                             const ForegroundNotificationConfig(
                                           notificationText:
-                                              "Example app will continue to receive your location even when you aren't using it",
+                                              "BusBuddy app will continue to receive your location even when you aren't using it",
                                           notificationTitle:
                                               "Running in Background",
                                           enableWakeLock: true,
@@ -400,7 +422,6 @@ class _TripCardState extends State<TripCard>
                                             globel.serverIp +
                                                 'updateStaffLocation',
                                             body: {
-                                              'trip_id': globel.runningTripId,
                                               'latitude':
                                                   position.latitude.toString(),
                                               'longitude':
@@ -415,6 +436,7 @@ class _TripCardState extends State<TripCard>
                                     widget.parentTabController();
                                     await widget.parentReloadCallback();
                                   } else {
+                                    globel.runningTripId = "";
                                     // fluttertoast
                                     Fluttertoast.showToast(
                                         msg: "A trip is already ongoing",
@@ -443,15 +465,16 @@ class _TripCardState extends State<TripCard>
                               context.loaderOverlay.hide();
                             },
                             style: ElevatedButton.styleFrom(
-                              primary: widget.buttonColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                            ),
+                                primary: widget.buttonColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20.0),
+                                ),
+                                fixedSize: Size(200, 50)),
                             child: Text(widget.title,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 10,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 )),
                           )
                         : SizedBox.shrink(),
@@ -465,42 +488,34 @@ class _TripCardState extends State<TripCard>
 }
 
 Widget buildDataTable(Map<String, String> data) {
-  List<DataRow> rows = [];
-
-  data.forEach((label, value) {
-    rows.add(buildDataRow(label, value));
-  });
-
-  return DataTable(
-    dataRowHeight: 50, // Adjust the row height as needed
-    columns: [
-      DataColumn(
-        label: SizedBox.shrink(), // Hide the header
-      ),
-      DataColumn(
-        label: SizedBox.shrink(), // Hide the header
-      ),
-    ],
-    rows: rows,
-  );
-}
-
-DataRow buildDataRow(String label, String value) {
-  return DataRow(
-    cells: [
-      DataCell(
-        Center(
-          child: Text(
-            label,
-            style: TextStyle(fontWeight: FontWeight.bold),
+  return Table(
+    columnWidths: {
+      0: FlexColumnWidth(2), // Adjust the width of the first column
+      1: FlexColumnWidth(5), // Adjust the width of the second column
+    },
+    children: data.entries.map((entry) {
+      return TableRow(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 6),
+            child: Text(
+              '${entry.key}:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            ),
           ),
-        ),
-      ),
-      DataCell(
-        Center(
-          child: Text(value),
-        ),
-      ),
-    ],
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 6),
+            child: Text(
+              '${entry.value}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black.withOpacity(0.5),
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ],
+      );
+    }).toList(),
   );
 }
