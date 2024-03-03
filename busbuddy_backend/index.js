@@ -888,32 +888,33 @@ app.post('/api/getTrackingData', async (req, res) => {
 //     });
 // }
 // );
-// app.post('/api/getNotifications', (req,res) => {
-//     
-//     consoleLogger.info(req.body);
-//     res.send({
-//         success: true,
-//         data: [
-//             {
-//                 id: 1,
-//                 user_id: "1905067",
-//                 heading: "Your bus is near",
-//                 body: "Your bus is coming to your location. Please be ready at the bus stop.",
-//                 timestamp: "2021-05-01 12:00:00"
-//             },
-            
-           
-//         ]
-//     });
-// });
-// //send real time notification api
-// app.post('/api/sendNotification', (req,res) => {
-//     
-//     consoleLogger.info(req.body);
-//     res.send({
-//         success: true,
-//     });
-// });
+app.post('/api/getNotifications', (req,res) => {
+    consoleLogger.info(req.body);
+    let notifs = [];
+    dbclient.query(
+        `select * from broadcast_notification limit 10`
+    ).then(qres => {
+        //log(qres);
+        notifs = notifs + [...qres.rows];
+        dbclient.query(
+            `select * from personal_notification where user_id=$1 limit 10`, [req.session.userid]
+        ).then(qres2 => {
+            //log(qres);
+            notifs = notifs + [...qres2.rows];
+            res.send(notifs);
+        }).catch(e => {
+            errLogger.error(e.stack);
+            res.send({ 
+                success: false,
+            });
+        });
+    }).catch(e => {
+        errLogger.error(e.stack);
+        res.send({ 
+            success: false,
+        });
+    });
+});
 
 // // Teacher bill payment api
 // app.post('/api/payBill', (req,res) => {
