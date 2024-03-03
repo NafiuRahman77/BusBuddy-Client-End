@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DriverHelperInfo extends StatelessWidget {
-  final String title;
-  final String name;
-  final String phone;
+  final String driverTitle;
+  final String driverName;
+  final String driverPhone;
+  final String helperTitle;
+  final String helperName;
+  final String helperPhone;
 
   const DriverHelperInfo({
-    Key? key,
-    required this.title,
-    required this.name,
-    required this.phone,
-  }) : super(key: key);
+    required this.driverTitle,
+    required this.driverName,
+    required this.driverPhone,
+    required this.helperTitle,
+    required this.helperName,
+    required this.helperPhone,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,57 +30,130 @@ class DriverHelperInfo extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          Row(
+          // Driver Section
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.circle,
-                size: 12,
-                color: Colors.red,
-              ),
-              SizedBox(width: 5),
               Text(
-                'Name: $name',
+                driverTitle,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Colors.white, // Change text color to white
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 5),
-          Row(
-            children: [
-              Icon(
-                Icons.phone,
-                size: 18,
-                color: Colors.black87,
-              ),
-              SizedBox(width: 5),
-              Text(
-                'Phone: $phone',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+              Row(
+                children: [
+                  Icon(
+                    Icons.circle,
+                    size: 12,
+                    color: Colors.red,
+                  ),
+                  SizedBox(width: 5),
+                  Text(
+                    '$driverName',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white, // Change text color to white
+                    ),
+                  ),
+                  SizedBox(width: 5),
+                  IconButton(
+                    icon: Icon(Icons.call),
+                    onPressed: () async {
+                      final Uri callurl = Uri(
+                        scheme: 'tel',
+                        path: driverPhone,
+                      );
+                      if (await canLaunchUrl(callurl))
+                        await launchUrl(callurl);
+                      else
+                        Fluttertoast.showToast(
+                          msg: "Can't make call",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                          timeInSecForIosWeb: 1,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0,
+                        );
+                    },
+                  ),
+                  Text(
+                    driverPhone,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  )
+                ],
               ),
             ],
           ),
           SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () async {
-              // Implement call functionality
-            },
-            child: Text('Call Now'),
+          // Helper Section
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                helperTitle,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              Row(
+                children: [
+                  Icon(
+                    Icons.circle,
+                    size: 12,
+                    color: Colors.red,
+                  ),
+                  SizedBox(width: 5),
+                  Text(
+                    '$helperName',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white, // Change text color to white
+                    ),
+                  ),
+                  SizedBox(width: 5),
+                  IconButton(
+                    icon: Icon(Icons.call),
+                    onPressed: () async {
+                      final Uri callurl = Uri(
+                        scheme: 'tel',
+                        path: helperPhone,
+                      );
+                      if (await canLaunchUrl(callurl))
+                        await launchUrl(callurl);
+                      else
+                        Fluttertoast.showToast(
+                          msg: "Can't make call",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                          timeInSecForIosWeb: 1,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0,
+                        );
+                    },
+                  ),
+                  Text(
+                    helperPhone,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  )
+                ],
+              ),
+            ],
           ),
         ],
       ),

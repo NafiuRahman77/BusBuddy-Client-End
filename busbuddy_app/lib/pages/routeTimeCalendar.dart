@@ -34,12 +34,12 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
   List<dynamic> rejectedData = [];
   bool loadedRouteTimeData = false;
   List<dynamic> routeCoords = [];
-  String driver_Id = "";
-  String driver_Name = "";
-  String driver_Phone = "";
-  String helper_ID = "";
-  String helper_Name = "";
-  String helper_Phone = "";
+  List<String> driverIDs = [];
+  List<String> driverNames = [];
+  List<String> driverPhones = [];
+  List<String> HelperIDs = [];
+  List<String> HelperNames = [];
+  List<String> HelperPhones = [];
 
   @override
   void initState() {
@@ -103,10 +103,6 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
     //   print(element);
     // });
 
-    station_coords.forEach((element) {
-      //print(element);
-    });
-
     context.loaderOverlay.hide();
     await onRouteSelect(defaultRoute);
     // If the server did return a 201 CREATED response,
@@ -135,6 +131,32 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       });
 
       routeTimeData = acceptedList;
+      driverIDs.clear();
+      HelperIDs.clear();
+      setState(() {
+        routeTimeData.forEach((element) {
+          driverIDs.add(element['driver']);
+          HelperIDs.add(element['helper']);
+        });
+      });
+      driverNames.clear();
+      HelperNames.clear();
+      globel.driverHelpers.forEach(
+        (element) => {
+          driverIDs.forEach((driverid) {
+            if (element['id'] == driverid) {
+              driverNames.add(element['name']);
+              driverPhones.add(element['phone']);
+            }
+          }),
+          HelperIDs.forEach((helperID) {
+            if (element['id'] == helperID) {
+              HelperNames.add(element['name']);
+              HelperPhones.add(element['phone']);
+            }
+          })
+        },
+      );
     });
 
     // print("ok" + routeTimeData.length.toString());
@@ -151,16 +173,44 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
     r.raiseForStatus();
     setState(() {
       routeTimeData = r.json();
-      //
+      driverIDs.clear();
+      HelperIDs.clear();
+      routeTimeData.forEach((element) {
+        driverIDs.add(element['driver']);
+        HelperIDs.add(element['helper']);
+      });
+      //print(driverIDs);
       //print(routeTimeData);
       loadedRouteTimeData = true;
 
       routeTimeData.forEach((j) {
         j["array_to_json"].forEach((stop) {
           // routeCoords.add(station_coords[int.parse(stop['station']) - 1]);
-          stop['coord'] = station_coords[station_ids.indexOf(stop['station'])];
+          stop['coord'] = station_coords[int.parse(stop['station']) - 1];
         });
       });
+
+      // in global , we have List<dynamic> driverHelpers , now using the driver and helper id , we will search driverhelpers and fetch them to lists here
+      driverNames.clear();
+      HelperNames.clear();
+      globel.driverHelpers.forEach(
+        (element) => {
+          driverIDs.forEach((driverid) {
+            if (element['id'] == driverid) {
+              driverNames.add(element['name']);
+              driverPhones.add(element['phone']);
+            }
+          }),
+          HelperIDs.forEach((helperID) {
+            if (element['id'] == helperID) {
+              HelperNames.add(element['name']);
+              HelperPhones.add(element['phone']);
+            }
+          })
+        },
+      );
+      print(HelperNames);
+      print(HelperPhones);
 
       setDateInit();
     });
@@ -222,9 +272,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
                     value: selectedRouteName,
                     onChanged: (value) {
                       setState(() {
-                        // Handle dropdown selection
                         selectedRouteName = value!;
-                        // print(selectedOption);
                         int idx = globel.routeNames.indexOf(selectedRouteName);
                         selectedRouteId = globel.routeIDs[idx];
                       });
@@ -283,49 +331,45 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
               ),
               SizedBox(height: 30),
               if (loadedRouteTimeData)
-                for (int i = 0; i < routeTimeData.length; i++)
-                  Container(
-                    child: Column(
-                      children: [
-                        DriverHelperInfo(
-                          title: routeTimeData[i]['bus'],
-                          name: routeTimeData[i]['driver'],
-                          phone: routeTimeData[i]['driver_phone'],
-                        ),
-                        SizedBox(height: 15),
-                        CustomCard(
-                          title: routeTimeData[i]['bus'],
-                          location1: station_names[station_ids.indexOf(
-                              routeTimeData[i]["array_to_json"][0]['station'])],
-                          time1: DateFormat('jm').format(DateTime.parse(
-                                  routeTimeData[i]["array_to_json"][0]['time'])
-                              .toLocal()),
-                          location2: station_names[station_ids.indexOf(
-                              routeTimeData[i]["array_to_json"][
-                                  routeTimeData[i]["array_to_json"].length -
-                                      3]['station'])],
-                          time2: DateFormat('jm').format(DateTime.parse(
-                                  routeTimeData[i]["array_to_json"][
-                                      routeTimeData[i]["array_to_json"].length -
-                                          3]['time'])
-                              .toLocal()),
-                          location3: station_names[station_ids.indexOf(
-                              routeTimeData[i]["array_to_json"][
-                                  routeTimeData[i]["array_to_json"].length -
-                                      1]['station'])],
-                          time3: DateFormat('jm').format(DateTime.parse(
-                                  routeTimeData[i]["array_to_json"][
-                                      routeTimeData[i]["array_to_json"].length -
-                                          1]['time'])
-                              .toLocal()),
-                          extendedInfo: routeTimeData[i]["array_to_json"],
-                          stationIds: station_ids,
-                          stationNames: station_names,
-                          stationCoords: station_coords,
-                        ),
-                      ],
-                    ),
-                  ),
+                Column(
+                  children: [
+                    for (int i = 0; i < routeTimeData.length; i++)
+                      CustomCard(
+                        title: routeTimeData[i]['bus'],
+                        location1: station_names[station_ids.indexOf(
+                            routeTimeData[i]["array_to_json"][0]['station'])],
+                        time1: DateFormat('jm').format(DateTime.parse(
+                                routeTimeData[i]["array_to_json"][0]['time'])
+                            .toLocal()),
+                        location2: station_names[station_ids.indexOf(
+                            routeTimeData[i]["array_to_json"][
+                                routeTimeData[i]["array_to_json"].length -
+                                    3]['station'])],
+                        time2: DateFormat('jm').format(DateTime.parse(
+                                routeTimeData[i]["array_to_json"][
+                                    routeTimeData[i]["array_to_json"].length -
+                                        3]['time'])
+                            .toLocal()),
+                        location3: station_names[station_ids.indexOf(
+                            routeTimeData[i]["array_to_json"][
+                                routeTimeData[i]["array_to_json"].length -
+                                    1]['station'])],
+                        time3: DateFormat('jm').format(DateTime.parse(
+                                routeTimeData[i]["array_to_json"][
+                                    routeTimeData[i]["array_to_json"].length -
+                                        1]['time'])
+                            .toLocal()),
+                        extendedInfo: routeTimeData[i]["array_to_json"],
+                        stationIds: station_ids,
+                        stationNames: station_names,
+                        stationCoords: station_coords,
+                        driverName: driverNames[i],
+                        driverPhone: driverPhones[i],
+                        helperName: HelperNames[i],
+                        helperPhone: HelperPhones[i],
+                      ),
+                  ],
+                ),
             ],
           ),
         ),

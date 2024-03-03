@@ -209,11 +209,7 @@ class _trackingState extends State<Tracking> {
                   Container(
                     child: Column(
                       children: [
-                        DriverHelperInfo(
-                          title: trackingData[i]['bus'],
-                          name: trackingData[i]['driver'],
-                          phone: trackingData[i]['driver_phone'],
-                        ),
+                        
                         SizedBox(height: 15),
                         TrackingCard(
                           title: trackingData[i]['bus'],
