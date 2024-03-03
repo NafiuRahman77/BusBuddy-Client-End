@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import '../../globel.dart' as globel;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../components/driverHelperInfo.dart';
 
 bool isSameDate(DateTime one, DateTime other) {
   //print("hi am here");
@@ -33,6 +34,12 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
   List<dynamic> rejectedData = [];
   bool loadedRouteTimeData = false;
   List<dynamic> routeCoords = [];
+  String driver_Id = "";
+  String driver_Name = "";
+  String driver_Phone = "";
+  String helper_ID = "";
+  String helper_Name = "";
+  String helper_Phone = "";
 
   @override
   void initState() {
@@ -275,43 +282,49 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
                 ],
               ),
               SizedBox(height: 30),
-
               if (loadedRouteTimeData)
                 for (int i = 0; i < routeTimeData.length; i++)
-                  // if (selectedDate == null ||
-                  //     isSameDate(
-                  //         DateTime.parse(
-                  //             routeTimeData[i]["array_to_json"][0]['time']),
-                  //         selectedDate!))
-                  CustomCard(
-                    title: routeTimeData[i]['bus'],
-                    location1: station_names[station_ids.indexOf(
-                        routeTimeData[i]["array_to_json"][0]['station'])],
-                    time1: DateFormat('jm').format(DateTime.parse(
-                            routeTimeData[i]["array_to_json"][0]['time'])
-                        .toLocal()),
-                    location2: station_names[station_ids.indexOf(
-                        routeTimeData[i]["array_to_json"]
-                                [routeTimeData[i]["array_to_json"].length - 3]
-                            ['station'])],
-                    time2: DateFormat('jm').format(DateTime.parse(routeTimeData[
-                                    i]["array_to_json"]
-                                [routeTimeData[i]["array_to_json"].length - 3]
-                            ['time'])
-                        .toLocal()),
-                    location3: station_names[station_ids.indexOf(
-                        routeTimeData[i]["array_to_json"]
-                                [routeTimeData[i]["array_to_json"].length - 1]
-                            ['station'])],
-                    time3: DateFormat('jm').format(DateTime.parse(routeTimeData[
-                                    i]["array_to_json"]
-                                [routeTimeData[i]["array_to_json"].length - 1]
-                            ['time'])
-                        .toLocal()),
-                    extendedInfo: routeTimeData[i]["array_to_json"],
-                    stationIds: station_ids,
-                    stationNames: station_names,
-                    stationCoords: station_coords,
+                  Container(
+                    child: Column(
+                      children: [
+                        DriverHelperInfo(
+                          title: routeTimeData[i]['bus'],
+                          name: routeTimeData[i]['driver'],
+                          phone: routeTimeData[i]['driver_phone'],
+                        ),
+                        SizedBox(height: 15),
+                        CustomCard(
+                          title: routeTimeData[i]['bus'],
+                          location1: station_names[station_ids.indexOf(
+                              routeTimeData[i]["array_to_json"][0]['station'])],
+                          time1: DateFormat('jm').format(DateTime.parse(
+                                  routeTimeData[i]["array_to_json"][0]['time'])
+                              .toLocal()),
+                          location2: station_names[station_ids.indexOf(
+                              routeTimeData[i]["array_to_json"][
+                                  routeTimeData[i]["array_to_json"].length -
+                                      3]['station'])],
+                          time2: DateFormat('jm').format(DateTime.parse(
+                                  routeTimeData[i]["array_to_json"][
+                                      routeTimeData[i]["array_to_json"].length -
+                                          3]['time'])
+                              .toLocal()),
+                          location3: station_names[station_ids.indexOf(
+                              routeTimeData[i]["array_to_json"][
+                                  routeTimeData[i]["array_to_json"].length -
+                                      1]['station'])],
+                          time3: DateFormat('jm').format(DateTime.parse(
+                                  routeTimeData[i]["array_to_json"][
+                                      routeTimeData[i]["array_to_json"].length -
+                                          1]['time'])
+                              .toLocal()),
+                          extendedInfo: routeTimeData[i]["array_to_json"],
+                          stationIds: station_ids,
+                          stationNames: station_names,
+                          stationCoords: station_coords,
+                        ),
+                      ],
+                    ),
                   ),
             ],
           ),

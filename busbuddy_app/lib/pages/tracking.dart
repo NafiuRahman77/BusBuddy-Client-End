@@ -10,6 +10,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import './trackingMap.dart';
 import './routeTimeCalendar.dart';
 import '../components/trackingCard.dart';
+import '../components/driverHelperInfo.dart';
 
 class Tracking extends StatefulWidget {
   @override
@@ -205,46 +206,60 @@ class _trackingState extends State<Tracking> {
               ),
               if (loadedRouteTimeData && trackingData.isNotEmpty)
                 for (int i = 0; i < trackingData.length; i++)
-                  TrackingCard(
-                    title: trackingData[i]['bus'],
-                    TripID: trackingData[i]['id'],
-                    pathCoords: trackingData[i]['path'],
-                    location1: station_names[station_ids
-                        .indexOf(trackingData[i]["time_list"][0]['station'])],
-                    time1: trackingData[i]["time_list"][0]['time'] != null
-                        ? DateFormat('jm').format(DateTime.parse(
-                                trackingData[i]["time_list"][0]['time'])
-                            .toLocal())
-                        : "--",
-                    location2: station_names[station_ids.indexOf(trackingData[i]
-                            ["time_list"]
-                        [trackingData[i]["time_list"].length - 3]['station'])],
-                    time2: trackingData[i]["time_list"]
-                                    [trackingData[i]["time_list"].length - 3]
-                                ['time'] !=
-                            null
-                        ? DateFormat('jm').format(DateTime.parse(trackingData[i]
-                                        ["time_list"]
-                                    [trackingData[i]["time_list"].length - 3]
-                                ['time'])
-                            .toLocal())
-                        : "--",
-                    location3: station_names[station_ids.indexOf(trackingData[i]
-                            ["time_list"]
-                        [trackingData[i]["time_list"].length - 1]['station'])],
-                    time3: trackingData[i]["time_list"]
-                                    [trackingData[i]["time_list"].length - 1]
-                                ['time'] !=
-                            null
-                        ? DateFormat('jm').format(DateTime.parse(trackingData[i]
-                                        ["time_list"]
-                                    [trackingData[i]["time_list"].length - 1]
-                                ['time'])
-                            .toLocal())
-                        : "--",
-                    completeInfo: trackingData[i]["time_list"],
-                    stationIds: station_ids,
-                    stationNames: station_names,
+                  Container(
+                    child: Column(
+                      children: [
+                        DriverHelperInfo(
+                          title: trackingData[i]['bus'],
+                          name: trackingData[i]['driver'],
+                          phone: trackingData[i]['driver_phone'],
+                        ),
+                        SizedBox(height: 15),
+                        TrackingCard(
+                          title: trackingData[i]['bus'],
+                          TripID: trackingData[i]['id'],
+                          pathCoords: trackingData[i]['path'],
+                          location1: station_names[station_ids.indexOf(
+                              trackingData[i]["time_list"][0]['station'])],
+                          time1: trackingData[i]["time_list"][0]['time'] != null
+                              ? DateFormat('jm').format(DateTime.parse(
+                                      trackingData[i]["time_list"][0]['time'])
+                                  .toLocal())
+                              : "--",
+                          location2: station_names[station_ids.indexOf(
+                              trackingData[i]["time_list"]
+                                      [trackingData[i]["time_list"].length - 3]
+                                  ['station'])],
+                          time2: trackingData[i]["time_list"][
+                                          trackingData[i]["time_list"].length - 3]
+                                      ['time'] !=
+                                  null
+                              ? DateFormat('jm').format(DateTime.parse(
+                                      trackingData[i]["time_list"][
+                                          trackingData[i]["time_list"].length -
+                                              3]['time'])
+                                  .toLocal())
+                              : "--",
+                          location3: station_names[station_ids.indexOf(
+                              trackingData[i]["time_list"]
+                                      [trackingData[i]["time_list"].length - 1]
+                                  ['station'])],
+                          time3: trackingData[i]["time_list"][
+                                          trackingData[i]["time_list"].length - 1]
+                                      ['time'] !=
+                                  null
+                              ? DateFormat('jm').format(DateTime.parse(
+                                      trackingData[i]["time_list"][
+                                          trackingData[i]["time_list"].length -
+                                              1]['time'])
+                                  .toLocal())
+                              : "--",
+                          completeInfo: trackingData[i]["time_list"],
+                          stationIds: station_ids,
+                          stationNames: station_names,
+                        ),
+                      ],
+                    ),
                   ),
               if (trackingData.isEmpty)
                 Align(
