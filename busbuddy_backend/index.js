@@ -899,9 +899,8 @@ app.post('/api/getNotifications', (req,res) => {
         dbclient.query(
             `select * from personal_notification where user_id=$1 order by timestamp desc limit 10`, 
             [req.session.userid]
-        ).then(aqres2 => {
-            //log(qres);
-            let personal = [...qres.rows];
+        ).then(qres2 => {
+            let personal = [...qres2.rows];
             for (let i=0; i<personal.length; i++) personal[i].type = 'personal';
             notifs = [...notifs, ...personal];
             res.send(notifs);
