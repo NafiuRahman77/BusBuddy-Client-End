@@ -541,7 +541,7 @@ app.post('/api/getRouteStations', (req,res) => {
 
 app.post('/api/getBusStaffData', (req,res) => {
     if (req.session && req.session.user_type == "buet_staff") {
-        dbclient.query("SELECT id, name, phone from bus_staff)",
+        dbclient.query("SELECT id, name, phone from bus_staff",
             [ req.body.route]).then(qres => {
             res.send(qres.rows);
         }).catch(e => errLogger.error(e.stack));
