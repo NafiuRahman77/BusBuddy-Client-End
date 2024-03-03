@@ -141,6 +141,8 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       });
       driverNames.clear();
       HelperNames.clear();
+      driverPhones.clear();
+      HelperPhones.clear();
       globel.driverHelpers.forEach(
         (element) => {
           driverIDs.forEach((driverid) {

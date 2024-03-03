@@ -70,14 +70,17 @@ class _CustomCardState extends State<CustomCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              DriverHelperInfo(
-                driverTitle: "Driver",
-                driverName: widget.driverName,
-                driverPhone: widget.driverPhone,
-                helperTitle: "Helper",
-                helperName: widget.helperName,
-                helperPhone: widget.helperPhone,
-              ),
+              if (globel.userType == "buet_staff")
+                Container(
+                  child: DriverHelperInfo(
+                    driverTitle: "Driver",
+                    driverName: widget.driverName,
+                    driverPhone: widget.driverPhone,
+                    helperTitle: "Helper",
+                    helperName: widget.helperName,
+                    helperPhone: widget.helperPhone,
+                  ),
+                ),
               SizedBox(height: 10),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,

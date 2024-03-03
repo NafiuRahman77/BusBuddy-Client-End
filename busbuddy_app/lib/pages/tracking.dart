@@ -24,6 +24,13 @@ class _trackingState extends State<Tracking> {
   String selectedRouteName = "";
   String selectedRouteId = "";
   String choice = "0";
+  List<String> driverIDs = [];
+  List<String> driverNames = [];
+  List<String> driverPhones = [];
+  List<String> HelperIDs = [];
+  List<String> HelperNames = [];
+  List<String> HelperPhones = [];
+
   List<String> station_ids = [], station_names = [];
   @override
   void initState() {
@@ -76,20 +83,45 @@ class _trackingState extends State<Tracking> {
         bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
     r.raiseForStatus();
+    print(r.json());
     setState(() {
       trackingData = r.json();
       loadedRouteTimeData = true;
-      print(trackingData);
-      // for(int i=0 ; i<trackingData.length ; i++)
-      // {
-      //   List<dynamic> pathCoords = trackingData[i]['path'] ;
-      // }
+      driverIDs.clear();
+      HelperIDs.clear();
+      setState(() {
+        trackingData.forEach((element) {
+          driverIDs.add(element['driver']);
+          HelperIDs.add(element['helper']);
+        });
+      });
+      driverNames.clear();
+      HelperNames.clear();
+      driverPhones.clear();
+      HelperPhones.clear();
+      globel.driverHelpers.forEach(
+        (element) => {
+          driverIDs.forEach((driverid) {
+            if (element['id'] == driverid) {
+              driverNames.add(element['name']);
+              driverPhones.add(element['phone']);
+            }
+          }),
+          HelperIDs.forEach((helperID) {
+            if (element['id'] == helperID) {
+              HelperNames.add(element['name']);
+              HelperPhones.add(element['phone']);
+            }
+          })
+        },
+      );
     });
     // context.loaderOverlay.hide();
   }
 
   Future<void> onRouteSelect(String route) async {
     context.loaderOverlay.show();
+
     await getPoints(route);
     context.loaderOverlay.hide();
   }
@@ -209,7 +241,6 @@ class _trackingState extends State<Tracking> {
                   Container(
                     child: Column(
                       children: [
-                        
                         SizedBox(height: 15),
                         TrackingCard(
                           title: trackingData[i]['bus'],
@@ -253,6 +284,10 @@ class _trackingState extends State<Tracking> {
                           completeInfo: trackingData[i]["time_list"],
                           stationIds: station_ids,
                           stationNames: station_names,
+                          driverName: driverNames[i],
+                          driverPhone: driverPhones[i],
+                          helperName: HelperNames[i],
+                          helperPhone: HelperPhones[i],
                         ),
                       ],
                     ),

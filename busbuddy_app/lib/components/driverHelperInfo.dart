@@ -34,18 +34,19 @@ class DriverHelperInfo extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                driverTitle,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white, // Change text color to white
-                ),
-              ),
               Row(
                 children: [
+                  Text(
+                    driverTitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white, // Change text color to white
+                    ),
+                  ),
+                  SizedBox(width: 5),
                   Icon(
-                    Icons.circle,
+                    Icons.person,
                     size: 12,
                     color: Colors.red,
                   ),
@@ -58,36 +59,35 @@ class DriverHelperInfo extends StatelessWidget {
                       color: Colors.white, // Change text color to white
                     ),
                   ),
-                  SizedBox(width: 5),
-                  IconButton(
-                    icon: Icon(Icons.call),
-                    onPressed: () async {
-                      final Uri callurl = Uri(
-                        scheme: 'tel',
-                        path: driverPhone,
-                      );
-                      if (await canLaunchUrl(callurl))
-                        await launchUrl(callurl);
-                      else
-                        Fluttertoast.showToast(
-                          msg: "Can't make call",
-                          toastLength: Toast.LENGTH_SHORT,
-                          gravity: ToastGravity.BOTTOM,
-                          timeInSecForIosWeb: 1,
-                          backgroundColor: Colors.red,
-                          textColor: Colors.white,
-                          fontSize: 16.0,
-                        );
-                    },
-                  ),
-                  Text(
-                    driverPhone,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  Spacer(), // Add a spacer to push the IconButton to the right
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.grey), // Add gray border
                     ),
-                  )
+                    child: IconButton(
+                      icon: Icon(Icons.call),
+                      iconSize: 18,
+                      onPressed: () async {
+                        final Uri callurl = Uri(
+                          scheme: 'tel',
+                          path: driverPhone,
+                        );
+                        if (await canLaunchUrl(callurl))
+                          await launchUrl(callurl);
+                        else
+                          Fluttertoast.showToast(
+                            msg: "Can't make call",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIosWeb: 1,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                            fontSize: 16.0,
+                          );
+                      },
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -97,18 +97,19 @@ class DriverHelperInfo extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                helperTitle,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
               Row(
                 children: [
+                  Text(
+                    helperTitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(width: 5),
                   Icon(
-                    Icons.circle,
+                    Icons.person,
                     size: 12,
                     color: Colors.red,
                   ),
@@ -116,41 +117,41 @@ class DriverHelperInfo extends StatelessWidget {
                   Text(
                     '$helperName',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: Colors.white, // Change text color to white
                     ),
                   ),
-                  SizedBox(width: 5),
-                  IconButton(
-                    icon: Icon(Icons.call),
-                    onPressed: () async {
-                      final Uri callurl = Uri(
-                        scheme: 'tel',
-                        path: helperPhone,
-                      );
-                      if (await canLaunchUrl(callurl))
-                        await launchUrl(callurl);
-                      else
-                        Fluttertoast.showToast(
-                          msg: "Can't make call",
-                          toastLength: Toast.LENGTH_SHORT,
-                          gravity: ToastGravity.BOTTOM,
-                          timeInSecForIosWeb: 1,
-                          backgroundColor: Colors.red,
-                          textColor: Colors.white,
-                          fontSize: 16.0,
-                        );
-                    },
-                  ),
-                  Text(
-                    helperPhone,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  Spacer(), // Add a spacer to push the IconButton to the right
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.grey),
+                      // Add gray border
                     ),
-                  )
+                    child: IconButton(
+                      icon: Icon(Icons.call),
+                      iconSize: 18,
+                      onPressed: () async {
+                        final Uri callurl = Uri(
+                          scheme: 'tel',
+                          path: helperPhone,
+                        );
+                        if (await canLaunchUrl(callurl))
+                          await launchUrl(callurl);
+                        else
+                          Fluttertoast.showToast(
+                            msg: "Can't make call",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIosWeb: 1,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                            fontSize: 16.0,
+                          );
+                      },
+                    ),
+                  ),
                 ],
               ),
             ],
