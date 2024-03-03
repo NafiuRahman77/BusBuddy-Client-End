@@ -891,7 +891,7 @@ app.post('/api/getTrackingData', async (req, res) => {
 app.post('/api/getNotifications', (req,res) => {
     let notifs = [];
     dbclient.query(
-        `select * from broadcast_notification order by timsestamp desc limit 10`
+        `select * from broadcast_notification order by timestamp desc limit 10`
     ).then(qres => {
         notifs = notifs.concat(qres.rows);
         dbclient.query(
