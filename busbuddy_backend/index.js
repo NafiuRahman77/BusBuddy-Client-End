@@ -551,7 +551,7 @@ app.post('/api/getBusStaffData', (req,res) => {
     };
 });
 
-app.post('/api/getBusStaffData', (req,res) => {
+app.post('/api/getBusList', (req,res) => {
     if (req.session && req.session.user_type == "bus_staff") {
         dbclient.query("select bus from allocation where driver=$1 or helper=$1",
         [req.session.userid]).then(qres => {
@@ -610,6 +610,27 @@ app.post('/api/addRequisition', (req,res) => {
              values ($1, $2, $3, $4, $5, $6, $7)`, 
             [req.session.userid, req.body.destination, JSON.parse(req.body.bus_type), 
                 req.body.subject, req.body.text, req.body.timestamp, req.body.source]
+        ).then(qres => {
+            historyLogger.debug(qres);
+            if (qres.rowCount === 1) res.send({ 
+                success: true,
+            });
+            else if (qres.rowCount === 0) {
+                res.send({
+                    success: false,
+                });
+            };
+        }).catch(e => errLogger.error(e.stack));
+    };
+});
+
+app.post('/api/addRepairRequest', (req,res) => {
+    consoleLogger.info(req.body);
+    if (req.session.userid && req.session.user_type=="bus_staff") {
+        dbclient.query(
+            `INSERT INTO repair (requestor, bus, parts, request_des, repair_des, timestamp) 
+             values ($1, $2, $3, $4, $5, current_timestamp)`, 
+            [req.session.userid, req.body.bus, req.body.parts, req.body.request_des, req.body.repair_des]
         ).then(qres => {
             historyLogger.debug(qres);
             if (qres.rowCount === 1) res.send({ 
@@ -762,6 +783,23 @@ app.post('/api/getUserRequisition', (req, res) => {
            union
            select *, null as driver, null as helper, null as bus from requisition 
            where requestor_id=$1 and allocation_id is null`, [req.session.userid]
+        ).then(qres => {
+            historyLogger.debug(qres);
+            res.send(qres.rows);
+        }).catch(e => {
+            errLogger.error(e.stack);
+            res.send({ 
+                success: false,
+            });
+        });
+    };
+});
+
+app.post('/api/getRepairRequests', (req, res) => {
+    historyLogger.debug(req.session);
+    if (req.session.userid && req.session.user_type=="bus_staff") {
+        dbclient.query(
+           `select * from repair where requestor = $1`, [req.session.userid]
         ).then(qres => {
             historyLogger.debug(qres);
             res.send(qres.rows);
