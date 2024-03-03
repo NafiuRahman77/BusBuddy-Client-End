@@ -1582,7 +1582,7 @@ process.stdin.on('keypress', async (chunk, key) => {
                 if (i<trip.time_window.length-1) timeWindowStr += ", ";
             };
             timeWindowStr += "}";
-            historyLogger.debug(pathStr);
+            historyLogger.debug(timeWindowStr);
             let pathStr = "{";
             for (let i=0; i<trip.path.length; i++) {
                 pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
