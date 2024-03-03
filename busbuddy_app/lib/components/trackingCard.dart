@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:requests/requests.dart';
 import '../../globel.dart' as globel;
 import './circlewidget.dart';
+import 'package:geolocator/geolocator.dart';
 
 class TrackingCard extends StatefulWidget {
   final String title;
@@ -22,6 +23,7 @@ class TrackingCard extends StatefulWidget {
   List<dynamic> completeInfo;
   final List<String> stationIds;
   final List<String> stationNames;
+  final List<dynamic> timeWindow;
   TrackingCard({
     required this.title,
     required this.TripID,
@@ -35,6 +37,7 @@ class TrackingCard extends StatefulWidget {
     required this.completeInfo,
     required this.stationIds,
     required this.stationNames,
+    required this.timeWindow,
   });
 
   @override
@@ -68,8 +71,33 @@ class _TrackingCardState extends State<TrackingCard> {
     locationUpdateTimer =
         Timer.periodic(Duration(seconds: 10), (Timer timer) async {
       await getlocationupdate(widget.TripID);
+      setState(() {});
+
       // x = cnv(widget.pathCoords);
     });
+    Geolocator geolocator = new Geolocator();
+    // print(element);
+    double d = 0;
+    int ps = widget.pathCoords.length;
+    int ts = widget.timeWindow.length;
+    for (int i = ps - 1; i > ps - ts + 1; i--) {
+      double delta = Geolocator.distanceBetween(
+          double.parse(widget.pathCoords[i]['latitude'].toString()),
+          double.parse(widget.pathCoords[i]['longitude'].toString()),
+          double.parse(widget.pathCoords[i - 1]['latitude'].toString()),
+          double.parse(widget.pathCoords[i - 1]['longitude'].toString()));
+      d += delta;
+      print(delta);
+    }
+    double t9 =
+        (DateTime.parse(widget.timeWindow[ts - 1]).microsecondsSinceEpoch) *
+            0.001;
+    double t0 =
+        (DateTime.parse(widget.timeWindow[0]).microsecondsSinceEpoch) * 0.001;
+    double delT = t9 - t0;
+    print(delT);
+    double speed = d / delT;
+    print("velocity: $speed");
   }
 
   @override
@@ -78,6 +106,10 @@ class _TrackingCardState extends State<TrackingCard> {
       locationUpdateTimer!.cancel();
     }
     super.dispose();
+  }
+
+  String predictStationTime(dynamic coordinate) {
+    return "--";
   }
 
   @override

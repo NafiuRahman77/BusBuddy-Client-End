@@ -243,6 +243,7 @@ class _trackingState extends State<Tracking> {
                             .toLocal())
                         : "--",
                     completeInfo: trackingData[i]["time_list"],
+                    timeWindow: trackingData[i]['time_window'],
                     stationIds: station_ids,
                     stationNames: station_names,
                   ),

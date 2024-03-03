@@ -1225,7 +1225,7 @@ app.post('/api/endTrip', async (req,res) => {
         if (trip) {
             let timeWindowStr = "{";
             for (let i=0; i<trip.time_window.length; i++) {
-                timeWindowStr += `"${trip.time_window[i]}"`;
+                timeWindowStr += `"${trip.time_window[i].toISOString()}"`;
                 if (i<trip.time_window.length-1) timeWindowStr += ", ";
             };
             timeWindowStr += "}";
