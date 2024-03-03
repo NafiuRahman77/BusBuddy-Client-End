@@ -110,7 +110,36 @@ void main() async {
       print(message.notification?.title);
       print(message.notification?.body);
       print(message.data.runtimeType);
-      print(message.data['nType'].toString());
+      print(message.data['nType'].toString() == "personal");
+
+      if (message.data['nType'].toString() != "personal" &&
+          message.data['nType'].toString() != "broadcast") {
+        List<String> noti_title = prefs.getStringList('noti_title') ?? [];
+        List<String> noti_body = prefs.getStringList('noti_body') ?? [];
+        List<String> noti_time = prefs.getStringList('noti_time') ?? [];
+        List<String> noti_type = prefs.getStringList('noti_type') ?? [];
+        noti_time.add((message.sentTime).toString() ?? "");
+        noti_title.add(message.notification?.title ?? "");
+        noti_body.add(message.notification?.body ?? "");
+        noti_type.add(message.data['nType'].toString() ?? "");
+        prefs.setStringList('noti_title', noti_title);
+        prefs.setStringList('noti_body', noti_body);
+        prefs.setStringList('noti_time', noti_time);
+        prefs.setStringList('noti_type', noti_type);
+      }
+    }
+  });
+
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+    print("openedAppreceived fcm: ${message.data}");
+    var prefs = await SharedPreferences.getInstance();
+    print(message);
+    print(message.notification?.title);
+    print(message.notification?.body);
+    print(message.data.runtimeType);
+    print(message.data['nType'].toString() == "personal");
+    if (message.data['nType'].toString() != "personal" &&
+        message.data['nType'].toString() != "broadcast") {
       List<String> noti_title = prefs.getStringList('noti_title') ?? [];
       List<String> noti_body = prefs.getStringList('noti_body') ?? [];
       List<String> noti_time = prefs.getStringList('noti_time') ?? [];
@@ -126,28 +155,6 @@ void main() async {
     }
   });
 
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
-    print("openedAppreceived fcm: ${message.data}");
-    var prefs = await SharedPreferences.getInstance();
-    print(message);
-    print(message.notification?.title);
-    print(message.notification?.body);
-    print(message.data.runtimeType);
-    print(message.data['nType'].toString());
-    List<String> noti_title = prefs.getStringList('noti_title') ?? [];
-    List<String> noti_body = prefs.getStringList('noti_body') ?? [];
-    List<String> noti_time = prefs.getStringList('noti_time') ?? [];
-    List<String> noti_type = prefs.getStringList('noti_type') ?? [];
-    noti_time.add((message.sentTime).toString() ?? "");
-    noti_title.add(message.notification?.title ?? "");
-    noti_body.add(message.notification?.body ?? "");
-    noti_type.add(message.data['nType'].toString() ?? "");
-    prefs.setStringList('noti_title', noti_title);
-    prefs.setStringList('noti_body', noti_body);
-    prefs.setStringList('noti_time', noti_time);
-    prefs.setStringList('noti_type', noti_type);
-  });
-
   FirebaseMessaging.instance
       .getInitialMessage()
       .then((RemoteMessage? message) async {
@@ -160,19 +167,22 @@ void main() async {
       print(message.notification?.title);
       print(message.notification?.body);
       print(message.data.runtimeType);
-      print(message.data['nType'].toString());
-      List<String> noti_title = prefs.getStringList('noti_title') ?? [];
-      List<String> noti_body = prefs.getStringList('noti_body') ?? [];
-      List<String> noti_time = prefs.getStringList('noti_time') ?? [];
-      List<String> noti_type = prefs.getStringList('noti_type') ?? [];
-      noti_time.add((message.sentTime).toString() ?? "");
-      noti_title.add(message.notification?.title ?? "");
-      noti_body.add(message.notification?.body ?? "");
-      noti_type.add(message.data['nType'].toString() ?? "");
-      prefs.setStringList('noti_title', noti_title);
-      prefs.setStringList('noti_body', noti_body);
-      prefs.setStringList('noti_time', noti_time);
-      prefs.setStringList('noti_type', noti_type);
+      print(message.data['nType'].toString() == "personal");
+      if (message.data['nType'].toString() != "personal" &&
+          message.data['nType'].toString() != "broadcast") {
+        List<String> noti_title = prefs.getStringList('noti_title') ?? [];
+        List<String> noti_body = prefs.getStringList('noti_body') ?? [];
+        List<String> noti_time = prefs.getStringList('noti_time') ?? [];
+        List<String> noti_type = prefs.getStringList('noti_type') ?? [];
+        noti_time.add((message.sentTime).toString() ?? "");
+        noti_title.add(message.notification?.title ?? "");
+        noti_body.add(message.notification?.body ?? "");
+        noti_type.add(message.data['nType'].toString() ?? "");
+        prefs.setStringList('noti_title', noti_title);
+        prefs.setStringList('noti_body', noti_body);
+        prefs.setStringList('noti_time', noti_time);
+        prefs.setStringList('noti_type', noti_type);
+      }
     }
   });
 
@@ -191,34 +201,23 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print(message);
   print(message.notification?.title);
   print(message.notification?.body);
-  print(message.data['nType'].toString());
-  List<String> noti_title = prefs.getStringList('noti_title') ?? [];
-  List<String> noti_body = prefs.getStringList('noti_body') ?? [];
-  List<String> noti_time = prefs.getStringList('noti_time') ?? [];
-  List<String> noti_type = prefs.getStringList('noti_type') ?? [];
-  noti_time.add((message.sentTime).toString() ?? "");
-  noti_title.add(message.notification?.title ?? "");
-  noti_body.add(message.notification?.body ?? "");
-  noti_type.add(message.data['nType'].toString() ?? "");
-  prefs.setStringList('noti_title', noti_title);
-  prefs.setStringList('noti_body', noti_body);
-  prefs.setStringList('noti_time', noti_time);
-  prefs.setStringList('noti_type', noti_type);
-  // runApp(BusBuddyApp());
-  // main();
-  // if (message.notification != null) {
-  //   const AndroidNotificationDetails androidNotificationDetails =
-  //       AndroidNotificationDetails('busbuddy_broadcast', 'Broadcast Notices',
-  //           channelDescription: 'Receive regular announcements and updates.',
-  //           importance: Importance.max,
-  //           priority: Priority.high,
-  //           ticker: 'ticker');
-  //   const NotificationDetails notificationDetails =
-  //       NotificationDetails(android: androidNotificationDetails);
-  //   await flutterLocalNotificationsPlugin.show(0, message.notification?.title,
-  //       message.notification?.body, notificationDetails,
-  //       payload: 'item x');
-  // }
+  print(message.data['nType'].toString() == "personal");
+  // send notification to local storage only if it is not a personal or broadcast notification
+  if (message.data['nType'].toString() != "personal" &&
+      message.data['nType'].toString() != "broadcast") {
+    List<String> noti_title = prefs.getStringList('noti_title') ?? [];
+    List<String> noti_body = prefs.getStringList('noti_body') ?? [];
+    List<String> noti_time = prefs.getStringList('noti_time') ?? [];
+    List<String> noti_type = prefs.getStringList('noti_type') ?? [];
+    noti_time.add((message.sentTime).toString() ?? "");
+    noti_title.add(message.notification?.title ?? "");
+    noti_body.add(message.notification?.body ?? "");
+    noti_type.add(message.data['nType'].toString() ?? "");
+    prefs.setStringList('noti_title', noti_title);
+    prefs.setStringList('noti_body', noti_body);
+    prefs.setStringList('noti_time', noti_time);
+    prefs.setStringList('noti_type', noti_type);
+  }
 }
 
 class BusBuddyApp extends StatelessWidget {
