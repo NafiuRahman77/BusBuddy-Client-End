@@ -131,8 +131,10 @@ dbclient.query(
             });
         });
         newTrip.passenger_count = td.passenger_count;
-        consoleLogger.info(td.time_window);
-        newTrip.time_window = [...td.time_window];
+        if (td.time_window) {
+            consoleLogger.info(td.time_window);
+            newTrip.time_window = [...td.time_window];
+        };
         tracking.runningTrips.set (newTrip.id, newTrip);
         tracking.busStaffMap.set (newTrip.driver, newTrip.id);
         tracking.busStaffMap.set (newTrip.helper, newTrip.id);
