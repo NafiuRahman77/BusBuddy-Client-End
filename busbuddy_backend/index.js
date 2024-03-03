@@ -895,15 +895,15 @@ app.post('/api/getNotifications', (req,res) => {
     ).then(qres => {
         let broadcast = [...qres.rows];
         for (let i=0; i<broadcast.length; i++) broadcast[i].type = 'broadcast';
-        notifs.concat(broadcast);
+        notifs = [...broadcast];
         dbclient.query(
             `select * from personal_notification where user_id=$1 order by timestamp desc limit 10`, 
             [req.session.userid]
-        ).then(qres2 => {
+        ).then(aqres2 => {
             //log(qres);
             let personal = [...qres.rows];
             for (let i=0; i<personal.length; i++) personal[i].type = 'personal';
-            notifs.concat(personal);
+            notifs = [...notifs, ...personal];
             res.send(notifs);
         }).catch(e => {
             errLogger.error(e.stack);
