@@ -131,6 +131,7 @@ dbclient.query(
             });
         });
         newTrip.passenger_count = td.passenger_count;
+        newTrip.time_window = td.time_window;
         tracking.runningTrips.set (newTrip.id, newTrip);
         tracking.busStaffMap.set (newTrip.driver, newTrip.id);
         tracking.busStaffMap.set (newTrip.helper, newTrip.id);
@@ -1172,6 +1173,12 @@ app.post('/api/endTrip', async (req,res) => {
         let t_id = await tracking.busStaffMap.get(req.session.userid);
         let trip = await tracking.runningTrips.get(t_id);
         if (trip) {
+            let timeWindowStr = "{";
+            for (let i=0; i<trip.time_window.length; i++) {
+                pathStr += `"${trip.time_window[i]}"`;
+                if (i<trip.time_window.length-1) timeWindowStr += ", ";
+            };
+            timeWindowStr += "}";
             let pathStr = "{";
             for (let i=0; i<trip.path.length; i++) {
                 pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
@@ -1191,10 +1198,10 @@ app.post('/api/endTrip', async (req,res) => {
             let lg = await trip.start_location.longitude;
             dbclient.query(
                 `update trip set end_timestamp=current_timestamp, passenger_count=$1, start_location=$2, end_location=$3, 
-                is_live=false, path=$6, time_list=$7 where id=$4 and (driver=$5 or helper=$5)`, 
+                is_live=false, path=$6, time_list=$7, time_window=$8 where id=$4 and (driver=$5 or helper=$5)`, 
                 [trip.passenger_count, ('('+lt+','+lg+')'),  
                 ('('+req.body.latitude+','+req.body.longitude+')'), 
-                t_id, req.session.userid, pathStr, timeListStr]
+                t_id, req.session.userid, pathStr, timeListStr, timeWindowStr]
             ).then(qres => {
                 historyLogger.debug(qres);
                 if (qres.rowCount === 1) res.send({ 
@@ -1566,6 +1573,13 @@ process.stdin.on('keypress', async (chunk, key) => {
             process.exit();
         } else tracking.runningTrips.forEach ((trip) => {
             consoleLogger.info("backing up " + trip.id);
+            let timeWindowStr = "{";
+            for (let i=0; i<trip.time_window.length; i++) {
+                pathStr += `"${trip.time_window[i]}"`;
+                if (i<trip.time_window.length-1) timeWindowStr += ", ";
+            };
+            timeWindowStr += "}";
+            historyLogger.debug(pathStr);
             let pathStr = "{";
             for (let i=0; i<trip.path.length; i++) {
                 pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
@@ -1582,8 +1596,8 @@ process.stdin.on('keypress', async (chunk, key) => {
             };
             timeListStr += "}";
             dbclient.query(
-                `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`, 
-                [trip.passenger_count, pathStr, timeListStr, trip.id]
+                `update trip set passenger_count=$1, path=$2, time_list=$3, time_window=$5 where id=$4`, 
+                [trip.passenger_count, pathStr, timeListStr, trip.id, timeWindowStr]
             ).then(qres => {
                 historyLogger.debug(qres);
                 consoleLogger.info("backed up " + trip.id);
