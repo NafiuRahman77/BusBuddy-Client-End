@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:busbuddy_app/pages/edit_password.dart';
 import 'package:busbuddy_app/pages/offline_ticket.dart';
 import 'package:busbuddy_app/pages/scan_ticket_qr.dart';
+import 'package:busbuddy_app/pages/show_repair_request.dart';
 import 'package:busbuddy_app/pages/ticket_qr.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -287,6 +288,10 @@ class BusBuddyApp extends StatelessWidget {
         path: "/edit_password",
         builder: ((context, state) => const HomeView(page: "Edit Password"))),
     GoRoute(
+        path: "/show_repair_request",
+        builder: ((context, state) =>
+            const HomeView(page: "Show Repair Request"))),
+    GoRoute(
         path: "/offline_ticket",
         builder: ((context, state) => OfflineTicketQR()))
   ]);
@@ -341,6 +346,8 @@ class PageBody extends StatelessWidget {
       return ManageTrips();
     else if (this.page == "Request Repair")
       return ReqRepair();
+    else if (this.page == "Show Repair Request")
+      return ShowRepair();
     else if (this.page == "Tracking")
       return Tracking();
     else if (this.page == "Notifications")
@@ -384,6 +391,7 @@ class HomeViewState extends State<HomeView> {
   int exp1 = 0;
   int exp2 = 0;
   int exp3 = 0;
+  int exp4 = 0;
 
   @override
   void initState() {
@@ -444,6 +452,8 @@ class HomeViewState extends State<HomeView> {
       _selectedIndex = 16;
     } else if (currentRouteName == '/offline_ticket') {
       _selectedIndex = 17;
+    } else if (currentRouteName == '/show_repair_request') {
+      _selectedIndex = 18;
     } else {
       _selectedIndex = 1000;
     }
@@ -743,21 +753,71 @@ class HomeViewState extends State<HomeView> {
                           },
                         ),
                         if (globel.userType == "bus_staff")
-                          ListTile(
-                            leading: const Icon(Icons.car_repair),
-                            title: const Text('Request Repair'),
-                            selected: _selectedIndex == 15,
-                            onTap: () {
-                              if (_selectedIndex == 15) return;
-                              // Update the state of the app
-                              // _onItemTapped(2);
-                              // Then close the drawer
-                              GoRouter.of(context).pop();
-                              GoRouter.of(context).push("/req_repair");
-                              setState(() {
-                                _selectedIndex = 15;
-                              });
+                          // ListTile(
+                          //   leading: const Icon(Icons.car_repair),
+                          //   title: const Text('Request Repair'),
+                          //   selected: _selectedIndex == 15,
+                          //   onTap: () {
+                          //     if (_selectedIndex == 15) return;
+                          //     // Update the state of the app
+                          //     // _onItemTapped(2);
+                          //     // Then close the drawer
+                          //     GoRouter.of(context).pop();
+                          //     GoRouter.of(context).push("/req_repair");
+                          //     setState(() {
+                          //       _selectedIndex = 15;
+                          //     });
+                          //   },
+                          // ),
+                          ExpansionTile(
+                            initiallyExpanded:
+                                (_selectedIndex == 15 || _selectedIndex == 18),
+                            leading: Icon(
+                              Icons.settings_outlined,
+                              color: Colors.black,
+                            ), // Change color based on the selected index,),
+                            title: Text(
+                              'Repair',
+                              style: TextStyle(
+                                color: Colors
+                                    .black, // Change color based on the selected index
+                              ),
+                            ),
+                            onExpansionChanged: (bool expanded) {
+                              if (expanded) {
+                                // The tile is expanded, update the selected index or perform other actions.
+                                setState(() {
+                                  _selectedIndex = 15;
+                                  exp4 = 1;
+                                });
+                              } else {
+                                setState(() {
+                                  _selectedIndex = 18;
+                                  exp4 = 0;
+                                });
+                              }
                             },
+                            children: <Widget>[
+                              ListTile(
+                                leading: Icon(Icons.add),
+                                title: Text('Request For Repair'),
+                                selected: _selectedIndex == 15,
+                                onTap: () {
+                                  GoRouter.of(context).pop();
+                                  GoRouter.of(context).push("/req_repair");
+                                },
+                              ),
+                              ListTile(
+                                leading: Icon(Icons.view_agenda),
+                                title: Text('Show Repair Request'),
+                                selected: _selectedIndex == 18,
+                                onTap: () {
+                                  GoRouter.of(context).pop();
+                                  GoRouter.of(context)
+                                      .push("/show_repair_request");
+                                },
+                              ),
+                            ],
                           ),
                         if (globel.userType == "student")
                           ListTile(
