@@ -539,6 +539,16 @@ app.post('/api/getRouteStations', (req,res) => {
     }).catch(e => errLogger.error(e.stack));
 });
 
+app.post('/api/getBusStaffData', (req,res) => {
+    if (req.session && req.session.user_type == "buet_staff") {
+        dbclient.query("SELECT id, name, phone from bus_staff)",
+            [ req.body.route]).then(qres => {
+            res.send(qres.rows);
+        }).catch(e => errLogger.error(e.stack));
+    };
+});
+
+
 app.post('/api/addFeedback', (req,res) => {
     historyLogger.debug(req.body);
     if (req.session.userid) {
@@ -793,8 +803,8 @@ app.post('/api/getRouteTimeData', (req, res) => {
     historyLogger.debug(req.session);
     if (req.session.userid) {
         dbclient.query(
-            `select lpad(id::varchar, 8, '0') as id, start_timestamp, route, array_to_json(time_list), bus
-             from allocation where route=$1`, [req.body.route]
+            `select lpad(id::varchar, 8, '0') as id, start_timestamp, route, array_to_json(time_list), bus,
+             driver, helper, from allocation where route=$1`, [req.body.route]
         ).then(qres => {
 	    let list = [...qres.rows];
 	    //list.forEach(trip => {
