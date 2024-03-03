@@ -891,11 +891,12 @@ app.post('/api/getTrackingData', async (req, res) => {
 app.post('/api/getNotifications', (req,res) => {
     let notifs = [];
     dbclient.query(
-        `select * from broadcast_notification limit 10`
+        `select * from broadcast_notification order by timsestamp desc limit 10`
     ).then(qres => {
         notifs = notifs.concat(qres.rows);
         dbclient.query(
-            `select * from personal_notification where user_id=$1 limit 10`, [req.session.userid]
+            `select * from personal_notification where user_id=$1 order by timestamp desc limit 10`, 
+            [req.session.userid]
         ).then(qres2 => {
             //log(qres);
             notifs = notifs.concat(qres.rows);
