@@ -1178,7 +1178,7 @@ app.post('/api/endTrip', async (req,res) => {
         if (trip) {
             let timeWindowStr = "{";
             for (let i=0; i<trip.time_window.length; i++) {
-                pathStr += `"${trip.time_window[i]}"`;
+                timeWindowStr += `"${trip.time_window[i]}"`;
                 if (i<trip.time_window.length-1) timeWindowStr += ", ";
             };
             timeWindowStr += "}";
@@ -1578,7 +1578,7 @@ process.stdin.on('keypress', async (chunk, key) => {
             consoleLogger.info("backing up " + trip.id);
             let timeWindowStr = "{";
             for (let i=0; i<trip.time_window.length; i++) {
-                pathStr += `"${trip.time_window[i]}"`;
+                timeWindowStr += `"${trip.time_window[i]}"`;
                 if (i<trip.time_window.length-1) timeWindowStr += ", ";
             };
             timeWindowStr += "}";
