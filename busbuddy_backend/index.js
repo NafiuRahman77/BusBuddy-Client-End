@@ -551,6 +551,15 @@ app.post('/api/getBusStaffData', (req,res) => {
     };
 });
 
+app.post('/api/getBusStaffData', (req,res) => {
+    if (req.session && req.session.user_type == "bus_staff") {
+        dbclient.query("select bus from allocation where driver=$1 or helper=$1",
+        [req.session.userid]).then(qres => {
+            res.send(qres.rows);
+        }).catch(e => errLogger.error(e.stack));
+    };
+});
+
 
 app.post('/api/addFeedback', (req,res) => {
     historyLogger.debug(req.body);
