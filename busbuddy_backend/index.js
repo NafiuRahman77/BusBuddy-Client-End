@@ -889,18 +889,16 @@ app.post('/api/getTrackingData', async (req, res) => {
 // }
 // );
 app.post('/api/getNotifications', (req,res) => {
-    consoleLogger.info(req.body);
     let notifs = [];
     dbclient.query(
         `select * from broadcast_notification limit 10`
     ).then(qres => {
-        //log(qres);
-        notifs = notifs + [...qres.rows];
+        notifs = notifs.concat(qres.rows);
         dbclient.query(
             `select * from personal_notification where user_id=$1 limit 10`, [req.session.userid]
         ).then(qres2 => {
             //log(qres);
-            notifs = notifs + [...qres2.rows];
+            notifs = notifs.concat(qres.rows);
             res.send(notifs);
         }).catch(e => {
             errLogger.error(e.stack);
