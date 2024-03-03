@@ -97,191 +97,198 @@ class _trackingState extends State<Tracking> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Align(
-          alignment: Alignment.center,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  children: [
-                    Text(
-                      'Track By ',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: const Color.fromARGB(39, 158, 158, 158)
-                            .withOpacity(0.9),
+        child: SingleChildScrollView(
+          child: Align(
+            alignment: Alignment.center,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Track By ',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: const Color.fromARGB(39, 158, 158, 158)
+                              .withOpacity(0.9),
+                        ),
                       ),
-                    ),
-                    Radio(
-                      value: "0",
-                      groupValue: choice,
-                      onChanged: (value) {
-                        setState(() {
-                          choice = value as String;
-                        });
-                      },
-                    ),
-                    Text(
-                      'Route',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: const Color.fromARGB(39, 158, 158, 158)
-                            .withOpacity(0.9),
+                      Radio(
+                        value: "0",
+                        groupValue: choice,
+                        onChanged: (value) {
+                          setState(() {
+                            choice = value as String;
+                          });
+                        },
                       ),
-                    ),
-                    Radio(
-                      value: "1",
-                      groupValue: choice,
-                      onChanged: (value) {
-                        setState(() {
-                          choice = value as String;
-                        });
-                      },
-                    ),
-                    Text(
-                      ' Location',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: const Color.fromARGB(39, 158, 158, 158)
-                            .withOpacity(0.9),
+                      Text(
+                        'Route',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: const Color.fromARGB(39, 158, 158, 158)
+                              .withOpacity(0.9),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 10),
-              Align(
-                alignment: Alignment.topLeft,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    'Select Route',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.withOpacity(0.9),
-                    ),
+                      Radio(
+                        value: "1",
+                        groupValue: choice,
+                        onChanged: (value) {
+                          setState(() {
+                            choice = value as String;
+                          });
+                        },
+                      ),
+                      Text(
+                        ' Location',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: const Color.fromARGB(39, 158, 158, 158)
+                              .withOpacity(0.9),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  border: Border.all(color: Colors.grey.withOpacity(0.5)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: DropdownButtonFormField<String>(
-                    value: selectedRouteName,
-                    onChanged: (value) {
-                      setState(() {
-                        // Handle dropdown selection
-                        selectedRouteName = value!;
-                        int idx = globel.routeNames.indexOf(selectedRouteName);
-                        selectedRouteId = globel.routeIDs[idx];
-                      });
-                      onRouteSelect(selectedRouteId);
-                    },
-                    items: globel.routeNames
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              if (loadedRouteTimeData && trackingData.isNotEmpty)
-                for (int i = 0; i < trackingData.length; i++)
-                  TrackingCard(
-                    title: trackingData[i]['bus'],
-                    TripID: trackingData[i]['id'],
-                    pathCoords: trackingData[i]['path'],
-                    location1: station_names[station_ids
-                        .indexOf(trackingData[i]["time_list"][0]['station'])],
-                    time1: trackingData[i]["time_list"][0]['time'] != null
-                        ? DateFormat('jm').format(DateTime.parse(
-                                trackingData[i]["time_list"][0]['time'])
-                            .toLocal())
-                        : "--",
-                    location2: station_names[station_ids.indexOf(trackingData[i]
-                            ["time_list"]
-                        [trackingData[i]["time_list"].length - 3]['station'])],
-                    time2: trackingData[i]["time_list"]
-                                    [trackingData[i]["time_list"].length - 3]
-                                ['time'] !=
-                            null
-                        ? DateFormat('jm').format(DateTime.parse(trackingData[i]
-                                        ["time_list"]
-                                    [trackingData[i]["time_list"].length - 3]
-                                ['time'])
-                            .toLocal())
-                        : "--",
-                    location3: station_names[station_ids.indexOf(trackingData[i]
-                            ["time_list"]
-                        [trackingData[i]["time_list"].length - 1]['station'])],
-                    time3: trackingData[i]["time_list"]
-                                    [trackingData[i]["time_list"].length - 1]
-                                ['time'] !=
-                            null
-                        ? DateFormat('jm').format(DateTime.parse(trackingData[i]
-                                        ["time_list"]
-                                    [trackingData[i]["time_list"].length - 1]
-                                ['time'])
-                            .toLocal())
-                        : "--",
-                    completeInfo: trackingData[i]["time_list"],
-                    stationIds: station_ids,
-                    stationNames: station_names,
-                  ),
-              if (trackingData.isEmpty)
+                SizedBox(height: 10),
                 Align(
-                  alignment: Alignment.center,
+                  alignment: Alignment.topLeft,
                   child: Padding(
-                    padding: EdgeInsets.only(left: 12.0, bottom: 20.0, top: 50),
-                    child: Column(
-                      children: [
-                        Text(
-                          'No running trips found on $selectedRouteName route!',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey.withOpacity(0.9),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        ElevatedButton(
-                          onPressed: () async {
-                            print("clicked");
-                            GoRouter.of(context).push("/route_calendar");
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF781B1B),
-                          ),
-                          child: Text(
-                            "View Schedule",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ],
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      'Select Route',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.withOpacity(0.9),
+                      ),
                     ),
                   ),
                 ),
-            ],
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: DropdownButtonFormField<String>(
+                      value: selectedRouteName,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedRouteName = value!;
+                          int idx =
+                              globel.routeNames.indexOf(selectedRouteName);
+                          selectedRouteId = globel.routeIDs[idx];
+                        });
+                        onRouteSelect(selectedRouteId);
+                      },
+                      items: globel.routeNames
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                if (loadedRouteTimeData && trackingData.isNotEmpty)
+                  for (int i = 0; i < trackingData.length; i++)
+                    TrackingCard(
+                      title: trackingData[i]['bus'],
+                      TripID: trackingData[i]['id'],
+                      pathCoords: trackingData[i]['path'],
+                      location1: station_names[station_ids
+                          .indexOf(trackingData[i]["time_list"][0]['station'])],
+                      time1: trackingData[i]["time_list"][0]['time'] != null
+                          ? DateFormat('jm').format(DateTime.parse(
+                                  trackingData[i]["time_list"][0]['time'])
+                              .toLocal())
+                          : "--",
+                      location2: station_names[station_ids.indexOf(
+                          trackingData[i]["time_list"]
+                                  [trackingData[i]["time_list"].length - 3]
+                              ['station'])],
+                      time2: trackingData[i]["time_list"]
+                                      [trackingData[i]["time_list"].length - 3]
+                                  ['time'] !=
+                              null
+                          ? DateFormat('jm').format(DateTime.parse(trackingData[
+                                          i]["time_list"]
+                                      [trackingData[i]["time_list"].length - 3]
+                                  ['time'])
+                              .toLocal())
+                          : "--",
+                      location3: station_names[station_ids.indexOf(
+                          trackingData[i]["time_list"]
+                                  [trackingData[i]["time_list"].length - 1]
+                              ['station'])],
+                      time3: trackingData[i]["time_list"]
+                                      [trackingData[i]["time_list"].length - 1]
+                                  ['time'] !=
+                              null
+                          ? DateFormat('jm').format(DateTime.parse(trackingData[
+                                          i]["time_list"]
+                                      [trackingData[i]["time_list"].length - 1]
+                                  ['time'])
+                              .toLocal())
+                          : "--",
+                      completeInfo: trackingData[i]["time_list"],
+                      stationIds: station_ids,
+                      stationNames: station_names,
+                      passengerCount:
+                          trackingData[i]["passenger_count"].toString(),
+                    ),
+                if (trackingData.isEmpty)
+                  Align(
+                    alignment: Alignment.center,
+                    child: Padding(
+                      padding:
+                          EdgeInsets.only(left: 12.0, bottom: 20.0, top: 50),
+                      child: Column(
+                        children: [
+                          Text(
+                            'No running trips found on $selectedRouteName route!',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.withOpacity(0.9),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              print("clicked");
+                              GoRouter.of(context).push("/route_calendar");
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFF781B1B),
+                            ),
+                            child: Text(
+                              "View Schedule",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
