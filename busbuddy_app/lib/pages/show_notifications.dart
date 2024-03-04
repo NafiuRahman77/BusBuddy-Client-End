@@ -11,6 +11,7 @@ class _NotificationsState extends State<Notifications> {
   List<String> notificationTitle = [];
   List<String> notificationBody = [];
   List<String> notificationTime = [];
+  List<String> notificationType = [];
 
   Color evenColor = Color.fromARGB(255, 253, 221, 221);
   Color oddColor = Color(0xFFfaebeb);
@@ -26,11 +27,61 @@ class _NotificationsState extends State<Notifications> {
     List<String> notificationTitle_ = prefs.getStringList('noti_title') ?? [];
     List<String> notificationBody_ = prefs.getStringList('noti_body') ?? [];
     List<String> notificationTime_ = prefs.getStringList('noti_time') ?? [];
+    List<String> notificationType_ = prefs.getStringList('noti_type') ?? [];
+
+    for (int i = 0; i < notificationTime_.length; i++) {
+      DateTime time = DateTime.parse(notificationTime_[i]);
+      String formattedTime = DateFormat("dd MMM h:mm a").format(time);
+      notificationTime_[i] = formattedTime;
+    }
+
+    print(notificationType_.length);
+
     setState(() {
       notificationTitle = notificationTitle_;
       notificationBody = notificationBody_;
       notificationTime = notificationTime_;
+      notificationType = notificationType_;
     });
+  }
+
+  Widget _buildNotificationIcon(String notificationType) {
+    IconData iconData;
+    Color iconColor = Colors.black;
+
+    switch (notificationType) {
+      case 'route_started':
+      case 'helper_trip_start':
+      case 'helper_trip_end':
+        iconData = Icons.directions_bus;
+        break;
+      case 'station_approaching':
+      case 'ticket_low_warning':
+        iconData = Icons.warning;
+        break;
+      case 'ticket_used':
+        iconData = Icons.confirmation_number;
+        break;
+      case 'personal':
+        iconData = Icons.person;
+        break;
+      case 'broadcast':
+        iconData = Icons.broadcast_on_home;
+        break;
+      default:
+        iconData = Icons.notifications_active;
+    }
+
+    return Icon(
+      iconData,
+      size: 30,
+      color: iconColor,
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -46,6 +97,7 @@ class _NotificationsState extends State<Notifications> {
           final notification_title = notificationTitle[index];
           final notification_body = notificationBody[index];
           final notification_time = notificationTime[index];
+          //final notification_type = notificationType[index];
           return Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(0),
@@ -54,20 +106,16 @@ class _NotificationsState extends State<Notifications> {
                   : Color(0xFFfaebeb),
             ),
             child: Padding(
-              padding: EdgeInsets.all(16.0), // Adjust padding as needed
+              padding:
+                  EdgeInsets.fromLTRB(4, 15, 5, 15), // Adjust padding as needed
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CircleAvatar(
-                    backgroundColor: Colors.transparent,
-                    radius: 30,
-                    child: Icon(
-                      Icons.notifications_active,
-                      size: 30,
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(width: 10.0), // Add space between avatar and text
+                      backgroundColor: Colors.transparent,
+                      radius: 30,
+                      child: _buildNotificationIcon(notificationType[index])),
+                  SizedBox(width: 5.0), // Add space between avatar and text
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

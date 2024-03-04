@@ -116,13 +116,30 @@ dbclient.query(
                 longitude: td.start_location.y.toString(),
             }, 
             td.end_location);
-        td.list_time.forEach (async tp =>  {
-            // newTrip.time_list.push({...tp});
-            newTrip.time_list.push({
-                station: tp.station,
-                time: (tp.time == "1970-01-01T06:00:00+06:00")? null : new Date(tp.time),
-            });
-        });
+        // td.list_time.forEach (async tp =>  {
+        //     // newTrip.time_list.push({...tp});
+        //     newTrip.time_list.push({
+        //         station: tp.station,
+        //         time: (tp.time == "1970-01-01T06:00:00+06:00")? null : new Date(tp.time),
+        //     });
+        // });
+        if (td.travel_direction == "to_buet") {
+            for (let i=0; i<td.list_time.length; i++) {
+                historyLogger.debug (td.list_time[i]);
+                newTrip.time_list.push({
+                    station: td.list_time[i].station,
+                    time: (td.list_time[i].time == "1970-01-01T06:00:00+06:00")? null : new Date(td.list_time[i].time),
+                });
+            };
+        } else if (td.travel_direction == "from_buet") {
+            for (let i=td.list_time.length-1; i>=0; i--) {
+                historyLogger.debug (td.list_time[i]);
+                newTrip.time_list.push({
+                    station: td.list_time[i].station,
+                    time: (td.list_time[i].time == "1970-01-01T06:00:00+06:00")? null : new Date(td.list_time[i].time),
+                });
+            };
+        };
         if (td.path) td.path.forEach (async p =>  {
             // newTrip.time_list.push({...tp});
             newTrip.path.push({
@@ -131,6 +148,10 @@ dbclient.query(
             });
         });
         newTrip.passenger_count = td.passenger_count;
+        if (td.time_window) {
+            consoleLogger.info(td.time_window);
+            newTrip.time_window = [...td.time_window];
+        };
         tracking.runningTrips.set (newTrip.id, newTrip);
         tracking.busStaffMap.set (newTrip.driver, newTrip.id);
         tracking.busStaffMap.set (newTrip.helper, newTrip.id);
@@ -539,6 +560,24 @@ app.post('/api/getRouteStations', (req,res) => {
     }).catch(e => errLogger.error(e.stack));
 });
 
+app.post('/api/getBusStaffData', (req,res) => {
+    if (req.session && req.session.user_type == "buet_staff") {
+        dbclient.query("SELECT id, name, phone from bus_staff").then(qres => {
+            res.send(qres.rows);
+        }).catch(e => errLogger.error(e.stack));
+    };
+});
+
+app.post('/api/getBusList', (req,res) => {
+    if (req.session && req.session.user_type == "bus_staff") {
+        dbclient.query("select distinct bus from allocation where driver=$1 or helper=$1",
+        [req.session.userid]).then(qres => {
+            res.send(qres.rows);
+        }).catch(e => errLogger.error(e.stack));
+    };
+});
+
+
 app.post('/api/addFeedback', (req,res) => {
     historyLogger.debug(req.body);
     if (req.session.userid) {
@@ -588,6 +627,27 @@ app.post('/api/addRequisition', (req,res) => {
              values ($1, $2, $3, $4, $5, $6, $7)`, 
             [req.session.userid, req.body.destination, JSON.parse(req.body.bus_type), 
                 req.body.subject, req.body.text, req.body.timestamp, req.body.source]
+        ).then(qres => {
+            historyLogger.debug(qres);
+            if (qres.rowCount === 1) res.send({ 
+                success: true,
+            });
+            else if (qres.rowCount === 0) {
+                res.send({
+                    success: false,
+                });
+            };
+        }).catch(e => errLogger.error(e.stack));
+    };
+});
+
+app.post('/api/addRepairRequest', (req,res) => {
+    consoleLogger.info(req.body);
+    if (req.session.userid && req.session.user_type=="bus_staff") {
+        dbclient.query(
+            `INSERT INTO repair (requestor, bus, parts, request_des, repair_des, timestamp) 
+             values ($1, $2, $3, $4, $5, current_timestamp)`, 
+            [req.session.userid, req.body.bus, req.body.parts, req.body.request_des, req.body.repair_des]
         ).then(qres => {
             historyLogger.debug(qres);
             if (qres.rowCount === 1) res.send({ 
@@ -752,6 +812,23 @@ app.post('/api/getUserRequisition', (req, res) => {
     };
 });
 
+app.post('/api/getRepairRequests', (req, res) => {
+    historyLogger.debug(req.session);
+    if (req.session.userid && req.session.user_type=="bus_staff") {
+        dbclient.query(
+           `select * from repair where requestor = $1`, [req.session.userid]
+        ).then(qres => {
+            historyLogger.debug(qres);
+            res.send(qres.rows);
+        }).catch(e => {
+            errLogger.error(e.stack);
+            res.send({ 
+                success: false,
+            });
+        });
+    };
+});
+
 app.post('/api/getUserPurchaseHistory', (req, res) => {
     historyLogger.debug(req.session);
     if (req.session.userid) {
@@ -793,8 +870,8 @@ app.post('/api/getRouteTimeData', (req, res) => {
     historyLogger.debug(req.session);
     if (req.session.userid) {
         dbclient.query(
-            `select lpad(id::varchar, 8, '0') as id, start_timestamp, route, array_to_json(time_list), bus
-             from allocation where route=$1`, [req.body.route]
+            `select lpad(id::varchar, 8, '0') as id, start_timestamp, route, array_to_json(time_list), bus,
+             driver, helper from allocation where route=$1`, [req.body.route]
         ).then(qres => {
 	    let list = [...qres.rows];
 	    //list.forEach(trip => {
@@ -879,32 +956,35 @@ app.post('/api/getTrackingData', async (req, res) => {
 //     });
 // }
 // );
-// app.post('/api/getNotifications', (req,res) => {
-//     
-//     consoleLogger.info(req.body);
-//     res.send({
-//         success: true,
-//         data: [
-//             {
-//                 id: 1,
-//                 user_id: "1905067",
-//                 heading: "Your bus is near",
-//                 body: "Your bus is coming to your location. Please be ready at the bus stop.",
-//                 timestamp: "2021-05-01 12:00:00"
-//             },
-            
-           
-//         ]
-//     });
-// });
-// //send real time notification api
-// app.post('/api/sendNotification', (req,res) => {
-//     
-//     consoleLogger.info(req.body);
-//     res.send({
-//         success: true,
-//     });
-// });
+app.post('/api/getNotifications', (req,res) => {
+    let notifs = [];
+    dbclient.query(
+        `select * from broadcast_notification order by timestamp desc limit 10`
+    ).then(qres => {
+        let broadcast = [...qres.rows];
+        for (let i=0; i<broadcast.length; i++) broadcast[i].type = 'broadcast';
+        notifs = [...broadcast];
+        dbclient.query(
+            `select * from personal_notification where user_id=$1 order by timestamp desc limit 10`, 
+            [req.session.userid]
+        ).then(qres2 => {
+            let personal = [...qres2.rows];
+            for (let i=0; i<personal.length; i++) personal[i].type = 'personal';
+            notifs = [...notifs, ...personal];
+            res.send(notifs);
+        }).catch(e => {
+            errLogger.error(e.stack);
+            res.send({ 
+                success: false,
+            });
+        });
+    }).catch(e => {
+        errLogger.error(e.stack);
+        res.send({ 
+            success: false,
+        });
+    });
+});
 
 // // Teacher bill payment api
 // app.post('/api/payBill', (req,res) => {
@@ -1051,13 +1131,30 @@ app.post('/api/startTrip', (req,res) => {
                                 longitude: req.body.longitude
                             }, 
                             td.end_location);
-                        td.list_time.forEach (async tp =>  {
-                            // newTrip.time_list.push({...tp});
-                            newTrip.time_list.push({
-                                station: tp.station,
-                                time: null
-                            });
-                        });
+                        // td.list_time.forEach (async tp =>  {
+                        //     // newTrip.time_list.push({...tp});
+                        //     newTrip.time_list.push({
+                        //         station: tp.station,
+                        //         time: null
+                        //     });
+                        // });
+                        newTrip.path.push (newTrip.start_location);
+                        newTrip.time_window.push (newTrip.start_timestamp);
+                        if (td.travel_direction == "to_buet") {
+                            for (let i=0; i<td.list_time.length; i++) {
+                                newTrip.time_list.push({
+                                    station: td.list_time[i].station,
+                                    time: null
+                                });
+                            }
+                        } else if (td.travel_direction == "from_buet") {
+                            for (let i=td.list_time.length-1; i>=0; i--) {
+                                newTrip.time_list.push({
+                                    station: td.list_time[i].station,
+                                    time: null
+                                });
+                            };
+                        };
                         tracking.runningTrips.set (newTrip.id, newTrip);
                         tracking.busStaffMap.set (newTrip.driver, newTrip.id);
                         tracking.busStaffMap.set (newTrip.helper, newTrip.id);
@@ -1160,6 +1257,12 @@ app.post('/api/endTrip', async (req,res) => {
         let t_id = await tracking.busStaffMap.get(req.session.userid);
         let trip = await tracking.runningTrips.get(t_id);
         if (trip) {
+            let timeWindowStr = "{";
+            for (let i=0; i<trip.time_window.length; i++) {
+                timeWindowStr += `"${trip.time_window[i].toISOString()}"`;
+                if (i<trip.time_window.length-1) timeWindowStr += ", ";
+            };
+            timeWindowStr += "}";
             let pathStr = "{";
             for (let i=0; i<trip.path.length; i++) {
                 pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
@@ -1179,10 +1282,10 @@ app.post('/api/endTrip', async (req,res) => {
             let lg = await trip.start_location.longitude;
             dbclient.query(
                 `update trip set end_timestamp=current_timestamp, passenger_count=$1, start_location=$2, end_location=$3, 
-                is_live=false, path=$6, time_list=$7 where id=$4 and (driver=$5 or helper=$5)`, 
+                is_live=false, path=$6, time_list=$7, time_window=$8 where id=$4 and (driver=$5 or helper=$5)`, 
                 [trip.passenger_count, ('('+lt+','+lg+')'),  
                 ('('+req.body.latitude+','+req.body.longitude+')'), 
-                t_id, req.session.userid, pathStr, timeListStr]
+                t_id, req.session.userid, pathStr, timeListStr, timeWindowStr]
             ).then(qres => {
                 historyLogger.debug(qres);
                 if (qres.rowCount === 1) res.send({ 
@@ -1279,7 +1382,7 @@ app.post('/api/updateStaffLocation', (req,res) => {
                 if (dist <= 180 && tp.time == null) {
                     consoleLogger.info(trip.id + " crossed " + tp.station);
                     tp.time = new Date();
-                    if (i < arr.length-2) {
+                    if (trip.travel_direction == "to_buet" && i < arr.length-2) {
                         nextStation = arr[i+1].station;
                         consoleLogger.info("coming up next: " + nextStation);
                         let notif_list;  
@@ -1554,6 +1657,13 @@ process.stdin.on('keypress', async (chunk, key) => {
             process.exit();
         } else tracking.runningTrips.forEach ((trip) => {
             consoleLogger.info("backing up " + trip.id);
+            let timeWindowStr = "{";
+            for (let i=0; i<trip.time_window.length; i++) {
+                timeWindowStr += `"${trip.time_window[i].toISOString()}"`;
+                if (i<trip.time_window.length-1) timeWindowStr += ", ";
+            };
+            timeWindowStr += "}";
+            historyLogger.debug(timeWindowStr);
             let pathStr = "{";
             for (let i=0; i<trip.path.length; i++) {
                 pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
@@ -1570,8 +1680,8 @@ process.stdin.on('keypress', async (chunk, key) => {
             };
             timeListStr += "}";
             dbclient.query(
-                `update trip set passenger_count=$1, path=$2, time_list=$3 where id=$4`, 
-                [trip.passenger_count, pathStr, timeListStr, trip.id]
+                `update trip set passenger_count=$1, path=$2, time_list=$3, time_window=$5 where id=$4`, 
+                [trip.passenger_count, pathStr, timeListStr, trip.id, timeWindowStr]
             ).then(qres => {
                 historyLogger.debug(qres);
                 consoleLogger.info("backed up " + trip.id);
