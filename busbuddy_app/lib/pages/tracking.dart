@@ -246,6 +246,7 @@ class _trackingState extends State<Tracking> {
                     timeWindow: trackingData[i]['time_window'],
                     stationIds: station_ids,
                     stationNames: station_names,
+                    stationCoords: station_coords,
                   ),
               if (trackingData.isEmpty)
                 Align(

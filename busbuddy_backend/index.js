@@ -116,13 +116,28 @@ dbclient.query(
                 longitude: td.start_location.y.toString(),
             }, 
             td.end_location);
-        td.list_time.forEach (async tp =>  {
-            // newTrip.time_list.push({...tp});
-            newTrip.time_list.push({
-                station: tp.station,
-                time: (tp.time == "1970-01-01T06:00:00+06:00")? null : new Date(tp.time),
-            });
-        });
+        // td.list_time.forEach (async tp =>  {
+        //     // newTrip.time_list.push({...tp});
+        //     newTrip.time_list.push({
+        //         station: tp.station,
+        //         time: (tp.time == "1970-01-01T06:00:00+06:00")? null : new Date(tp.time),
+        //     });
+        // });
+        if (td.travel_direction == "to_buet") {
+            for (let i=0; i<td.list_time.length; i++) {
+                newTrip.time_list.push({
+                    station: td.list_time[i].station,
+                    time: (td.list_time[i].time == "1970-01-01T06:00:00+06:00")? null : new Date(td.list_time[i].time),
+                });
+            };
+        } else if (td.travel_direction == "to_buet") {
+            for (let i=td.list_time.length-1; i>=0; i--) {
+                newTrip.time_list.push({
+                    station: td.list_time[i].station,
+                    time: (td.list_time[i].time == "1970-01-01T06:00:00+06:00")? null : new Date(td.list_time[i].time),
+                });
+            };
+        };
         if (td.path) td.path.forEach (async p =>  {
             // newTrip.time_list.push({...tp});
             newTrip.path.push({
@@ -1114,13 +1129,28 @@ app.post('/api/startTrip', (req,res) => {
                                 longitude: req.body.longitude
                             }, 
                             td.end_location);
-                        td.list_time.forEach (async tp =>  {
-                            // newTrip.time_list.push({...tp});
-                            newTrip.time_list.push({
-                                station: tp.station,
-                                time: null
-                            });
-                        });
+                        // td.list_time.forEach (async tp =>  {
+                        //     // newTrip.time_list.push({...tp});
+                        //     newTrip.time_list.push({
+                        //         station: tp.station,
+                        //         time: null
+                        //     });
+                        // });
+                        if (td.travel_direction == "to_buet") {
+                            for (let i=0; i<td.list_time.length; i++) {
+                                newTrip.time_list.push({
+                                    station: td.list_time[i].station,
+                                    time: null
+                                });
+                            }
+                        } else if (td.travel_direction == "from_buet") {
+                            for (let i=td.list_time.length-1; i>=0; i--) {
+                                newTrip.time_list.push({
+                                    station: td.list_time[i].station,
+                                    time: null
+                                });
+                            };
+                        };
                         tracking.runningTrips.set (newTrip.id, newTrip);
                         tracking.busStaffMap.set (newTrip.driver, newTrip.id);
                         tracking.busStaffMap.set (newTrip.helper, newTrip.id);

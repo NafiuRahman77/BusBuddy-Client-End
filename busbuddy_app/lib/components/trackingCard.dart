@@ -23,6 +23,7 @@ class TrackingCard extends StatefulWidget {
   List<dynamic> completeInfo;
   final List<String> stationIds;
   final List<String> stationNames;
+  final List<dynamic> stationCoords;
   final List<dynamic> timeWindow;
   TrackingCard({
     required this.title,
@@ -38,6 +39,7 @@ class TrackingCard extends StatefulWidget {
     required this.stationIds,
     required this.stationNames,
     required this.timeWindow,
+    required this.stationCoords,
   });
 
   @override
@@ -65,18 +67,7 @@ class _TrackingCardState extends State<TrackingCard> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    locationUpdateTimer =
-        Timer.periodic(Duration(seconds: 10), (Timer timer) async {
-      await getlocationupdate(widget.TripID);
-      setState(() {});
-
-      // x = cnv(widget.pathCoords);
-    });
-    Geolocator geolocator = new Geolocator();
-    // print(element);
+  Future<void> predictTimes() async {
     double d = 0;
     int ps = widget.pathCoords.length;
     int ts = widget.timeWindow.length;
@@ -90,14 +81,57 @@ class _TrackingCardState extends State<TrackingCard> {
       print(delta);
     }
     double t9 =
-        (DateTime.parse(widget.timeWindow[ts - 1]).microsecondsSinceEpoch) *
+        (DateTime.parse(widget.timeWindow[ts - 1]).millisecondsSinceEpoch) *
             0.001;
     double t0 =
-        (DateTime.parse(widget.timeWindow[0]).microsecondsSinceEpoch) * 0.001;
+        (DateTime.parse(widget.timeWindow[0]).millisecondsSinceEpoch) * 0.001;
     double delT = t9 - t0;
     print(delT);
     double speed = d / delT;
     print("velocity: $speed");
+    // print(widget.completeInfo);
+    for (int i = 0; i < widget.completeInfo.length; i++) {
+      print("hiiii");
+      print(widget.completeInfo[i]);
+      if (i > 0 && widget.completeInfo[i]['time'] == null) {
+        double prevT = (DateTime.parse(widget.completeInfo[i - 1]['time'])
+                .millisecondsSinceEpoch) *
+            0.001;
+        print(prevT);
+        dynamic prevCoord = widget.stationCoords[
+            widget.stationIds.indexOf(widget.completeInfo[i - 1]['station'])];
+        print(prevCoord);
+        dynamic nextCoord = widget.stationCoords[
+            widget.stationIds.indexOf(widget.completeInfo[i]['station'])];
+        print(nextCoord);
+        double distance = await Geolocator.distanceBetween(
+            double.parse(prevCoord['x'].toString()),
+            double.parse(prevCoord['y'].toString()),
+            double.parse(nextCoord['x'].toString()),
+            double.parse(nextCoord['y'].toString()));
+        int nextT = ((prevT + distance / speed) * 1000).toInt();
+        setState(() {
+          widget.completeInfo[i]['time'] =
+              DateTime.fromMillisecondsSinceEpoch(nextT).toIso8601String();
+        });
+
+        // print(widget.completeInfo[i]['time']);
+      } else {}
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    predictTimes();
+    locationUpdateTimer =
+        Timer.periodic(Duration(seconds: 10), (Timer timer) async {
+      await getlocationupdate(widget.TripID);
+      await predictTimes();
+    });
+
+    // x = cnv(widget.pathCoords);
+    // print(element);
   }
 
   @override
@@ -170,13 +204,13 @@ class _TrackingCardState extends State<TrackingCard> {
                                         .indexOf(
                                             widget.completeInfo[i]['station'])],
                                     text2:
-                                        widget.completeInfo[i]['time'] != null
-                                            ? DateFormat('jm').format(
+                                        (widget.completeInfo[i]['time'] != null)
+                                            ? (DateFormat('jm').format(
                                                 DateTime.parse(
                                                         widget.completeInfo[i]
                                                             ['time'])
-                                                    .toLocal())
-                                            : "--",
+                                                    .toLocal()))
+                                            : "",
                                     fromtrack: true,
                                   ),
                                   SizedBox(
