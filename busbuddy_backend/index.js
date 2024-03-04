@@ -852,7 +852,7 @@ app.post('/api/getTicketUsageHistory', (req, res) => {
         dbclient.query(
             `select tk.trip_id, tr.route, tr.start_timestamp, tr.travel_direction, 
             tr.bus, tk.scanned_by from ticket tk, trip tr where tk.is_used = true 
-            and tk.trip_id = tr.id and tk.student_id=$1`, [req.session.userid]
+            and tk.trip_id = tr.id and tk.student_id=$1 sort by tr.start_timestamp desc`, [req.session.userid]
         ).then(qres => {
             //log(qres);
             res.send(qres.rows);
