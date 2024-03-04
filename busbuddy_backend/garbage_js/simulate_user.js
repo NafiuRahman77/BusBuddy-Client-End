@@ -24,13 +24,10 @@ const getTripData = async (trip_id) => {
 const spam = async (trip_id) => {
 
     while (true) {
-            
-            setTimeout(async () => {
-                for (let i=0; i<trips.length; i++) {
-                    await getTripData(trips[i]);
-            };
-            }, 10000);
-
+        for (let i=0; i<trips.length; i++) {
+                await getTripData(trips[i]);
+                setTimeout(() => {}, 1000);
+        };
     };
 };
 
