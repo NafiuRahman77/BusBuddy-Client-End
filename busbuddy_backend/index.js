@@ -1138,6 +1138,8 @@ app.post('/api/startTrip', (req,res) => {
                         //         time: null
                         //     });
                         // });
+                        newTrip.path.push (newTrip.start_location);
+                        newTrip.time_window.push (newTrip.start_timestamp);
                         if (td.travel_direction == "to_buet") {
                             for (let i=0; i<td.list_time.length; i++) {
                                 newTrip.time_list.push({
