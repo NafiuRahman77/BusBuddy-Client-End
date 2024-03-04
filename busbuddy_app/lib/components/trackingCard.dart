@@ -20,6 +20,7 @@ class TrackingCard extends StatefulWidget {
   final String time2;
   final String location3;
   final String time3;
+  final String passengerCount;
   List<dynamic> completeInfo;
   final List<String> stationIds;
   final List<String> stationNames;
@@ -38,6 +39,7 @@ class TrackingCard extends StatefulWidget {
     required this.completeInfo,
     required this.stationIds,
     required this.stationNames,
+    required this.passengerCount,
     required this.timeWindow,
     required this.stationCoords,
   });
@@ -165,7 +167,7 @@ class _TrackingCardState extends State<TrackingCard> {
               children: <Widget>[
                 // Icon and Title Section
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     Icon(
                       Icons.directions_bus_rounded,
@@ -180,6 +182,36 @@ class _TrackingCardState extends State<TrackingCard> {
                         color: Colors.white, // Text color
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    if (isExtended) ...[
+                      Icon(
+                        Icons.person,
+                        size: 20,
+                        color: Color.fromARGB(255, 177, 245, 129),
+                      ),
+                      // Add spacing between Icon and Text
+                      Text(
+                        "Passengers",
+                        style: TextStyle(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.bold,
+                          color:
+                              Color.fromARGB(255, 177, 245, 129), // Text color
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ), // Add spacing between Icon and Text
+                      Text(
+                        widget.passengerCount,
+                        style: TextStyle(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.bold,
+                          color:
+                              Color.fromARGB(255, 177, 245, 129), // Text color
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 SizedBox(

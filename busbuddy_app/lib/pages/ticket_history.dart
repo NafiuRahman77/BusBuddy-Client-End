@@ -64,6 +64,10 @@ class _TicketHistoryState extends State<TicketHistory>
       }
     });
 
+    // reverse the list to show the latest purchase first
+    purchaseDateList = purchaseDateList.reversed.toList();
+    ticketAmountList = ticketAmountList.reversed.toList();
+
     var r1 = await Requests.post(globel.serverIp + 'getTicketUsageHistory');
     dynamic json1 = r1.json();
 

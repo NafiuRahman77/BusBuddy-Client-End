@@ -608,7 +608,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
 
-                    const SizedBox(height: 70),
+                    const SizedBox(height: 60),
                     // forgot password?
                     Visibility(
                       visible: netChecked && isConnected,
