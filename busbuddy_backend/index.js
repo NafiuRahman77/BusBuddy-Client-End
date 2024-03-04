@@ -125,6 +125,7 @@ dbclient.query(
         // });
         if (td.travel_direction == "to_buet") {
             for (let i=0; i<td.list_time.length; i++) {
+                historyLogger.debug (td.list_time[i]);
                 newTrip.time_list.push({
                     station: td.list_time[i].station,
                     time: (td.list_time[i].time == "1970-01-01T06:00:00+06:00")? null : new Date(td.list_time[i].time),
@@ -132,6 +133,7 @@ dbclient.query(
             };
         } else if (td.travel_direction == "from_buet") {
             for (let i=td.list_time.length-1; i>=0; i--) {
+                historyLogger.debug (td.list_time[i]);
                 newTrip.time_list.push({
                     station: td.list_time[i].station,
                     time: (td.list_time[i].time == "1970-01-01T06:00:00+06:00")? null : new Date(td.list_time[i].time),
