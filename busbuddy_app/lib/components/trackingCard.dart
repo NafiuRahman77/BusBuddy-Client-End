@@ -71,7 +71,7 @@ class _TrackingCardState extends State<TrackingCard> {
     double d = 0;
     int ps = widget.pathCoords.length;
     int ts = widget.timeWindow.length;
-    for (int i = ps - 1; i > ps - ts + 1; i--) {
+    for (int i = ps - 1; i > ps - ts; i--) {
       double delta = Geolocator.distanceBetween(
           double.parse(widget.pathCoords[i]['latitude'].toString()),
           double.parse(widget.pathCoords[i]['longitude'].toString()),
