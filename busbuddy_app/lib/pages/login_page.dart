@@ -211,6 +211,19 @@ class _LoginPageState extends State<LoginPage> {
             }
           }
         }
+
+        if (globel.userType == "buet_staff") {
+          globel.userDefaultRouteId = "4";
+          globel.userDefaultRouteName = globel
+              .routeNames[globel.routeIDs.indexOf(globel.userDefaultRouteId)];
+          globel.userDefaultStationId = "70";
+          globel.userDefaultStationName = "BUET";
+
+          var rrr = await Requests.post(globel.serverIp + 'getBusStaffData');
+          rrr.raiseForStatus();
+          globel.driverHelpers = rrr.json();
+        }
+
         if (globel.userType == 'student') {
           // context.loaderOverlay.show();
           var r = await Requests.post(globel.serverIp + 'getTicketList');
@@ -269,6 +282,19 @@ class _LoginPageState extends State<LoginPage> {
     dynamic json = r.json();
 
     print(json['success']);
+
+    if (globel.userType == "buet_staff") {
+      globel.userDefaultRouteId = "4";
+      globel.userDefaultRouteName =
+          globel.routeNames[globel.routeIDs.indexOf(globel.userDefaultRouteId)];
+      globel.userDefaultStationId = "70";
+      globel.userDefaultStationName = "BUET";
+
+      var rrr = await Requests.post(globel.serverIp + 'getBusStaffData');
+      rrr.raiseForStatus();
+
+      globel.driverHelpers = rrr.json();
+    }
 
     if (json['success'] == true) {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
