@@ -124,10 +124,11 @@ class _LoginPageState extends State<LoginPage> {
           bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
       r.raiseForStatus();
-      dynamic json = r.json();
+      dynamic json = await r.json();
       print(json);
       if (json['recognized'] == true) {
         globel.userType = json['user_type'];
+        globel.printWarning(globel.userType);
 
         // if (isConnected == true) {
         globel.routeIDs.clear();
@@ -212,7 +213,9 @@ class _LoginPageState extends State<LoginPage> {
           }
         }
 
+        globel.printError("is this a teacher? ${globel.userType}");
         if (globel.userType == "buet_staff") {
+          print("hi sir");
           globel.userDefaultRouteId = "4";
           globel.userDefaultRouteName = globel
               .routeNames[globel.routeIDs.indexOf(globel.userDefaultRouteId)];
@@ -280,23 +283,9 @@ class _LoginPageState extends State<LoginPage> {
         bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
     r.raiseForStatus();
-    dynamic json = r.json();
+    dynamic json = await r.json();
 
     print(json['success']);
-
-    if (globel.userType == "buet_staff") {
-      globel.userDefaultRouteId = "4";
-      globel.userDefaultRouteName =
-          globel.routeNames[globel.routeIDs.indexOf(globel.userDefaultRouteId)];
-      globel.userDefaultStationId = "70";
-      globel.userDefaultStationName = "BUET";
-
-      var rrr = await Requests.post(globel.serverIp + 'getBusStaffData');
-      rrr.raiseForStatus();
-
-      globel.driverHelpers = rrr.json();
-      print(globel.driverHelpers);
-    }
 
     if (json['success'] == true) {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -401,6 +390,23 @@ class _LoginPageState extends State<LoginPage> {
           }
         }
       }
+
+      globel.printError("is this a teacher? ${globel.userType}");
+      if (globel.userType == "buet_staff") {
+        print("hi sir");
+        globel.userDefaultRouteId = "4";
+        globel.userDefaultRouteName = globel
+            .routeNames[globel.routeIDs.indexOf(globel.userDefaultRouteId)];
+        globel.userDefaultStationId = "70";
+        globel.userDefaultStationName = "BUET";
+
+        var rrr = await Requests.post(globel.serverIp + 'getBusStaffData');
+        rrr.raiseForStatus();
+
+        globel.driverHelpers = rrr.json();
+        print(globel.driverHelpers);
+      }
+
       if (globel.userType == 'student') {
         // context.loaderOverlay.show();
         var r = await Requests.post(globel.serverIp + 'getTicketList');
