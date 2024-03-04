@@ -145,54 +145,54 @@ class _trackingState extends State<Tracking> {
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Row(
-                    children: [
-                      Text(
-                        'Track By ',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: const Color.fromARGB(39, 158, 158, 158)
-                              .withOpacity(0.9),
-                        ),
+                      // children: [
+                      //   Text(
+                      //     'Track By ',
+                      //     style: TextStyle(
+                      //       fontSize: 15,
+                      //       fontWeight: FontWeight.bold,
+                      //       color: const Color.fromARGB(39, 158, 158, 158)
+                      //           .withOpacity(0.9),
+                      //     ),
+                      //   ),
+                      //   Radio(
+                      //     value: "0",
+                      //     groupValue: choice,
+                      //     onChanged: (value) {
+                      //       setState(() {
+                      //         choice = value as String;
+                      //       });
+                      //     },
+                      //   ),
+                      //   Text(
+                      //     'Route',
+                      //     style: TextStyle(
+                      //       fontSize: 15,
+                      //       fontWeight: FontWeight.bold,
+                      //       color: const Color.fromARGB(39, 158, 158, 158)
+                      //           .withOpacity(0.9),
+                      //     ),
+                      //   ),
+                      //   Radio(
+                      //     value: "1",
+                      //     groupValue: choice,
+                      //     onChanged: (value) {
+                      //       setState(() {
+                      //         choice = value as String;
+                      //       });
+                      //     },
+                      //   ),
+                      //   Text(
+                      //     ' Location',
+                      //     style: TextStyle(
+                      //       fontSize: 15,
+                      //       fontWeight: FontWeight.bold,
+                      //       color: const Color.fromARGB(39, 158, 158, 158)
+                      //           .withOpacity(0.9),
+                      //     ),
+                      //   ),
+                      // ],
                       ),
-                      Radio(
-                        value: "0",
-                        groupValue: choice,
-                        onChanged: (value) {
-                          setState(() {
-                            choice = value as String;
-                          });
-                        },
-                      ),
-                      Text(
-                        'Route',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: const Color.fromARGB(39, 158, 158, 158)
-                              .withOpacity(0.9),
-                        ),
-                      ),
-                      Radio(
-                        value: "1",
-                        groupValue: choice,
-                        onChanged: (value) {
-                          setState(() {
-                            choice = value as String;
-                          });
-                        },
-                      ),
-                      Text(
-                        ' Location',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: const Color.fromARGB(39, 158, 158, 158)
-                              .withOpacity(0.9),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
                 SizedBox(height: 10),
                 Align(

@@ -195,7 +195,7 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       routeTimeData.forEach((j) {
         j["array_to_json"].forEach((stop) {
           // routeCoords.add(station_coords[int.parse(stop['station']) - 1]);
-          stop['coord'] = station_coords[int.parse(stop['station']) - 1];
+          stop['coord'] = station_coords[station_ids.indexOf(stop['station'])];
         });
       });
 
