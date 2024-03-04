@@ -1450,7 +1450,7 @@ app.post('/api/staffScanTicket', (req,res) => {
                     where id=$3 and is_used=false returning student_id
                 ) select student_id, 
                 array(select s.sess->>'fcm_id' from tk, session s where s.sess->>'userid' = tk.student_id) from tk`, 
-                [t_id, req.session.user_id, req.body.ticket_id]
+                [t_id, req.session.userid, req.body.ticket_id]
             ).then(qres => {
                 if (qres.rowCount === 1) {
                     let td = tracking.runningTrips.get(t_id);
