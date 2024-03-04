@@ -65,9 +65,10 @@ class DriverHelperInfo extends StatelessWidget {
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.grey), // Add gray border
                     ),
+                    width: 30,
                     child: IconButton(
                       icon: Icon(Icons.call),
-                      iconSize: 18,
+                      iconSize: 12,
                       onPressed: () async {
                         final Uri callurl = Uri(
                           scheme: 'tel',
@@ -92,7 +93,7 @@ class DriverHelperInfo extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 10),
+          // SizedBox(height: 10),
           // Helper Section
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,9 +130,10 @@ class DriverHelperInfo extends StatelessWidget {
                       border: Border.all(color: Colors.grey),
                       // Add gray border
                     ),
+                    width: 30,
                     child: IconButton(
                       icon: Icon(Icons.call),
-                      iconSize: 18,
+                      iconSize: 12,
                       onPressed: () async {
                         final Uri callurl = Uri(
                           scheme: 'tel',

@@ -285,6 +285,10 @@ class _trackingState extends State<Tracking> {
                       passengerCount:
                           trackingData[i]["passenger_count"].toString(),
                       stationCoords: station_coords,
+                      driverName: driverIDs[i],
+                      driverPhone: driverPhones[i],
+                      helperName: HelperNames[i],
+                      helperPhone: HelperPhones[i],
                     ),
                 if (trackingData.isEmpty)
                   Align(

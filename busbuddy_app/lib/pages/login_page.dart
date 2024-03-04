@@ -222,6 +222,7 @@ class _LoginPageState extends State<LoginPage> {
           var rrr = await Requests.post(globel.serverIp + 'getBusStaffData');
           rrr.raiseForStatus();
           globel.driverHelpers = rrr.json();
+          print(globel.driverHelpers);
         }
 
         if (globel.userType == 'student') {
@@ -294,6 +295,7 @@ class _LoginPageState extends State<LoginPage> {
       rrr.raiseForStatus();
 
       globel.driverHelpers = rrr.json();
+      print(globel.driverHelpers);
     }
 
     if (json['success'] == true) {
