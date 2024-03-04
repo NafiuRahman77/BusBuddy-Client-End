@@ -63,11 +63,13 @@ class DriverHelperInfo extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
+                      color: const Color.fromARGB(255, 97, 187, 100),
                       border: Border.all(color: Colors.grey), // Add gray border
                     ),
                     width: 30,
                     child: IconButton(
                       icon: Icon(Icons.call),
+                      color: Colors.white,
                       iconSize: 12,
                       onPressed: () async {
                         final Uri callurl = Uri(
@@ -127,12 +129,15 @@ class DriverHelperInfo extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
+                      color: const Color.fromARGB(255, 97, 187, 100),
                       border: Border.all(color: Colors.grey),
                       // Add gray border
                     ),
                     width: 30,
                     child: IconButton(
                       icon: Icon(Icons.call),
+                      // set icon color
+                      color: Colors.white,
                       iconSize: 12,
                       onPressed: () async {
                         final Uri callurl = Uri(
