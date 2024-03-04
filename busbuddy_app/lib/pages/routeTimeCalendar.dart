@@ -139,26 +139,33 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
           HelperIDs.add(element['helper']);
         });
       });
-      driverNames.clear();
-      HelperNames.clear();
-      driverPhones.clear();
-      HelperPhones.clear();
-      globel.driverHelpers.forEach(
-        (element) => {
-          driverIDs.forEach((driverid) {
-            if (element['id'] == driverid) {
-              driverNames.add(element['name']);
-              driverPhones.add(element['phone']);
-            }
-          }),
-          HelperIDs.forEach((helperID) {
-            if (element['id'] == helperID) {
-              HelperNames.add(element['name']);
-              HelperPhones.add(element['phone']);
-            }
-          })
-        },
-      );
+      if (globel.userType == "buet_staff") {
+        driverNames.clear();
+        HelperNames.clear();
+        driverPhones.clear();
+        HelperPhones.clear();
+        globel.driverHelpers.forEach(
+          (element) => {
+            driverIDs.forEach((driverid) {
+              if (element['id'] == driverid) {
+                driverNames.add(element['name']);
+                driverPhones.add(element['phone']);
+              }
+            }),
+            HelperIDs.forEach((helperID) {
+              if (element['id'] == helperID) {
+                HelperNames.add(element['name']);
+                HelperPhones.add(element['phone']);
+              }
+            })
+          },
+        );
+      } else {
+        driverNames = List.filled(routeTimeData.length, "(Not found)");
+        driverPhones = List.filled(routeTimeData.length, "(Not found)");
+        HelperNames = List.filled(routeTimeData.length, "(Not found)");
+        HelperPhones = List.filled(routeTimeData.length, "(Not found)");
+      }
     });
 
     // print("ok" + routeTimeData.length.toString());
@@ -193,27 +200,33 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
       });
 
       // in global , we have List<dynamic> driverHelpers , now using the driver and helper id , we will search driverhelpers and fetch them to lists here
-      driverNames.clear();
-      HelperNames.clear();
-      globel.driverHelpers.forEach(
-        (element) => {
-          driverIDs.forEach((driverid) {
-            if (element['id'] == driverid) {
-              driverNames.add(element['name']);
-              driverPhones.add(element['phone']);
-            }
-          }),
-          HelperIDs.forEach((helperID) {
-            if (element['id'] == helperID) {
-              HelperNames.add(element['name']);
-              HelperPhones.add(element['phone']);
-            }
-          })
-        },
-      );
-      print(HelperNames);
-      print(HelperPhones);
-
+      if (globel.userType == "buet_staff") {
+        driverNames.clear();
+        HelperNames.clear();
+        globel.driverHelpers.forEach(
+          (element) => {
+            driverIDs.forEach((driverid) {
+              if (element['id'] == driverid) {
+                driverNames.add(element['name']);
+                driverPhones.add(element['phone']);
+              }
+            }),
+            HelperIDs.forEach((helperID) {
+              if (element['id'] == helperID) {
+                HelperNames.add(element['name']);
+                HelperPhones.add(element['phone']);
+              }
+            })
+          },
+        );
+        print(HelperNames);
+        print(HelperPhones);
+      } else {
+        driverNames = List.filled(routeTimeData.length, "(Not found)");
+        driverPhones = List.filled(routeTimeData.length, "(Not found)");
+        HelperNames = List.filled(routeTimeData.length, "(Not found)");
+        HelperPhones = List.filled(routeTimeData.length, "(Not found)");
+      }
       setDateInit();
     });
 

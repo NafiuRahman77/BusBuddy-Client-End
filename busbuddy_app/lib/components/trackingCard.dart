@@ -21,7 +21,7 @@ class TrackingCard extends StatefulWidget {
   final String time2;
   final String location3;
   final String time3;
-  final String passengerCount;
+  String passengerCount;
   List<dynamic> completeInfo;
   final List<String> stationIds;
   final List<String> stationNames;
@@ -75,6 +75,7 @@ class _TrackingCardState extends State<TrackingCard> {
       widget.pathCoords = zz['path'];
       // get current location
       // _getCurrentLocation();
+      widget.passengerCount = zz['passenger_count'].toString();
     });
   }
 
