@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:requests/requests.dart';
 import '../../globel.dart' as globel;
 import './circlewidget.dart';
+import '../components/driverHelperInfo.dart';
 import 'package:geolocator/geolocator.dart';
 
 class TrackingCard extends StatefulWidget {
@@ -20,9 +21,14 @@ class TrackingCard extends StatefulWidget {
   final String time2;
   final String location3;
   final String time3;
+  String passengerCount;
   List<dynamic> completeInfo;
   final List<String> stationIds;
   final List<String> stationNames;
+  final String driverName;
+  final String driverPhone;
+  final String helperName;
+  final String helperPhone;
   final List<dynamic> stationCoords;
   final List<dynamic> timeWindow;
   TrackingCard({
@@ -38,6 +44,11 @@ class TrackingCard extends StatefulWidget {
     required this.completeInfo,
     required this.stationIds,
     required this.stationNames,
+    required this.driverName,
+    required this.driverPhone,
+    required this.helperName,
+    required this.helperPhone,
+    required this.passengerCount,
     required this.timeWindow,
     required this.stationCoords,
   });
@@ -64,6 +75,7 @@ class _TrackingCardState extends State<TrackingCard> {
       widget.pathCoords = zz['path'];
       // get current location
       // _getCurrentLocation();
+      widget.passengerCount = zz['passenger_count'].toString();
     });
   }
 
@@ -160,140 +172,193 @@ class _TrackingCardState extends State<TrackingCard> {
           ),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                // Icon and Title Section
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Icon(
-                      Icons.directions_bus_rounded,
-                      size: 80,
+                // Driver Helper Info Section
+                if (globel.userType == "buet_staff")
+                  Container(
+                    child: DriverHelperInfo(
+                      driverTitle: "Driver",
+                      driverName: widget.driverName,
+                      driverPhone: widget.driverPhone,
+                      helperTitle: "Helper",
+                      helperName: widget.helperName,
+                      helperPhone: widget.helperPhone,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.title,
-                      style: TextStyle(
-                        fontSize: 12.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white, // Text color
-                      ),
+                  ),
+                SizedBox(height: 10),
+                SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Circle Logo Section
+                    Column(
+                      children: [
+                        Icon(
+                          Icons.directions_bus_rounded,
+                          size: 80,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.title,
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white, // Text color
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        if (isExtended) ...[
+                          Icon(
+                            Icons.person,
+                            size: 20,
+                            color: Color.fromARGB(255, 177, 245, 129),
+                          ),
+                          // Add spacing between Icon and Text
+                          Text(
+                            "Passengers",
+                            style: TextStyle(
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(
+                                  255, 177, 245, 129), // Text color
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ), // Add spacing between Icon and Text
+                          Text(
+                            widget.passengerCount,
+                            style: TextStyle(
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(
+                                  255, 177, 245, 129), // Text color
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
-                ),
-                SizedBox(
-                  width: 8,
-                ), // Add spacing between Icon/Title and Stations
+                    SizedBox(
+                      width: 8,
+                    ), // Add spacing between Icon/Title and Stations
 
-                // Stations Section
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      // Extended Information Section
-                      if (isExtended) ...[
-                        // Show extended information if isExtended is true
-                        Column(
-                          children: [
-                            for (int i = 0; i < widget.completeInfo.length; i++)
-                              Column(
-                                children: [
-                                  CircleWidget(
-                                    text1: widget.stationNames[widget.stationIds
-                                        .indexOf(
-                                            widget.completeInfo[i]['station'])],
-                                    text2:
-                                        (widget.completeInfo[i]['time'] != null)
+                    // Stations Section
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          // Extended Information Section
+                          if (isExtended) ...[
+                            // Show extended information if isExtended is true
+                            Column(
+                              children: [
+                                for (int i = 0;
+                                    i < widget.completeInfo.length;
+                                    i++)
+                                  Column(
+                                    children: [
+                                      CircleWidget(
+                                        text1: widget.stationNames[widget
+                                            .stationIds
+                                            .indexOf(widget.completeInfo[i]
+                                                ['station'])],
+                                        text2: (widget.completeInfo[i]
+                                                    ['time'] !=
+                                                null)
                                             ? (DateFormat('jm').format(
                                                 DateTime.parse(
                                                         widget.completeInfo[i]
                                                             ['time'])
                                                     .toLocal()))
                                             : "",
-                                    fromtrack: true,
-                                  ),
-                                  SizedBox(
-                                      height:
-                                          10), // Add spacing between CircleWidgets
-                                ],
-                              ),
-                          ],
-                        ),
-                      ] else ...[
-                        CircleWidget(
-                            text1: widget.location1, text2: widget.time1),
-                        SizedBox(height: 10),
-                        CircleWidget(
-                            text1: widget.location2, text2: widget.time2),
-                        SizedBox(height: 10),
-                        CircleWidget(
-                            text1: widget.location3, text2: widget.time3),
-                        SizedBox(height: 10),
-                      ],
-
-                      // Toggle button and Map button
-                      Center(
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: isExtended
-                                  ? MainAxisAlignment.center
-                                  : MainAxisAlignment.start,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      isExtended = !isExtended;
-                                    });
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    side: const BorderSide(
-                                      width: 1.0,
-                                      color: Color.fromARGB(150, 255, 255, 255),
-                                    ),
-                                    backgroundColor:
-                                        Color.fromARGB(255, 160, 88, 88),
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  child: isExtended
-                                      ? Icon(Icons.keyboard_arrow_up)
-                                      : Icon(Icons.keyboard_arrow_down),
-                                ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Visibility(
-                                  visible: isExtended,
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      GoRouter.of(context)
-                                          .push("/trackingmap", extra: {
-                                        'TripID': widget.TripID,
-                                        'pathCoords': widget.pathCoords,
-                                      });
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      side: const BorderSide(
-                                        width: 1.0,
-                                        color:
-                                            Color.fromARGB(150, 255, 255, 255),
+                                        fromtrack: true,
                                       ),
-                                      backgroundColor:
-                                          Color.fromARGB(255, 160, 88, 88),
-                                      foregroundColor: Colors.white,
-                                    ),
-                                    icon: Icon(Icons.map),
-                                    label: Text("Track on Map"),
+                                      SizedBox(
+                                          height:
+                                              10), // Add spacing between CircleWidgets
+                                    ],
                                   ),
+                              ],
+                            ),
+                          ] else ...[
+                            CircleWidget(
+                                text1: widget.location1, text2: widget.time1),
+                            SizedBox(height: 10),
+                            CircleWidget(
+                                text1: widget.location2, text2: widget.time2),
+                            SizedBox(height: 10),
+                            CircleWidget(
+                                text1: widget.location3, text2: widget.time3),
+                            SizedBox(height: 10),
+                          ],
+
+                          // Toggle button and Map button
+                          Center(
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: isExtended
+                                      ? MainAxisAlignment.center
+                                      : MainAxisAlignment.start,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          isExtended = !isExtended;
+                                        });
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        side: const BorderSide(
+                                          width: 1.0,
+                                          color: Color.fromARGB(
+                                              150, 255, 255, 255),
+                                        ),
+                                        backgroundColor:
+                                            Color.fromARGB(255, 160, 88, 88),
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      child: isExtended
+                                          ? Icon(Icons.keyboard_arrow_up)
+                                          : Icon(Icons.keyboard_arrow_down),
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Visibility(
+                                      visible: isExtended,
+                                      child: ElevatedButton.icon(
+                                        onPressed: () {
+                                          GoRouter.of(context)
+                                              .push("/trackingmap", extra: {
+                                            'TripID': widget.TripID,
+                                            'pathCoords': widget.pathCoords,
+                                          });
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          side: const BorderSide(
+                                            width: 1.0,
+                                            color: Color.fromARGB(
+                                                150, 255, 255, 255),
+                                          ),
+                                          backgroundColor:
+                                              Color.fromARGB(255, 160, 88, 88),
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        icon: Icon(Icons.map),
+                                        label: Text("Track on Map"),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
