@@ -45,4 +45,11 @@ class RunningTrip {
     };
 };
 
-module.exports = {RunningTrip, runningTrips, stationCoords, stationNames, routeNames, busStaffMap}
+module.exports = {
+    RunningTrip, 
+    runningTrips, 
+    stationCoords, 
+    stationNames, 
+    routeNames, 
+    busStaffMap
+}
