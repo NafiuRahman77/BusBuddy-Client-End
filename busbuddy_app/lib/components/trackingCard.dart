@@ -83,6 +83,7 @@ class _TrackingCardState extends State<TrackingCard> {
     double d = 0;
     int ps = widget.pathCoords.length;
     int ts = widget.timeWindow.length;
+    // if (ts < 3) reutrn
     for (int i = ps - 1; i > ps - ts; i--) {
       double delta = Geolocator.distanceBetween(
           double.parse(widget.pathCoords[i]['latitude'].toString()),
@@ -265,14 +266,17 @@ class _TrackingCardState extends State<TrackingCard> {
                                             .indexOf(widget.completeInfo[i]
                                                 ['station'])],
                                         text2: (widget.completeInfo[i]
-                                                    ['time'] !=
-                                                null)
+                                                        ['time'] !=
+                                                    "--" &&
+                                                widget.completeInfo[i]
+                                                        ['time'] !=
+                                                    null)
                                             ? (DateFormat('jm').format(
                                                 DateTime.parse(
                                                         widget.completeInfo[i]
                                                             ['time'])
                                                     .toLocal()))
-                                            : "",
+                                            : "-",
                                         fromtrack: true,
                                       ),
                                       SizedBox(
