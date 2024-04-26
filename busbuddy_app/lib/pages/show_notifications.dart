@@ -27,6 +27,12 @@ class _NotificationsState extends State<Notifications> {
     getNotifications();
   }
 
+  @override
+  void dispose() {
+    print("dispose");
+    super.dispose();
+  }
+
   Future<void> getNotifications() async {
     context.loaderOverlay.show();
     var prefs = await SharedPreferences.getInstance();
@@ -34,6 +40,8 @@ class _NotificationsState extends State<Notifications> {
     List<String> notificationBody_ = prefs.getStringList('noti_body') ?? [];
     List<String> notificationTime_ = prefs.getStringList('noti_time') ?? [];
     List<String> notificationType_ = prefs.getStringList('noti_type') ?? [];
+    print(notificationTitle_);
+    print(notificationTitle_.length.toString() + " notifications found");
 
     var r = await Requests.post(globel.serverIp + 'getNotifications');
     var json = r.json();
@@ -79,6 +87,8 @@ class _NotificationsState extends State<Notifications> {
     for (int i = 0; i < notifications_.length; i++) {
       DateTime time = DateTime.parse(notifications_[i]['time']);
       String formattedTime = DateFormat("dd MMM h:mm a").format(time);
+      // convert time to local time
+      formattedTime = DateFormat("dd MMM h:mm a").format(time.toLocal());
       notifications_[i]['time'] = formattedTime;
     }
 
@@ -86,7 +96,15 @@ class _NotificationsState extends State<Notifications> {
       notifications = notifications_;
     });
 
-    print(notificationTitle.length);
+    // remove notifications where title or body is empty or time is null or type is empty
+    setState(() {
+      notifications.removeWhere((element) =>
+          element['title'] == null ||
+          element['body'] == null ||
+          element['time'] == null ||
+          element['type'] == null);
+    });
+
     context.loaderOverlay.hide();
   }
 
@@ -125,11 +143,6 @@ class _NotificationsState extends State<Notifications> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return LoaderOverlay(
       child: Scaffold(
@@ -153,7 +166,7 @@ class _NotificationsState extends State<Notifications> {
               ),
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
-                    4, 15, 5, 15), // Adjust padding as needed
+                    4, 15, 8, 15), // Adjust padding as needed
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -170,14 +183,20 @@ class _NotificationsState extends State<Notifications> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                notification_title,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14.0,
-                                  color: Colors.black, // Text color
+                              Expanded(
+                                flex: 50,
+                                child: Container(
+                                  child: Text(
+                                    notification_title ?? '',
+                                    style: TextStyle(
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black, // Text color
+                                    ),
+                                  ),
                                 ),
                               ),
+
                               Spacer(), // Pushes the time to the right corner
                               Text(
                                 notification_time ?? '',
