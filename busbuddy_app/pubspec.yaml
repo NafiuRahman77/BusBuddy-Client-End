@@ -56,6 +56,7 @@ dependencies:
   firebase_crashlytics: ^3.4.14
   internet_connection_checker: ^1.0.0+1
   flutter_local_notifications: ^16.3.2
+  google_fonts: ^4.0.4
 
 
 dev_dependencies:

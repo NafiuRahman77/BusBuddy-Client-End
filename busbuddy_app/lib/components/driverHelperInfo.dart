@@ -25,7 +25,7 @@ class DriverHelperInfo extends StatelessWidget {
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
-        border: Border.all(color: Colors.grey.withOpacity(0.5)),
+        border: Border.all(color: Colors.white.withOpacity(0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,29 +36,34 @@ class DriverHelperInfo extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(
-                    driverTitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white, // Change text color to white
-                    ),
-                  ),
                   SizedBox(width: 5),
                   Icon(
                     Icons.person,
-                    size: 12,
-                    color: Colors.red,
+                    size: 30,
+                    color: Colors.white,
                   ),
-                  SizedBox(width: 5),
-                  Text(
-                    '$driverName',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white, // Change text color to white
-                    ),
-                  ),
+                  SizedBox(width: 15),
+                  Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          driverTitle,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.normal,
+                            color: Colors.white, // Change text color to white
+                          ),
+                        ),
+                        Text(
+                          '$driverName',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white, // Change text color to white
+                          ),
+                        )
+                      ]),
+
                   Spacer(), // Add a spacer to push the IconButton to the right
                   Container(
                     decoration: BoxDecoration(
@@ -93,38 +98,39 @@ class DriverHelperInfo extends StatelessWidget {
                   ),
                 ],
               ),
-            ],
-          ),
-          // SizedBox(height: 10),
-          // Helper Section
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+
+              // SizedBox(height: 10),
+              // Helper Section
+
               Row(
                 children: [
-                  Text(
-                    helperTitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
                   SizedBox(width: 5),
                   Icon(
                     Icons.person,
-                    size: 12,
-                    color: Colors.red,
+                    size: 30,
+                    color: Colors.white,
                   ),
-                  SizedBox(width: 5),
-                  Text(
-                    '$helperName',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white, // Change text color to white
-                    ),
-                  ),
+                  SizedBox(width: 15),
+                  Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          helperTitle,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.normal,
+                            color: Colors.white, // Change text color to white
+                          ),
+                        ),
+                        Text(
+                          '$helperName',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white, // Change text color to white
+                          ),
+                        )
+                      ]),
                   Spacer(), // Add a spacer to push the IconButton to the right
                   Container(
                     decoration: BoxDecoration(

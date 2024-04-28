@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:ffi';
 
+import 'package:busbuddy_app/components/marker_icon.dart';
 import 'package:flutter/material.dart';
 import '../components/CustomCard.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -70,11 +72,29 @@ class _trackingMapUIState extends State<trackingMap> {
     super.dispose();
   }
 
+  MarkerGenerator markerGenerator = MarkerGenerator(jMarkerSize: 100);
+  BitmapDescriptor? busIcon;
+
+  Future<void> generateIcons() async {
+    print("start gen");
+
+    busIcon = await markerGenerator.createBitmapDescriptorFromIconData(
+        Icons.directions_bus_rounded,
+        Colors.white,
+        Colors.transparent,
+        Color(0xff8b1b1b));
+
+    setState(() {}); // DO NOT DELETE THIS
+
+    print("end gen");
+  }
+
   @override
   void initState() {
     super.initState();
     //getPoints(widget.RouteID) ;
     x = cnv(widget.pathCoords);
+    generateIcons();
     locationUpdateTimer =
         Timer.periodic(Duration(seconds: 10), (Timer timer) async {
       await getlocationupdate(widget.TripID);
@@ -111,7 +131,8 @@ class _trackingMapUIState extends State<trackingMap> {
             Marker(
               markerId: MarkerId('last'),
               position: x[x.length - 1],
-              icon: BitmapDescriptor.defaultMarker,
+              icon:
+                  (busIcon == null) ? BitmapDescriptor.defaultMarker : busIcon!,
             ),
             // Marker(
             //   markerId: MarkerId('last'),

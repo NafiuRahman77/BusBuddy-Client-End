@@ -33,7 +33,7 @@ String teacherDepartment = "";
 String teacherDesignation = "";
 String teacherResidence = "";
 String staffRole = "";
-String serverAddr = 'http://3.141.62.8:6969';
+String serverAddr = 'http://103.94.135.116:6969';
 String serverIp = '$serverAddr/api/';
 String runningTripId = "";
 String trackingTripId = "";
@@ -70,7 +70,7 @@ void clearAll() {
   teacherDesignation = "";
   teacherResidence = "";
   staffRole = "";
-  serverAddr = 'http://3.141.62.8:6969';
+  serverAddr = 'http://103.94.135.116:6969';
   serverIp = '$serverAddr/api/';
   runningTripId = "";
   trackingTripId = "";

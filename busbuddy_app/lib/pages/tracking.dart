@@ -142,59 +142,58 @@ class _trackingState extends State<Tracking> {
             alignment: Alignment.center,
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
-                      // children: [
-                      //   Text(
-                      //     'Track By ',
-                      //     style: TextStyle(
-                      //       fontSize: 15,
-                      //       fontWeight: FontWeight.bold,
-                      //       color: const Color.fromARGB(39, 158, 158, 158)
-                      //           .withOpacity(0.9),
-                      //     ),
-                      //   ),
-                      //   Radio(
-                      //     value: "0",
-                      //     groupValue: choice,
-                      //     onChanged: (value) {
-                      //       setState(() {
-                      //         choice = value as String;
-                      //       });
-                      //     },
-                      //   ),
-                      //   Text(
-                      //     'Route',
-                      //     style: TextStyle(
-                      //       fontSize: 15,
-                      //       fontWeight: FontWeight.bold,
-                      //       color: const Color.fromARGB(39, 158, 158, 158)
-                      //           .withOpacity(0.9),
-                      //     ),
-                      //   ),
-                      //   Radio(
-                      //     value: "1",
-                      //     groupValue: choice,
-                      //     onChanged: (value) {
-                      //       setState(() {
-                      //         choice = value as String;
-                      //       });
-                      //     },
-                      //   ),
-                      //   Text(
-                      //     ' Location',
-                      //     style: TextStyle(
-                      //       fontSize: 15,
-                      //       fontWeight: FontWeight.bold,
-                      //       color: const Color.fromARGB(39, 158, 158, 158)
-                      //           .withOpacity(0.9),
-                      //     ),
-                      //   ),
-                      // ],
-                      ),
-                ),
-                SizedBox(height: 10),
+                // Padding(
+                //   padding: const EdgeInsets.all(10.0),
+                //   child: Row(
+                //       // children: [
+                //       //   Text(
+                //       //     'Track By ',
+                //       //     style: TextStyle(
+                //       //       fontSize: 15,
+                //       //       fontWeight: FontWeight.bold,
+                //       //       color: const Color.fromARGB(39, 158, 158, 158)
+                //       //           .withOpacity(0.9),
+                //       //     ),
+                //       //   ),
+                //       //   Radio(
+                //       //     value: "0",
+                //       //     groupValue: choice,
+                //       //     onChanged: (value) {
+                //       //       setState(() {
+                //       //         choice = value as String;
+                //       //       });
+                //       //     },
+                //       //   ),
+                //       //   Text(
+                //       //     'Route',
+                //       //     style: TextStyle(
+                //       //       fontSize: 15,
+                //       //       fontWeight: FontWeight.bold,
+                //       //       color: const Color.fromARGB(39, 158, 158, 158)
+                //       //           .withOpacity(0.9),
+                //       //     ),
+                //       //   ),
+                //       //   Radio(
+                //       //     value: "1",
+                //       //     groupValue: choice,
+                //       //     onChanged: (value) {
+                //       //       setState(() {
+                //       //         choice = value as String;
+                //       //       });
+                //       //     },
+                //       //   ),
+                //       //   Text(
+                //       //     ' Location',
+                //       //     style: TextStyle(
+                //       //       fontSize: 15,
+                //       //       fontWeight: FontWeight.bold,
+                //       //       color: const Color.fromARGB(39, 158, 158, 158)
+                //       //           .withOpacity(0.9),
+                //       //     ),
+                //       //   ),
+                //       // ],
+                //       ),
+                // ),
                 Align(
                   alignment: Alignment.topLeft,
                   child: Padding(
@@ -249,53 +248,54 @@ class _trackingState extends State<Tracking> {
                     TrackingCard(
                       title: trackingData[i]['bus'],
                       TripID: trackingData[i]['id'],
-                      pathCoords: trackingData[i]['path'],
-                      location1: station_names[station_ids
-                          .indexOf(trackingData[i]["time_list"][0]['station'])],
-                      time1: trackingData[i]["time_list"][0]['time'] != null
-                          ? DateFormat('jm').format(DateTime.parse(
-                                  trackingData[i]["time_list"][0]['time'])
-                              .toLocal())
-                          : "--",
-                      location2: station_names[station_ids.indexOf(
-                          trackingData[i]["time_list"]
-                                  [trackingData[i]["time_list"].length - 3]
-                              ['station'])],
-                      time2: trackingData[i]["time_list"]
-                                      [trackingData[i]["time_list"].length - 3]
-                                  ['time'] !=
-                              null
-                          ? DateFormat('jm').format(DateTime.parse(trackingData[
-                                          i]["time_list"]
-                                      [trackingData[i]["time_list"].length - 3]
-                                  ['time'])
-                              .toLocal())
-                          : "--",
-                      location3: station_names[station_ids.indexOf(
-                          trackingData[i]["time_list"]
-                                  [trackingData[i]["time_list"].length - 1]
-                              ['station'])],
-                      time3: trackingData[i]["time_list"]
-                                      [trackingData[i]["time_list"].length - 1]
-                                  ['time'] !=
-                              null
-                          ? DateFormat('jm').format(DateTime.parse(trackingData[
-                                          i]["time_list"]
-                                      [trackingData[i]["time_list"].length - 1]
-                                  ['time'])
-                              .toLocal())
-                          : "--",
-                      completeInfo: trackingData[i]["time_list"],
-                      timeWindow: trackingData[i]['time_window'],
+                      // pathCoords: trackingData[i]['path'],
+                      // location1: station_names[station_ids
+                      //     .indexOf(trackingData[i]["time_list"][0]['station'])],
+                      // time1: trackingData[i]["time_list"][0]['time'] != "--"
+                      //     ? DateFormat('jm').format(DateTime.parse(
+                      //             trackingData[i]["time_list"][0]['time'])
+                      //         .toLocal())
+                      //     : "--",
+                      // location2: station_names[station_ids.indexOf(
+                      //     trackingData[i]["time_list"]
+                      //             [trackingData[i]["time_list"].length - 3]
+                      //         ['station'])],
+                      // time2: trackingData[i]["time_list"]
+                      //                 [trackingData[i]["time_list"].length - 3]
+                      //             ['time'] !=
+                      //         "--"
+                      //     ? DateFormat('jm').format(DateTime.parse(trackingData[
+                      //                     i]["time_list"]
+                      //                 [trackingData[i]["time_list"].length - 3]
+                      //             ['time'])
+                      //         .toLocal())
+                      //     : "--",
+                      // location3: station_names[station_ids.indexOf(
+                      //     trackingData[i]["time_list"]
+                      //             [trackingData[i]["time_list"].length - 1]
+                      //         ['station'])],
+                      // time3: trackingData[i]["time_list"]
+                      //                 [trackingData[i]["time_list"].length - 1]
+                      //             ['time'] !=
+                      //         "--"
+                      //     ? DateFormat('jm').format(DateTime.parse(trackingData[
+                      //                     i]["time_list"]
+                      //                 [trackingData[i]["time_list"].length - 1]
+                      //             ['time'])
+                      //         .toLocal())
+                      //     : "--",
+                      // completeInfo: trackingData[i]["time_list"],
+                      // timeWindow: trackingData[i]['time_window'],
                       stationIds: station_ids,
                       stationNames: station_names,
-                      passengerCount:
-                          trackingData[i]["passenger_count"].toString(),
+                      // passengerCount:
+                      // trackingData[i]["passenger_count"].toString(),
                       stationCoords: station_coords,
-                      driverName: driverIDs[i],
+                      driverName: driverNames[i],
                       driverPhone: driverPhones[i],
                       helperName: HelperNames[i],
                       helperPhone: HelperPhones[i],
+                      isUserRoute: selectedRouteId == globel.userDefaultRouteId,
                     ),
                 if (trackingData.isEmpty)
                   Align(
