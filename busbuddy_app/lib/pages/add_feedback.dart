@@ -227,7 +227,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                   style: TextStyle(
                     color: Color(0xFF781B1B),
                     fontWeight: FontWeight.bold,
-                    fontSize: 12.0,
+                    fontSize: 14.0,
                   ),
                 ),
               ),
@@ -317,18 +317,20 @@ class _FeedbackFormState extends State<FeedbackForm> {
                   style: TextStyle(
                     color: Color(0xFF781B1B),
                     fontWeight: FontWeight.bold,
-                    fontSize: 12.0,
+                    fontSize: 14.0,
                   ),
                 ),
               ),
+              SizedBox(height: 8.0),
               Container(
+                margin: const EdgeInsets.only(left: 8.0, right: 8.0),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10.0),
                   border: Border.all(color: Colors.grey.withOpacity(0.6)),
                 ),
                 child: Padding(
                   padding:
-                      const EdgeInsets.only(left: 10, bottom: 5, right: 10),
+                      const EdgeInsets.only(left: 15, bottom: 5, right: 10),
                   child: DropdownButtonFormField<String>(
                     value: selectedRouteName,
                     onChanged: (value) {
@@ -359,14 +361,16 @@ class _FeedbackFormState extends State<FeedbackForm> {
                   style: TextStyle(
                     color: Color(0xFF781B1B),
                     fontWeight: FontWeight.bold,
-                    fontSize: 12.0,
+                    fontSize: 14.0,
                   ),
                 ),
               ),
+              SizedBox(height: 8.0),
               Row(
                 children: [
                   Expanded(
                     child: Container(
+                      margin: const EdgeInsets.only(left: 8.0, right: 8.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10.0),
                         border: Border.all(color: Colors.grey.withOpacity(0.6)),
@@ -395,12 +399,12 @@ class _FeedbackFormState extends State<FeedbackForm> {
                   style: TextStyle(
                     color: Color(0xFF781B1B),
                     fontWeight: FontWeight.bold,
-                    fontSize: 12.0,
+                    fontSize: 14.0,
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 10, bottom: 5, right: 10),
+                padding: const EdgeInsets.only(left: 0, bottom: 5, right: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: shiftList.map((String value) {
@@ -421,21 +425,22 @@ class _FeedbackFormState extends State<FeedbackForm> {
                   }).toList(),
                 ),
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 8),
               Container(
                 margin: const EdgeInsets.only(
-                    left: 10.0, top: 16.0), // Add top padding
+                    left: 10.0, top: 10.0), // Add top padding
                 child: Text(
                   'Write Feedback',
                   style: TextStyle(
                     color: Color(0xFF781B1B),
                     fontWeight: FontWeight.bold,
-                    fontSize: 16.0,
+                    fontSize: 14.0,
                   ),
                 ),
               ),
               SizedBox(height: 8.0),
               Container(
+                margin: const EdgeInsets.only(left: 8.0, right: 8.0),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10.0),
                   border: Border.all(
@@ -444,8 +449,10 @@ class _FeedbackFormState extends State<FeedbackForm> {
                 ),
                 child: TextFormField(
                   controller: feedbackController,
-                  maxLines: 3,
+                  maxLines: 4,
                   decoration: InputDecoration(
+                    // set position of hint text to top
+                    contentPadding: EdgeInsets.only(top: 30, left: 10),
                     hintText: 'Enter your feedback here',
                     hintStyle: TextStyle(
                         fontSize: 14.0,

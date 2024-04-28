@@ -12,11 +12,13 @@ class ReqRepair extends StatefulWidget {
 }
 
 class _ReqRepairState extends State<ReqRepair> {
-  String SelectedBus = "Mirpur 2";
+  String SelectedBus = "";
   List<String> BusList = [];
   TextEditingController RepairController = TextEditingController();
+  TextEditingController ReqController = TextEditingController();
   String SelectedParts = "Mirpur 2";
   List<String> Partslist = [];
+  String partslist = "";
 
   @override
   void initState() {
@@ -28,14 +30,17 @@ class _ReqRepairState extends State<ReqRepair> {
   Future<void> getBus() async {
     context.loaderOverlay.show();
 
-    var r1 = await Requests.post(globel.serverIp + 'getRoutes');
+    var r1 = await Requests.post(globel.serverIp + 'getBusList');
     r1.raiseForStatus();
-    List<dynamic> json1 = r1.json();
+    List<dynamic> d = r1.json();
+    print(d);
+    BusList.clear();
     setState(() {
-      for (int i = 0; i < json1.length; i++) {
-        BusList.add(json1[i]['terminal_point']);
+      for (int i = 0; i < d.length; i++) {
+        BusList.add(d[i]['bus']);
       }
     });
+    SelectedBus = BusList[0];
     BusList.forEach((element) {
       print(element);
     });
@@ -49,19 +54,19 @@ class _ReqRepairState extends State<ReqRepair> {
   }
 
   Future<void> getParts() async {
-    context.loaderOverlay.show();
-    var r1 = await Requests.post(globel.serverIp + 'getRoutes');
-    r1.raiseForStatus();
-    List<dynamic> json1 = r1.json();
-    setState(() {
-      for (int i = 0; i < json1.length; i++) {
-        Partslist.add(json1[i]['terminal_point']);
-      }
-    });
-    Partslist.forEach((element) {
-      print(element);
-    });
-    context.loaderOverlay.hide();
+    // context.loaderOverlay.show();
+    // var r1 = await Requests.post(globel.serverIp + 'getRoutes');
+    // r1.raiseForStatus();
+    // List<dynamic> json1 = r1.json();
+    // setState(() {
+    //   for (int i = 0; i < json1.length; i++) {
+    //     Partslist.add(json1[i]['terminal_point']);
+    //   }
+    // });
+    // Partslist.forEach((element) {
+    //   print(element);
+    // });
+    // context.loaderOverlay.hide();
   }
 
   void _showConfirmationDialog() {
@@ -73,7 +78,16 @@ class _ReqRepairState extends State<ReqRepair> {
           content: Text('Repair request submitted successfully!'),
           actions: [
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                var r =
+                    await Requests.post(globel.serverIp + 'addRepairRequest',
+                        body: {
+                          "bus": SelectedBus,
+                          "parts": partslist,
+                          "request_des": ReqController.text,
+                          "repair_des": RepairController.text,
+                        },
+                        bodyEncoding: RequestBodyEncoding.FormURLEncoded);
                 Navigator.of(context).pop();
                 GoRouter.of(context).go("/show_profile");
               },
@@ -119,11 +133,8 @@ class _ReqRepairState extends State<ReqRepair> {
                     value: SelectedBus,
                     onChanged: (value) {
                       setState(() {
-                        // Handle dropdown selection
                         SelectedBus = value!;
-                        // print(selectedOption);
                       });
-                      //onRouteSelect(SelectedBusIndex);
                     },
                     items:
                         BusList.map<DropdownMenuItem<String>>((String value) {
@@ -141,7 +152,7 @@ class _ReqRepairState extends State<ReqRepair> {
                 child: Padding(
                   padding: EdgeInsets.only(left: 12.0, bottom: 6.0),
                   child: Text(
-                    'Select Parts',
+                    'Enter Parts',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -158,23 +169,16 @@ class _ReqRepairState extends State<ReqRepair> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 10),
-                  child: DropdownButtonFormField<String>(
-                    value: SelectedParts,
+                  child: TextFormField(
                     onChanged: (value) {
                       setState(() {
-                        // Handle dropdown selection
-                        SelectedParts = value!;
-                        // print(selectedOption);
+                        partslist = value;
                       });
-                      //onRouteSelect(SelectedBusIndex);
                     },
-                    items:
-                        Partslist.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
+                    decoration: InputDecoration(
+                      hintText: 'Enter parts here',
+                      border: InputBorder.none,
+                    ),
                   ),
                 ),
               ),
@@ -200,7 +204,7 @@ class _ReqRepairState extends State<ReqRepair> {
                           Color.fromARGB(255, 237, 235, 235).withOpacity(0.1)),
                 ),
                 child: TextFormField(
-                  controller: RepairController,
+                  controller: ReqController,
                   maxLines: 3,
                   decoration: InputDecoration(
                     hintText: 'Enter your request here',

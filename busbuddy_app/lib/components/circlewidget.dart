@@ -38,8 +38,8 @@ class CircleWidget extends StatelessWidget {
         }
       }
       textColor = entryTime != null && entryTime.isBefore(currentTime)
-          ? Colors.yellow
-          : Colors.green;
+          ? const Color.fromARGB(255, 254, 237, 84)
+          : Color.fromARGB(255, 177, 245, 129);
     } else {
       textColor = Colors.white;
     }
@@ -48,7 +48,7 @@ class CircleWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 10.0,
+          width: 8.0,
           height: 10.0,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
@@ -66,7 +66,7 @@ class CircleWidget extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: textColor,
-                  fontSize: 12.0,
+                  fontSize: 13.0,
                 ),
               ),
               if (text2.isNotEmpty)
@@ -77,7 +77,7 @@ class CircleWidget extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  fontSize: 12.0,
+                  fontSize: 13.0,
                 ),
               ),
             ],

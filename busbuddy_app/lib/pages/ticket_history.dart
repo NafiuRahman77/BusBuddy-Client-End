@@ -59,10 +59,14 @@ class _TicketHistoryState extends State<TicketHistory>
         DateTime dateTime = DateTime.parse(purchaseDateList[i]);
         // Format the time in AM/PM format without seconds
         String formattedDate = "${dateTime.toLocal()}".split(" ")[0];
-        String formattedTime = DateFormat('h:mma').format(dateTime);
+        String formattedTime = DateFormat('h:mma').format(dateTime.toLocal());
         purchaseDateList[i] = formattedDate + "  " + formattedTime;
       }
     });
+
+    // reverse the list to show the latest purchase first
+    purchaseDateList = purchaseDateList.reversed.toList();
+    ticketAmountList = ticketAmountList.reversed.toList();
 
     var r1 = await Requests.post(globel.serverIp + 'getTicketUsageHistory');
     dynamic json1 = r1.json();
@@ -81,7 +85,7 @@ class _TicketHistoryState extends State<TicketHistory>
     });
 
     print("in ticket history");
-    print(json);
+    print(json1);
 
     context.loaderOverlay.hide();
   }
