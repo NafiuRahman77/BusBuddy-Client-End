@@ -23,7 +23,9 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
   //   super.dispose();
   // }
 
-  bool showicon = true;
+  bool showicon1 = true;
+  bool showicon2 = true;
+  bool showicon3 = true;
   bool obscureText1 = true;
   bool obscureText2 = true;
   bool obscureText3 = true;
@@ -49,12 +51,13 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                   decoration: InputDecoration(
                       labelText: 'Old Password',
                       suffixIcon: IconButton(
-                        icon: Icon(
-                            showicon ? Icons.visibility : Icons.visibility_off),
+                        icon: Icon(showicon1
+                            ? Icons.visibility
+                            : Icons.visibility_off),
                         onPressed: () {
                           setState(() {
                             obscureText1 = !obscureText1;
-                            showicon = !showicon;
+                            showicon1 = !showicon1;
                           });
                         },
                       )),
@@ -67,12 +70,13 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                   decoration: InputDecoration(
                       labelText: 'New Password',
                       suffixIcon: IconButton(
-                        icon: Icon(
-                            showicon ? Icons.visibility : Icons.visibility_off),
+                        icon: Icon(showicon2
+                            ? Icons.visibility
+                            : Icons.visibility_off),
                         onPressed: () {
                           setState(() {
                             obscureText2 = !obscureText2;
-                            showicon = !showicon;
+                            showicon2 = !showicon2;
                           });
                         },
                       )),
@@ -84,12 +88,13 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
                   decoration: InputDecoration(
                       labelText: 'Confirm New Password',
                       suffixIcon: IconButton(
-                        icon: Icon(
-                            showicon ? Icons.visibility : Icons.visibility_off),
+                        icon: Icon(showicon3
+                            ? Icons.visibility
+                            : Icons.visibility_off),
                         onPressed: () {
                           setState(() {
                             obscureText3 = !obscureText3;
-                            showicon = !showicon;
+                            showicon3 = !showicon3;
                           });
                         },
                       )),
@@ -117,6 +122,20 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
     String confirmPassword = _confirmPasswordController.text;
 
     context.loaderOverlay.show();
+
+    if (oldPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+      // Show fluttertoast
+      Fluttertoast.showToast(
+          msg: "Please fill all fields",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+      context.loaderOverlay.hide();
+      return;
+    }
 
     if (newPassword != confirmPassword) {
       // Show fluttertoast

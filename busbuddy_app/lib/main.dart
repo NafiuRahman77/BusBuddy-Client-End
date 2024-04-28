@@ -489,8 +489,7 @@ class HomeViewState extends State<HomeView> {
                     Column(
                       // Important: Remove any padding from the ListView.
                       children: <Widget>[
-                        DrawerHeader(
-                          padding: EdgeInsets.zero,
+                        Container(
                           child: UserAccountsDrawerHeader(
                             accountName: Text(
                               globel.userName,
@@ -501,10 +500,16 @@ class HomeViewState extends State<HomeView> {
                             ),
                             accountEmail:
                                 null, // If you don't want to display an email, set it to null
-                            currentAccountPicture: CircleAvatar(
-                              radius: 48 / 2,
-                              backgroundColor: Colors.white,
-                              backgroundImage: globel.userAvatar,
+                            currentAccountPicture: Container(
+                              margin: EdgeInsets.only(
+                                top: 2.0,
+                              ), // Add margin for spacing above
+
+                              child: CircleAvatar(
+                                radius: 48 / 2,
+                                backgroundColor: Colors.white,
+                                backgroundImage: globel.userAvatar,
+                              ),
                             ),
                             decoration: BoxDecoration(
                               color: Color(0xFF781B1B),
