@@ -395,8 +395,8 @@ class _TripCardState extends State<TripCard>
                                         accuracy: LocationAccuracy.high,
                                         distanceFilter: globel.distanceFilter,
                                         forceLocationManager: true,
-                                        intervalDuration:
-                                            const Duration(seconds: 10),
+                                        intervalDuration: const Duration(
+                                            seconds: globel.updateInterval),
                                         //(Optional) Set foreground notification config to keep the app alive
                                         //when going to the background
                                         foregroundNotificationConfig:
@@ -465,7 +465,7 @@ class _TripCardState extends State<TripCard>
                               context.loaderOverlay.hide();
                             },
                             style: ElevatedButton.styleFrom(
-                                primary: widget.buttonColor,
+                                backgroundColor: widget.buttonColor,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20.0),
                                 ),

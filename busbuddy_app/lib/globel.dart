@@ -17,7 +17,8 @@ void printError(String text) {
   print('\x1B[31m$text\x1B[0m');
 }
 
-const int distanceFilter = 50;
+const int distanceFilter = 30;
+const int updateInterval = 5;
 
 String userId = "";
 String userName = "";

@@ -207,7 +207,7 @@ class _TrackingCardState extends State<TrackingCard> {
     context.loaderOverlay.hide();
 
     locationUpdateTimer =
-        Timer.periodic(Duration(seconds: 10), (Timer timer) async {
+        Timer.periodic(Duration(seconds: 5), (Timer timer) async {
       await getlocationupdate(widget.TripID);
       await predictTimes();
     });
@@ -228,6 +228,14 @@ class _TrackingCardState extends State<TrackingCard> {
       locationUpdateTimer!.cancel();
     }
     super.dispose();
+  }
+
+  List<dynamic> sendTimeList() {
+    return completeInfo;
+  }
+
+  List<dynamic> sendPathCoords() {
+    return pathCoords;
   }
 
   @override
@@ -374,6 +382,13 @@ class _TrackingCardState extends State<TrackingCard> {
                                               .push("/trackingmap", extra: {
                                             'TripID': widget.TripID,
                                             'pathCoords': pathCoords,
+                                            'timeList': completeInfo,
+                                            'stationCoords':
+                                                widget.stationCoords,
+                                            'stationIds': widget.stationIds,
+                                            'stationNames': widget.stationNames,
+                                            'sendTimeList': sendTimeList,
+                                            'sendPathCoords': sendPathCoords,
                                           });
                                         },
                                         style: ElevatedButton.styleFrom(
