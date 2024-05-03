@@ -140,7 +140,7 @@ class _RequisitionState extends State<Requisition> {
       Fluttertoast.showToast(
           msg: 'Select at least one bus type.',
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
           backgroundColor: Color.fromARGB(73, 77, 65, 64),
           textColor: Colors.white,
@@ -153,7 +153,7 @@ class _RequisitionState extends State<Requisition> {
       Fluttertoast.showToast(
           msg: 'Please enter Requisition details.',
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
           backgroundColor: Color.fromARGB(73, 77, 65, 64),
           textColor: Colors.white,
@@ -162,51 +162,82 @@ class _RequisitionState extends State<Requisition> {
       return false;
     }
 
-    var r = await Requests.post(globel.serverIp + 'addRequisition',
-        body: {
-          'destination': DestinationController.text,
-          'submission_timestamp': DateTime.now().toIso8601String(),
-          'timestamp': timestampStr,
-          'text': DescribeController.text,
-          'bus_type': jsonEncode(BusTypeSelected),
-          'source': ReportingController.text,
-          'subject': reasonForRequisition
-        },
-        bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+    try {
+      var r = await Requests.post(globel.serverIp + 'addRequisition',
+          body: {
+            'destination': DestinationController.text,
+            'submission_timestamp': DateTime.now().toIso8601String(),
+            'timestamp': timestampStr,
+            'text': DescribeController.text,
+            'bus_type': jsonEncode(BusTypeSelected),
+            'source': ReportingController.text,
+            'subject': reasonForRequisition
+          },
+          bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
-    r.raiseForStatus();
-    dynamic json = r.json();
+      r.raiseForStatus();
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return false;
+      }
+      dynamic json = r.json();
 
-    print(r.content());
+      print(r.content());
 
-    // If the server did return a 201 CREATED response,
-    // then parse the JSON.
-    //print('bb: ${jsonDecode(r.body)['email']}');
-    if (json['success'] == true) {
-      Fluttertoast.showToast(
-          msg: 'Requisition submitted.',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(131, 71, 62, 62),
-          textColor: Colors.white,
-          fontSize: 16.0);
+      // If the server did return a 201 CREATED response,
+      // then parse the JSON.
+      //print('bb: ${jsonDecode(r.body)['email']}');
+      if (json['success'] == true) {
+        Fluttertoast.showToast(
+            msg: 'Requisition submitted.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(131, 71, 62, 62),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        setState(() {
+          // email = json['email'];
+          // phoneNo = json['phone'];
+          // defaultRoute = json['default_route'];
+
+          // id = json['id'];
+        });
+        context.loaderOverlay.hide();
+        return true;
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Error: Requisition not received by server.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(97, 212, 33, 21),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    } catch (err) {
+      globel.printError(err.toString());
       setState(() {
-        // email = json['email'];
-        // phoneNo = json['phone'];
-        // defaultRoute = json['default_route'];
-
-        // id = json['id'];
+        context.loaderOverlay.hide();
       });
-      context.loaderOverlay.hide();
-      return true;
-    } else {
+
       Fluttertoast.showToast(
-          msg: 'Error: Requisition not received by server.',
+          msg: 'Failed to reach server. Try again.',
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(97, 212, 33, 21),
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
           textColor: Colors.white,
           fontSize: 16.0);
     }

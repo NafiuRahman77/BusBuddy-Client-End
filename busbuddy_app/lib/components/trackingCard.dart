@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:busbuddy_app/components/GradientIcon.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -14,7 +15,7 @@ import '../components/driverHelperInfo.dart';
 import 'package:geolocator/geolocator.dart';
 
 class TrackingCard extends StatefulWidget {
-  final String title;
+  // final String title;
   String TripID = "";
   // List<dynamic> pathCoords = List.empty();
   // final String location1;
@@ -36,7 +37,7 @@ class TrackingCard extends StatefulWidget {
   // final List<dynamic> timeWindow;
   List<String> timeList = List.empty();
   TrackingCard({
-    required this.title,
+    // required this.title,
     required this.TripID,
     // required this.pathCoords,
     // required this.location1,
@@ -64,11 +65,12 @@ class TrackingCard extends StatefulWidget {
 
 class _TrackingCardState extends State<TrackingCard> {
   int defaultRouteIdx = -1;
-  bool isExtended = false;
+  bool isExtended = false, isStalled = false;
   Timer? locationUpdateTimer;
   List<dynamic> completeInfo = [];
   List<dynamic> pathCoords = [];
   String passengerCount = "";
+  String busNo = "";
   List<dynamic> timeWindow = [];
   String st1 = "", t1 = "", st2 = "", t2 = "", st3 = "", t3 = "";
 
@@ -82,6 +84,21 @@ class _TrackingCardState extends State<TrackingCard> {
 
     r.raiseForStatus();
     var zz = await r.json();
+    if (r.statusCode == 401) {
+      await Requests.clearStoredCookies(globel.serverAddr);
+      globel.clearAll();
+      Fluttertoast.showToast(
+          msg: 'Not authenticated / authorised.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(71, 211, 59, 45),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      context.loaderOverlay.hide();
+      GoRouter.of(context).go("/login");
+      return;
+    }
     setState(() {
       completeInfo = zz["time_list"];
 
@@ -93,6 +110,7 @@ class _TrackingCardState extends State<TrackingCard> {
       pathCoords = zz['path'];
       passengerCount = zz['passenger_count'].toString();
       timeWindow = zz['time_window'];
+      busNo = zz['bus'];
     });
   }
 
@@ -116,7 +134,6 @@ class _TrackingCardState extends State<TrackingCard> {
       st1 = widget
           .stationNames[widget.stationIds.indexOf(completeInfo[0]['station'])];
       t1 = completeInfo[0]['time'];
-      double half = completeInfo.length / 2;
       int midIdx = (defaultRouteIdx == -1 ||
               defaultRouteIdx == 0 ||
               defaultRouteIdx == completeInfo.length - 1)
@@ -136,56 +153,82 @@ class _TrackingCardState extends State<TrackingCard> {
     int ps = pathCoords.length;
     int ts = timeWindow.length;
     if (ts > 2) {
-      for (int i = ps - 1; i > ps - ts; i--) {
-        double delta = Geolocator.distanceBetween(
-            double.parse(pathCoords[i]['latitude'].toString()),
-            double.parse(pathCoords[i]['longitude'].toString()),
-            double.parse(pathCoords[i - 1]['latitude'].toString()),
-            double.parse(pathCoords[i - 1]['longitude'].toString()));
-        d += delta;
-        print(delta);
-      }
-      double t9 =
-          (DateTime.parse(timeWindow[ts - 1]).millisecondsSinceEpoch) * 0.001;
-      double t0 =
-          (DateTime.parse(timeWindow[0]).millisecondsSinceEpoch) * 0.001;
-      double delT = t9 - t0;
-      print(delT);
-      double speed = d / delT;
-      print("velocity: $speed");
-      // print(completeInfo);
-      for (int i = 0; i < completeInfo.length; i++) {
-        print("hiiii");
-        print(completeInfo[i]);
-        if (i > 0 &&
-            (completeInfo[i]['time'] == null ||
-                completeInfo[i]['time'] == "--")) {
-          double prevT = (DateTime.parse(completeInfo[i - 1]['time'])
-                  .millisecondsSinceEpoch) *
-              0.001;
-          print(prevT);
-          dynamic prevCoord = widget.stationCoords[
-              widget.stationIds.indexOf(completeInfo[i - 1]['station'])];
-          print(prevCoord);
-          dynamic nextCoord = widget.stationCoords[
-              widget.stationIds.indexOf(completeInfo[i]['station'])];
-          print(nextCoord);
-          double distance = await Geolocator.distanceBetween(
-              double.parse(prevCoord['x'].toString()),
-              double.parse(prevCoord['y'].toString()),
-              double.parse(nextCoord['x'].toString()),
-              double.parse(nextCoord['y'].toString()));
-          int nextT = ((prevT + distance / speed) * 1000).toInt();
-          setState(() {
-            completeInfo[i]['time'] =
-                DateTime.fromMillisecondsSinceEpoch(nextT).toIso8601String();
-            completeInfo[i]['pred'] = true;
-          });
-          // print(completeInfo[i]['time']);
-        } else {
-          setState(() {
-            completeInfo[i]['pred'] = false;
-          });
+      if (DateTime.parse(timeWindow[timeWindow.length - 1])
+              .difference(DateTime.now())
+              .inMinutes <=
+          -20) {
+        setState(() {
+          isStalled = true;
+        });
+      } else {
+        double delay = DateTime.now()
+                .difference(DateTime.parse(timeWindow[timeWindow.length - 1]))
+                .inMilliseconds *
+            1.2;
+
+        for (int i = ps - 1; i > ps - ts; i--) {
+          double delta = Geolocator.distanceBetween(
+              double.parse(pathCoords[i]['latitude'].toString()),
+              double.parse(pathCoords[i]['longitude'].toString()),
+              double.parse(pathCoords[i - 1]['latitude'].toString()),
+              double.parse(pathCoords[i - 1]['longitude'].toString()));
+          d += delta;
+          print(delta);
+        }
+        double t9 =
+            (DateTime.parse(timeWindow[ts - 1]).millisecondsSinceEpoch) * 0.001;
+        double t0 =
+            (DateTime.parse(timeWindow[0]).millisecondsSinceEpoch) * 0.001;
+        double delT = t9 - t0;
+        print(delT);
+        double speed = d / delT;
+        print("velocity: $speed");
+        // print(completeInfo);
+        int j = -1;
+        for (int i = 0; i < completeInfo.length; i++) {
+          print("hiiii");
+          print(completeInfo[i]);
+          if (i > 0 &&
+              (completeInfo[i]['time'] == null ||
+                  completeInfo[i]['time'] == "--")) {
+            if (j == -1) j = 0;
+            double prevT = (DateTime.parse(completeInfo[i - 1]['time'])
+                    .millisecondsSinceEpoch) *
+                0.001;
+            print(prevT);
+            dynamic prevCoord = widget.stationCoords[
+                widget.stationIds.indexOf(completeInfo[i - 1]['station'])];
+            print(prevCoord);
+            dynamic nextCoord = widget.stationCoords[
+                widget.stationIds.indexOf(completeInfo[i]['station'])];
+            print(nextCoord);
+            double distance = await Geolocator.distanceBetween(
+                double.parse(prevCoord['x'].toString()),
+                double.parse(prevCoord['y'].toString()),
+                double.parse(nextCoord['x'].toString()),
+                double.parse(nextCoord['y'].toString()));
+            double deltaT = distance / speed;
+            if (deltaT / 3600 < 4) {
+              int nextT = ((prevT + deltaT) * 1000 + delay).toInt();
+              if (j == 0) {
+                nextT = (nextT + delay).toInt();
+                j = 1;
+              }
+              setState(() {
+                completeInfo[i]['time'] =
+                    DateTime.fromMillisecondsSinceEpoch(nextT)
+                        .toIso8601String();
+                completeInfo[i]['pred'] = true;
+              });
+              // print(completeInfo[i]['time']);
+            } else {
+              break;
+            }
+          } else {
+            setState(() {
+              completeInfo[i]['pred'] = false;
+            });
+          }
         }
       }
     }
@@ -195,22 +238,49 @@ class _TrackingCardState extends State<TrackingCard> {
   Future<void> initCard() async {
     context.loaderOverlay.show();
     print("innit");
-    await getlocationupdate(widget.TripID);
-    if (widget.isUserRoute) {
-      for (int i = 0; i < completeInfo.length; i++) {
-        if (completeInfo[i]['station'] == globel.userDefaultStationId) {
-          defaultRouteIdx = i;
+    try {
+      await getlocationupdate(widget.TripID);
+      if (widget.isUserRoute) {
+        for (int i = 0; i < completeInfo.length; i++) {
+          if (completeInfo[i]['station'] == globel.userDefaultStationId) {
+            defaultRouteIdx = i;
+          }
         }
       }
-    }
-    await predictTimes();
-    context.loaderOverlay.hide();
-
-    locationUpdateTimer =
-        Timer.periodic(Duration(seconds: 5), (Timer timer) async {
-      await getlocationupdate(widget.TripID);
       await predictTimes();
-    });
+
+      locationUpdateTimer =
+          Timer.periodic(Duration(seconds: 5), (Timer timer) async {
+        try {
+          await getlocationupdate(widget.TripID);
+          await predictTimes();
+        } catch (err) {
+          globel.printError(err.toString());
+          // context.loaderOverlay.hide();
+          Fluttertoast.showToast(
+              msg: 'Failed to reach server. Check your connection.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(209, 194, 16, 0),
+              textColor: Colors.white,
+              fontSize: 16.0);
+          // GoRouter.of(context).pop();
+        }
+      });
+    } catch (err) {
+      globel.printError(err.toString());
+      context.loaderOverlay.hide();
+      Fluttertoast.showToast(
+          msg: 'Failed to reach server. Check your connection.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
+    context.loaderOverlay.hide();
   }
 
   @override
@@ -293,7 +363,7 @@ class _TrackingCardState extends State<TrackingCard> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          widget.title,
+                          busNo,
                           style: GoogleFonts.barlow(
                             textStyle: TextStyle(
                               fontSize: 12.0,

@@ -54,6 +54,21 @@ class _ManageTripsState extends State<ManageTrips>
     context.loaderOverlay.show();
     var r = await Requests.post(globel.serverIp + 'getStaffTrips');
     r.raiseForStatus();
+    if (r.statusCode == 401) {
+      await Requests.clearStoredCookies(globel.serverAddr);
+      globel.clearAll();
+      Fluttertoast.showToast(
+          msg: 'Not authenticated / authorised.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(71, 211, 59, 45),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      context.loaderOverlay.hide();
+      GoRouter.of(context).go("/login");
+      return;
+    }
     print(r.content());
     dynamic tripInformation = r.json();
     if (tripInformation['success'] == false) return;

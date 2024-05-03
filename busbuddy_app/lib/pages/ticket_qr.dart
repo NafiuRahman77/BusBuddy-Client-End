@@ -30,32 +30,64 @@ class _TicketQRState extends State<TicketQR> {
 
   Future<void> getTicketInfo() async {
     context.loaderOverlay.show();
-    var r = await Requests.post(globel.serverIp + 'getTicketQRData');
+    try {
+      var r = await Requests.post(globel.serverIp + 'getTicketQRData');
 
-    r.raiseForStatus();
-    dynamic json = r.json();
-    print(json);
+      r.raiseForStatus();
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
+      }
+      dynamic json = r.json();
+      print(json);
 
-    if (json['success'] == true) {
+      if (json['success'] == true) {
+        setState(() {
+          ticket_id = json['ticket_id'];
+          isTicketPresent = true;
+        });
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Failed to load data.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(118, 244, 67, 54),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        setState(() {
+          ticket_id = "BLANK_TICKET";
+          isTicketPresent = false;
+        });
+      }
+      print(ticket_id);
+    } catch (err) {
+      globel.printError(err.toString());
       setState(() {
-        ticket_id = json['ticket_id'];
-        isTicketPresent = true;
+        context.loaderOverlay.hide();
       });
-    } else {
+
       Fluttertoast.showToast(
-          msg: 'Failed to load data.',
+          msg: 'Failed to reach server. Try again.',
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(118, 244, 67, 54),
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
           textColor: Colors.white,
           fontSize: 16.0);
-      setState(() {
-        ticket_id = "BLANK_TICKET";
-        isTicketPresent = false;
-      });
+      GoRouter.of(context).pop();
     }
-    print(ticket_id);
     context.loaderOverlay.hide();
   }
 

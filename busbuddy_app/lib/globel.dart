@@ -17,8 +17,11 @@ void printError(String text) {
   print('\x1B[31m$text\x1B[0m');
 }
 
-const int distanceFilter = 30;
+const int distanceFilter = 10;
 const int updateInterval = 5;
+const String serverAddr = 'http://103.94.135.116:6969';
+const String serverIp = '$serverAddr/api/';
+bool wmg = false;
 
 String userId = "";
 String userName = "";
@@ -34,12 +37,9 @@ String teacherDepartment = "";
 String teacherDesignation = "";
 String teacherResidence = "";
 String staffRole = "";
-String serverAddr = 'http://103.94.135.116:6969';
-String serverIp = '$serverAddr/api/';
 String runningTripId = "";
 String trackingTripId = "";
 String fcmId = "";
-bool wmg = false;
 StreamSubscription<Position>? positionStream;
 List<String> routeNames = [];
 List<String> routeIDs = [];
@@ -71,8 +71,6 @@ void clearAll() {
   teacherDesignation = "";
   teacherResidence = "";
   staffRole = "";
-  serverAddr = 'http://103.94.135.116:6969';
-  serverIp = '$serverAddr/api/';
   runningTripId = "";
   trackingTripId = "";
   userAvatar = userAvatarBackup;

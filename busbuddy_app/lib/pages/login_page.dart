@@ -62,6 +62,21 @@ class _LoginPageState extends State<LoginPage> {
             bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
         r2.raiseForStatus();
+        if (r2.statusCode == 401) {
+          await Requests.clearStoredCookies(globel.serverAddr);
+          globel.clearAll();
+          Fluttertoast.showToast(
+              msg: 'Not authenticated / authorised.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(71, 211, 59, 45),
+              textColor: Colors.white,
+              fontSize: 16.0);
+          context.loaderOverlay.hide();
+          GoRouter.of(context).go("/login");
+          return;
+        }
       }
     });
   }
@@ -117,24 +132,332 @@ class _LoginPageState extends State<LoginPage> {
           Requests.getHostname(globel.serverIp), 'connect.sid', c);
 
       // context.loaderOverlay.show();
-      var r = await Requests.post(globel.serverIp + 'sessionCheck',
+      try {
+        var r = await Requests.post(globel.serverIp + 'sessionCheck',
+            body: {
+              'fcm_id': globel.fcmId,
+            },
+            bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+
+        r.raiseForStatus();
+        if (r.statusCode == 401) {
+          await Requests.clearStoredCookies(globel.serverAddr);
+          globel.clearAll();
+          Fluttertoast.showToast(
+              msg: 'Not authenticated / authorised.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(71, 211, 59, 45),
+              textColor: Colors.white,
+              fontSize: 16.0);
+          context.loaderOverlay.hide();
+          GoRouter.of(context).go("/login");
+          return;
+        }
+        dynamic json = await r.json();
+        print(json);
+        if (json['recognized'] == true) {
+          globel.userType = json['user_type'];
+          globel.printWarning(globel.userType);
+
+          // if (isConnected == true) {
+          globel.routeIDs.clear();
+          globel.routeNames.clear();
+          var r1 = await Requests.post(globel.serverIp + 'getRoutes');
+          r1.raiseForStatus();
+          if (r1.statusCode == 401) {
+            await Requests.clearStoredCookies(globel.serverAddr);
+            globel.clearAll();
+            Fluttertoast.showToast(
+                msg: 'Not authenticated / authorised.',
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Color.fromARGB(71, 211, 59, 45),
+                textColor: Colors.white,
+                fontSize: 16.0);
+            context.loaderOverlay.hide();
+            GoRouter.of(context).go("/login");
+            return;
+          }
+          List<dynamic> json1 = r1.json();
+          setState(() {
+            for (int i = 0; i < json1.length; i++) {
+              globel.routeIDs.add(json1[i]['id']);
+              globel.routeNames.add(json1[i]['terminal_point']);
+            }
+          });
+
+          print(globel.routeNames);
+          // }
+
+          if (globel.userType == 'bus_staff') {
+            globel.staffRole = json['bus_role'];
+            if (json['relogin'] == true) {
+              Fluttertoast.showToast(
+                  msg:
+                      'Bus staff can login from only one device at once. Your previous sessions have been deactivated',
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Color.fromARGB(131, 244, 67, 54),
+                  textColor: Colors.white,
+                  fontSize: 16.0);
+            }
+
+            var r4 =
+                await Requests.post(globel.serverIp + 'checkStaffRunningTrip');
+            print("hello bus stff");
+            r4.raiseForStatus();
+            if (r4.statusCode == 401) {
+              await Requests.clearStoredCookies(globel.serverAddr);
+              globel.clearAll();
+              Fluttertoast.showToast(
+                  msg: 'Not authenticated / authorised.',
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.CENTER,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Color.fromARGB(71, 211, 59, 45),
+                  textColor: Colors.white,
+                  fontSize: 16.0);
+              context.loaderOverlay.hide();
+              GoRouter.of(context).go("/login");
+              return;
+            }
+            dynamic rt = r4.json();
+            if (rt['success']) {
+              globel.runningTripId = rt['id'];
+              if (globel.staffRole == 'driver') {
+                bool isLocationServiceEnabled =
+                    await Geolocator.isLocationServiceEnabled();
+
+                // Workmanager()
+                //     .registerOneOffTask("bus", "sojib")
+                if (!isLocationServiceEnabled) {
+                  // Handle the case where location services are not enabled
+                  // You may want to show a toast or display a message
+                  print('Location services are not enabled.');
+                  Fluttertoast.showToast(
+                    msg: "Please enable location services.",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+                  SystemNavigator.pop();
+                }
+
+                // Check if the app has location permission
+                LocationPermission permission =
+                    await Geolocator.checkPermission();
+                if (permission == LocationPermission.denied) {
+                  // Request location permission
+                  permission = await Geolocator.requestPermission();
+                  if (permission != LocationPermission.whileInUse &&
+                      permission != LocationPermission.always) {
+                    // Handle the case where the user denied location permission
+                    print('User denied location permission.');
+                    SystemNavigator.pop();
+                  }
+                }
+                try {
+                  await startLocationStream();
+                  // return true;
+                } catch (e) {
+                  print("Error getting location: $e");
+                  SystemNavigator.pop();
+                }
+              }
+            }
+          }
+
+          globel.printError("is this a teacher? ${globel.userType}");
+          if (globel.userType == "buet_staff") {
+            print("hi sir");
+            globel.userDefaultRouteId = "4";
+            globel.userDefaultRouteName = globel
+                .routeNames[globel.routeIDs.indexOf(globel.userDefaultRouteId)];
+            globel.userDefaultStationId = "70";
+            globel.userDefaultStationName = "BUET";
+
+            var rrr = await Requests.post(globel.serverIp + 'getBusStaffData');
+            rrr.raiseForStatus();
+            if (rrr.statusCode == 401) {
+              await Requests.clearStoredCookies(globel.serverAddr);
+              globel.clearAll();
+              Fluttertoast.showToast(
+                  msg: 'Not authenticated / authorised.',
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.CENTER,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Color.fromARGB(71, 211, 59, 45),
+                  textColor: Colors.white,
+                  fontSize: 16.0);
+              context.loaderOverlay.hide();
+              GoRouter.of(context).go("/login");
+              return;
+            }
+            globel.driverHelpers = rrr.json();
+            print(globel.driverHelpers);
+          }
+
+          if (globel.userType == 'student') {
+            // context.loaderOverlay.show();
+            var r = await Requests.post(globel.serverIp + 'getTicketList');
+
+            r.raiseForStatus();
+            if (r.statusCode == 401) {
+              await Requests.clearStoredCookies(globel.serverAddr);
+              globel.clearAll();
+              Fluttertoast.showToast(
+                  msg: 'Not authenticated / authorised.',
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.CENTER,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Color.fromARGB(71, 211, 59, 45),
+                  textColor: Colors.white,
+                  fontSize: 16.0);
+              context.loaderOverlay.hide();
+              GoRouter.of(context).go("/login");
+              return;
+            }
+            dynamic json = r.json();
+            print(json);
+
+            if (json['success'] == true) {
+              List<String> ticketIds = List<String>.from(json['ticket_list']);
+
+              final SharedPreferences prefs =
+                  await SharedPreferences.getInstance();
+              prefs.setStringList('ticketIds', ticketIds);
+              // setState(() {
+              //   flagforofflinebutton = ticketIds.isNotEmpty;
+              // });
+              print(ticketIds.isNotEmpty.toString() + "..........");
+            } else {
+              // Fluttertoast.showToast(
+              //   msg: 'Failed to load data.',
+              //   toastLength: Toast.LENGTH_SHORT,
+              //   gravity: ToastGravity.CENTER,
+              //   timeInSecForIosWeb: 1,
+              //   backgroundColor: Color.fromARGB(118, 244, 67, 54),
+              //   textColor: Colors.white,
+              //   fontSize: 16.0,
+              // );
+            }
+            // context.loaderOverlay.hide();
+          }
+          await onProfileReady();
+          await onProfileMount();
+
+          loaderShowing = false;
+          context.loaderOverlay.hide();
+          GoRouter.of(context).go("/show_profile");
+        }
+      } catch (err) {
+        globel.printError(err.toString());
+        setState(() {
+          isConnected = false;
+          flagforofflinebutton = ticketIds.isNotEmpty;
+
+          if (loaderShowing == true) {
+            context.loaderOverlay.hide();
+            loaderShowing = false;
+          }
+        });
+
+        Fluttertoast.showToast(
+            msg: 'Failed to reach server. Try again.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(209, 194, 16, 0),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    }
+    if (loaderShowing == true) {
+      context.loaderOverlay.hide();
+    }
+  }
+
+  Future<bool> onLogin(String id, String password) async {
+    print('Checking internet connection... 2');
+    try {
+      var r = await Requests.post(globel.serverIp + 'login',
           body: {
+            'id': id,
+            'password': password,
             'fcm_id': globel.fcmId,
           },
           bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
       r.raiseForStatus();
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return false;
+      }
       dynamic json = await r.json();
-      print(json);
-      if (json['recognized'] == true) {
+
+      print(json['success']);
+
+      if (json['success'] == true) {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        String pref_id = prefs.getString("student_id") ?? "";
+
+        if (id != pref_id) {
+          prefs.setStringList('noti_title', []);
+          prefs.setStringList('noti_body', []);
+          prefs.setStringList("noti_time", []);
+          prefs.setStringList("noti_type", []);
+        }
+
+        // set student id to shared pref
+        prefs.setString('student_id', id);
+        print("..........");
+        CookieJar cj = await Requests.getStoredCookies(
+            Requests.getHostname(globel.serverIp));
+        cj.forEach((key, value) async {
+          print(key);
+          print(value);
+          await (prefs.setString(key, value.value));
+        });
         globel.userType = json['user_type'];
-        globel.printWarning(globel.userType);
 
         // if (isConnected == true) {
         globel.routeIDs.clear();
         globel.routeNames.clear();
         var r1 = await Requests.post(globel.serverIp + 'getRoutes');
         r1.raiseForStatus();
+        if (r1.statusCode == 401) {
+          await Requests.clearStoredCookies(globel.serverAddr);
+          globel.clearAll();
+          Fluttertoast.showToast(
+              msg: 'Not authenticated / authorised.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(71, 211, 59, 45),
+              textColor: Colors.white,
+              fontSize: 16.0);
+          context.loaderOverlay.hide();
+          GoRouter.of(context).go("/login");
+          return false;
+        }
         List<dynamic> json1 = r1.json();
         setState(() {
           for (int i = 0; i < json1.length; i++) {
@@ -164,6 +487,21 @@ class _LoginPageState extends State<LoginPage> {
               await Requests.post(globel.serverIp + 'checkStaffRunningTrip');
           print("hello bus stff");
           r4.raiseForStatus();
+          if (r4.statusCode == 401) {
+            await Requests.clearStoredCookies(globel.serverAddr);
+            globel.clearAll();
+            Fluttertoast.showToast(
+                msg: 'Not authenticated / authorised.',
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Color.fromARGB(71, 211, 59, 45),
+                textColor: Colors.white,
+                fontSize: 16.0);
+            context.loaderOverlay.hide();
+            GoRouter.of(context).go("/login");
+            return false;
+          }
           dynamic rt = r4.json();
           if (rt['success']) {
             globel.runningTripId = rt['id'];
@@ -186,7 +524,7 @@ class _LoginPageState extends State<LoginPage> {
                   textColor: Colors.white,
                   fontSize: 16.0,
                 );
-                SystemNavigator.pop();
+                return false;
               }
 
               // Check if the app has location permission
@@ -199,15 +537,15 @@ class _LoginPageState extends State<LoginPage> {
                     permission != LocationPermission.always) {
                   // Handle the case where the user denied location permission
                   print('User denied location permission.');
-                  SystemNavigator.pop();
+                  return false;
                 }
               }
               try {
                 await startLocationStream();
-                // return true;
+                return true;
               } catch (e) {
                 print("Error getting location: $e");
-                SystemNavigator.pop();
+                return false;
               }
             }
           }
@@ -224,6 +562,21 @@ class _LoginPageState extends State<LoginPage> {
 
           var rrr = await Requests.post(globel.serverIp + 'getBusStaffData');
           rrr.raiseForStatus();
+          if (rrr.statusCode == 401) {
+            await Requests.clearStoredCookies(globel.serverAddr);
+            globel.clearAll();
+            Fluttertoast.showToast(
+                msg: 'Not authenticated / authorised.',
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Color.fromARGB(71, 211, 59, 45),
+                textColor: Colors.white,
+                fontSize: 16.0);
+            context.loaderOverlay.hide();
+            GoRouter.of(context).go("/login");
+            return false;
+          }
           globel.driverHelpers = rrr.json();
           print(globel.driverHelpers);
         }
@@ -233,6 +586,21 @@ class _LoginPageState extends State<LoginPage> {
           var r = await Requests.post(globel.serverIp + 'getTicketList');
 
           r.raiseForStatus();
+          if (r.statusCode == 401) {
+            await Requests.clearStoredCookies(globel.serverAddr);
+            globel.clearAll();
+            Fluttertoast.showToast(
+                msg: 'Not authenticated / authorised.',
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Color.fromARGB(71, 211, 59, 45),
+                textColor: Colors.white,
+                fontSize: 16.0);
+            context.loaderOverlay.hide();
+            GoRouter.of(context).go("/login");
+            return false;
+          }
           dynamic json = r.json();
           print(json);
 
@@ -259,202 +627,42 @@ class _LoginPageState extends State<LoginPage> {
           }
           // context.loaderOverlay.hide();
         }
-        await onProfileReady();
-        await onProfileMount();
+        // print(globel.userType);
+        Fluttertoast.showToast(
+            msg: 'Welcome, ${json['name']}',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(73, 56, 52, 52),
+            textColor: Colors.white,
+            fontSize: 16.0);
 
-        loaderShowing = false;
-        context.loaderOverlay.hide();
-        GoRouter.of(context).go("/show_profile");
+        return true;
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Invalid credentiels',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(131, 244, 67, 54),
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
-    }
-    if (loaderShowing == true) {
-      context.loaderOverlay.hide();
-    }
-  }
-
-  Future<bool> onLogin(String id, String password) async {
-    print('Checking internet connection... 2');
-    var r = await Requests.post(globel.serverIp + 'login',
-        body: {
-          'id': id,
-          'password': password,
-          'fcm_id': globel.fcmId,
-        },
-        bodyEncoding: RequestBodyEncoding.FormURLEncoded);
-
-    r.raiseForStatus();
-    dynamic json = await r.json();
-
-    print(json['success']);
-
-    if (json['success'] == true) {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      String pref_id = prefs.getString("student_id") ?? "";
-
-      if (id != pref_id) {
-        prefs.setStringList('noti_title', []);
-        prefs.setStringList('noti_body', []);
-        prefs.setStringList("noti_time", []);
-        prefs.setStringList("noti_type", []);
-      }
-
-      // set student id to shared pref
-      prefs.setString('student_id', id);
-      print("..........");
-      CookieJar cj = await Requests.getStoredCookies(
-          Requests.getHostname(globel.serverIp));
-      cj.forEach((key, value) async {
-        print(key);
-        print(value);
-        await (prefs.setString(key, value.value));
-      });
-      globel.userType = json['user_type'];
-
-      // if (isConnected == true) {
-      globel.routeIDs.clear();
-      globel.routeNames.clear();
-      var r1 = await Requests.post(globel.serverIp + 'getRoutes');
-      r1.raiseForStatus();
-      List<dynamic> json1 = r1.json();
+    } catch (err) {
+      globel.printError(err.toString());
       setState(() {
-        for (int i = 0; i < json1.length; i++) {
-          globel.routeIDs.add(json1[i]['id']);
-          globel.routeNames.add(json1[i]['terminal_point']);
+        if (loaderShowing == true) {
+          context.loaderOverlay.hide();
+          loaderShowing = false;
         }
       });
 
-      print(globel.routeNames);
-      // }
-
-      if (globel.userType == 'bus_staff') {
-        globel.staffRole = json['bus_role'];
-        if (json['relogin'] == true) {
-          Fluttertoast.showToast(
-              msg:
-                  'Bus staff can login from only one device at once. Your previous sessions have been deactivated',
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              backgroundColor: Color.fromARGB(131, 244, 67, 54),
-              textColor: Colors.white,
-              fontSize: 16.0);
-        }
-
-        var r4 = await Requests.post(globel.serverIp + 'checkStaffRunningTrip');
-        print("hello bus stff");
-        r4.raiseForStatus();
-        dynamic rt = r4.json();
-        if (rt['success']) {
-          globel.runningTripId = rt['id'];
-          if (globel.staffRole == 'driver') {
-            bool isLocationServiceEnabled =
-                await Geolocator.isLocationServiceEnabled();
-
-            // Workmanager()
-            //     .registerOneOffTask("bus", "sojib")
-            if (!isLocationServiceEnabled) {
-              // Handle the case where location services are not enabled
-              // You may want to show a toast or display a message
-              print('Location services are not enabled.');
-              Fluttertoast.showToast(
-                msg: "Please enable location services.",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                backgroundColor: Colors.red,
-                textColor: Colors.white,
-                fontSize: 16.0,
-              );
-              return false;
-            }
-
-            // Check if the app has location permission
-            LocationPermission permission = await Geolocator.checkPermission();
-            if (permission == LocationPermission.denied) {
-              // Request location permission
-              permission = await Geolocator.requestPermission();
-              if (permission != LocationPermission.whileInUse &&
-                  permission != LocationPermission.always) {
-                // Handle the case where the user denied location permission
-                print('User denied location permission.');
-                return false;
-              }
-            }
-            try {
-              await startLocationStream();
-              return true;
-            } catch (e) {
-              print("Error getting location: $e");
-              return false;
-            }
-          }
-        }
-      }
-
-      globel.printError("is this a teacher? ${globel.userType}");
-      if (globel.userType == "buet_staff") {
-        print("hi sir");
-        globel.userDefaultRouteId = "4";
-        globel.userDefaultRouteName = globel
-            .routeNames[globel.routeIDs.indexOf(globel.userDefaultRouteId)];
-        globel.userDefaultStationId = "70";
-        globel.userDefaultStationName = "BUET";
-
-        var rrr = await Requests.post(globel.serverIp + 'getBusStaffData');
-        rrr.raiseForStatus();
-
-        globel.driverHelpers = rrr.json();
-        print(globel.driverHelpers);
-      }
-
-      if (globel.userType == 'student') {
-        // context.loaderOverlay.show();
-        var r = await Requests.post(globel.serverIp + 'getTicketList');
-
-        r.raiseForStatus();
-        dynamic json = r.json();
-        print(json);
-
-        if (json['success'] == true) {
-          List<String> ticketIds = List<String>.from(json['ticket_list']);
-
-          final SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.setStringList('ticketIds', ticketIds);
-          // setState(() {
-          //   flagforofflinebutton = ticketIds.isNotEmpty;
-          // });
-          print(ticketIds.isNotEmpty.toString() + "..........");
-        } else {
-          // Fluttertoast.showToast(
-          //   msg: 'Failed to load data.',
-          //   toastLength: Toast.LENGTH_SHORT,
-          //   gravity: ToastGravity.CENTER,
-          //   timeInSecForIosWeb: 1,
-          //   backgroundColor: Color.fromARGB(118, 244, 67, 54),
-          //   textColor: Colors.white,
-          //   fontSize: 16.0,
-          // );
-        }
-        // context.loaderOverlay.hide();
-      }
-      // print(globel.userType);
       Fluttertoast.showToast(
-          msg: 'Welcome, ${json['name']}',
+          msg: 'Failed to reach server. Try again.',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(73, 56, 52, 52),
-          textColor: Colors.white,
-          fontSize: 16.0);
-
-      return true;
-    } else {
-      Fluttertoast.showToast(
-          msg: 'Invalid credentiels',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(131, 244, 67, 54),
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
           textColor: Colors.white,
           fontSize: 16.0);
     }
@@ -465,67 +673,135 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> onProfileReady() async {
     print('Checking internet connection... 3');
-    var r = await Requests.post(globel.serverIp + 'getProfileStatic');
+    try {
+      var r = await Requests.post(globel.serverIp + 'getProfileStatic');
 
-    r.raiseForStatus();
-    dynamic json = r.json();
-
-    print(r.content());
-    if (json['success'] == true) {
-      globel.userName = json['name'];
-      if (json['imageStr'].toString().isNotEmpty) {
-        globel.userAvatar = MemoryImage(base64Decode(json['imageStr']));
+      r.raiseForStatus();
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
       }
-    } else {
+      dynamic json = r.json();
+
+      print(r.content());
+      if (json['success'] == true) {
+        globel.userName = json['name'];
+        if (json['imageStr'].toString().isNotEmpty) {
+          globel.userAvatar = MemoryImage(base64Decode(json['imageStr']));
+        }
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Failed to load data.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(147, 210, 61, 50),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    } catch (err) {
+      globel.printError(err.toString());
+      setState(() {
+        if (loaderShowing == true) {
+          context.loaderOverlay.hide();
+          loaderShowing = false;
+        }
+      });
+
       Fluttertoast.showToast(
-          msg: 'Failed to load data.',
+          msg: 'Failed to reach server. Try again.',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(147, 210, 61, 50),
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
           textColor: Colors.white,
           fontSize: 16.0);
     }
   }
 
   Future<void> onProfileMount() async {
-    var r = await Requests.post(globel.serverIp + 'getProfile');
+    try {
+      var r = await Requests.post(globel.serverIp + 'getProfile');
 
-    r.raiseForStatus();
-    dynamic json = r.json();
+      r.raiseForStatus();
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
+      }
+      dynamic json = r.json();
 
-    print(r.content());
+      print(r.content());
 
-    // If the server did return a 201 CREATED response,
-    // then parse the JSON.
-    //print('bb: ${jsonDecode(response.body)['email']}');
-    if (json['success'] == true) {
+      // If the server did return a 201 CREATED response,
+      // then parse the JSON.
+      //print('bb: ${jsonDecode(response.body)['email']}');
+      if (json['success'] == true) {
+        setState(() {
+          globel.userName = json['name'];
+          globel.userPhone = json['phone'];
+          if (globel.userType == "student") {
+            globel.userEmail = json['email'];
+            globel.userDefaultRouteId = json['default_route'];
+            globel.userDefaultRouteName = json['default_route_name'];
+            globel.userDefaultStationId = json['default_station'];
+            globel.userDefaultStationName = json['default_station_name'];
+          } else if (globel.userType == "buet_staff") {
+            globel.teacherDepartment = json['department'];
+            globel.teacherDesignation = json['designation'];
+            globel.teacherResidence = json['residence'];
+          } else if (globel.userType == "bus_staff") {
+            globel.staffRole = json['role'];
+          }
+
+          globel.userId = json['id'];
+        });
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Failed to load data.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(148, 244, 67, 54),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    } catch (err) {
+      globel.printError(err.toString());
       setState(() {
-        globel.userName = json['name'];
-        globel.userPhone = json['phone'];
-        if (globel.userType == "student") {
-          globel.userEmail = json['email'];
-          globel.userDefaultRouteId = json['default_route'];
-          globel.userDefaultRouteName = json['default_route_name'];
-          globel.userDefaultStationId = json['default_station'];
-          globel.userDefaultStationName = json['default_station_name'];
-        } else if (globel.userType == "buet_staff") {
-          globel.teacherDepartment = json['department'];
-          globel.teacherDesignation = json['designation'];
-          globel.teacherResidence = json['residence'];
-        } else if (globel.userType == "bus_staff") {
-          globel.staffRole = json['role'];
+        if (loaderShowing == true) {
+          context.loaderOverlay.hide();
+          loaderShowing = false;
         }
-
-        globel.userId = json['id'];
       });
-    } else {
+
       Fluttertoast.showToast(
-          msg: 'Failed to load data.',
+          msg: 'Failed to reach server. Try again.',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(148, 244, 67, 54),
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
           textColor: Colors.white,
           fontSize: 16.0);
     }

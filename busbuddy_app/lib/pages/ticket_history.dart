@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
 import 'package:requests/requests.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:intl/intl.dart';
@@ -45,48 +47,95 @@ class _TicketHistoryState extends State<TicketHistory>
 
   Future<void> onPageMount() async {
     context.loaderOverlay.show();
-    var r = await Requests.post(globel.serverIp + 'getUserPurchaseHistory');
+    try {
+      var r = await Requests.post(globel.serverIp + 'getUserPurchaseHistory');
 
-    r.raiseForStatus();
-    dynamic json = r.json();
-
-    setState(() {
-      for (int i = 0; i < json.length; i++) {
-        purchaseDateList.add(json[i]['timestamp'].toString());
-        ticketAmountList.add(json[i]['quantity'].toString());
+      r.raiseForStatus();
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
       }
-      for (int i = 0; i < purchaseDateList.length; i++) {
-        DateTime dateTime = DateTime.parse(purchaseDateList[i]);
-        // Format the time in AM/PM format without seconds
-        String formattedDate = "${dateTime.toLocal()}".split(" ")[0];
-        String formattedTime = DateFormat('h:mma').format(dateTime.toLocal());
-        purchaseDateList[i] = formattedDate + "  " + formattedTime;
+      dynamic json = r.json();
+
+      setState(() {
+        for (int i = 0; i < json.length; i++) {
+          purchaseDateList.add(json[i]['timestamp'].toString());
+          ticketAmountList.add(json[i]['quantity'].toString());
+        }
+        for (int i = 0; i < purchaseDateList.length; i++) {
+          DateTime dateTime = DateTime.parse(purchaseDateList[i]);
+          // Format the time in AM/PM format without seconds
+          String formattedDate = "${dateTime.toLocal()}".split(" ")[0];
+          String formattedTime = DateFormat('h:mma').format(dateTime.toLocal());
+          purchaseDateList[i] = formattedDate + "  " + formattedTime;
+        }
+      });
+
+      // reverse the list to show the latest purchase first
+      purchaseDateList = purchaseDateList.reversed.toList();
+      ticketAmountList = ticketAmountList.reversed.toList();
+
+      var r1 = await Requests.post(globel.serverIp + 'getTicketUsageHistory');
+      r1.raiseForStatus();
+      if (r1.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
       }
-    });
+      dynamic json1 = r1.json();
 
-    // reverse the list to show the latest purchase first
-    purchaseDateList = purchaseDateList.reversed.toList();
-    ticketAmountList = ticketAmountList.reversed.toList();
+      setState(() {
+        for (int i = 0; i < json1.length; i++) {
+          usageRouteList.add(json1[i]['route'].toString());
+          usageTripIDList.add(json1[i]['trip_id'].toString());
+          usageTimeList.add(json1[i]['start_timestamp'].toString());
+          usageDirectionList.add(json1[i]['travel_direction'].toString());
+          usageScannedByList.add(json1[i]['scanned_by'].toString());
+        }
+        for (int i = 0; i < usageTimeList.length; i++) {
+          usageTimeList[i] = formatDateString(usageTimeList[i]);
+        }
+      });
 
-    var r1 = await Requests.post(globel.serverIp + 'getTicketUsageHistory');
-    dynamic json1 = r1.json();
+      print("in ticket history");
+      print(json1);
+    } catch (err) {
+      globel.printError(err.toString());
+      setState(() {
+        context.loaderOverlay.hide();
+      });
 
-    setState(() {
-      for (int i = 0; i < json1.length; i++) {
-        usageRouteList.add(json1[i]['route'].toString());
-        usageTripIDList.add(json1[i]['trip_id'].toString());
-        usageTimeList.add(json1[i]['start_timestamp'].toString());
-        usageDirectionList.add(json1[i]['travel_direction'].toString());
-        usageScannedByList.add(json1[i]['scanned_by'].toString());
-      }
-      for (int i = 0; i < usageTimeList.length; i++) {
-        usageTimeList[i] = formatDateString(usageTimeList[i]);
-      }
-    });
-
-    print("in ticket history");
-    print(json1);
-
+      Fluttertoast.showToast(
+          msg: 'Failed to reach server. Try again.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      GoRouter.of(context).pop();
+    }
     context.loaderOverlay.hide();
   }
 

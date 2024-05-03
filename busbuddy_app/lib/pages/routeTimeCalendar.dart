@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../components/CustomCard.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:requests/requests.dart';
@@ -49,60 +50,106 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
 
   Future<void> onCalendarMount() async {
     context.loaderOverlay.show();
+    try {
+      var r = await Requests.post(globel.serverIp + 'getDefaultRoute');
 
-    var r = await Requests.post(globel.serverIp + 'getDefaultRoute');
+      r.raiseForStatus();
+      dynamic json = r.json();
 
-    r.raiseForStatus();
-    dynamic json = r.json();
-
-    if (json['success'] == true) {
-      setState(() {
-        defaultRoute = json['default_route'];
-        defaultRouteName = json['default_route_name'];
-      });
-    } else {
-      if (globel.userType != "student")
-        defaultRoute = "4";
-      else {
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
         Fluttertoast.showToast(
-            msg: 'Failed to load default route.',
+            msg: 'Not authenticated / authorised.',
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.CENTER,
             timeInSecForIosWeb: 1,
-            backgroundColor: Color.fromARGB(73, 77, 65, 64),
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
             textColor: Colors.white,
             fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
       }
+
+      if (json['success'] == true) {
+        setState(() {
+          defaultRoute = json['default_route'];
+          defaultRouteName = json['default_route_name'];
+        });
+      } else {
+        if (globel.userType != "student")
+          defaultRoute = "4";
+        else {
+          Fluttertoast.showToast(
+              msg: 'Failed to load default route.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(73, 77, 65, 64),
+              textColor: Colors.white,
+              fontSize: 16.0);
+        }
+      }
+      //print(r.content());
+
+      for (int i = 0; i < globel.routeIDs.length; i++) {
+        if (globel.routeIDs[i] == globel.userDefaultRouteId) {
+          selectedRouteId = globel.routeIDs[i];
+          selectedRouteName = globel.routeNames[i];
+        }
+      }
+
+      var r2 = await Requests.post(globel.serverIp + 'getStations');
+      r2.raiseForStatus();
+      if (r2.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
+      }
+      List<dynamic> json2 = r2.json();
+      setState(() {
+        //clear the lists
+        station_ids.clear();
+        station_names.clear();
+        station_coords.clear();
+        for (int i = 0; i < json2.length; i++) {
+          // List<dynamic> arr2j = json2[i]['array_to_json'];
+          station_ids.add(json2[i]['id']);
+          station_names.add(json2[i]['name']);
+          station_coords.add(json2[i]['coords']);
+          // route_st_cnt.add(arr2j.length);
+        }
+      });
+      // station_names.forEach((element) {
+      //   print(element);
+      // });
+    } catch (err) {
+      globel.printError(err.toString());
+      setState(() {
+        context.loaderOverlay.hide();
+      });
+
+      Fluttertoast.showToast(
+          msg: 'Failed to reach server. Try again.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      GoRouter.of(context).pop();
     }
-    //print(r.content());
-
-    for (int i = 0; i < globel.routeIDs.length; i++) {
-      if (globel.routeIDs[i] == globel.userDefaultRouteId) {
-        selectedRouteId = globel.routeIDs[i];
-        selectedRouteName = globel.routeNames[i];
-      }
-    }
-
-    var r2 = await Requests.post(globel.serverIp + 'getStations');
-    r2.raiseForStatus();
-    List<dynamic> json2 = r2.json();
-    setState(() {
-      //clear the lists
-      station_ids.clear();
-      station_names.clear();
-      station_coords.clear();
-      for (int i = 0; i < json2.length; i++) {
-        // List<dynamic> arr2j = json2[i]['array_to_json'];
-        station_ids.add(json2[i]['id']);
-        station_names.add(json2[i]['name']);
-        station_coords.add(json2[i]['coords']);
-        // route_st_cnt.add(arr2j.length);
-      }
-    });
-    // station_names.forEach((element) {
-    //   print(element);
-    // });
-
     context.loaderOverlay.hide();
     await onRouteSelect(defaultRoute);
     // If the server did return a 201 CREATED response,
@@ -173,63 +220,94 @@ class _RouteTimeCalendarState extends State<RouteTimeCalendar> {
 
   Future<void> onRouteSelect(String route) async {
     context.loaderOverlay.show();
-    var r = await Requests.post(globel.serverIp + 'getRouteTimeData',
-        body: {
-          'route': route,
-        },
-        bodyEncoding: RequestBodyEncoding.FormURLEncoded);
-
-    r.raiseForStatus();
-    setState(() {
-      routeTimeData = r.json();
-      driverIDs.clear();
-      HelperIDs.clear();
-      routeTimeData.forEach((element) {
-        driverIDs.add(element['driver']);
-        HelperIDs.add(element['helper']);
-      });
-      //print(driverIDs);
-      //print(routeTimeData);
-      loadedRouteTimeData = true;
-
-      routeTimeData.forEach((j) {
-        j["array_to_json"].forEach((stop) {
-          // routeCoords.add(station_coords[int.parse(stop['station']) - 1]);
-          stop['coord'] = station_coords[station_ids.indexOf(stop['station'])];
-        });
-      });
-
-      // in global , we have List<dynamic> driverHelpers , now using the driver and helper id , we will search driverhelpers and fetch them to lists here
-      if (globel.userType == "buet_staff") {
-        driverNames.clear();
-        HelperNames.clear();
-        globel.driverHelpers.forEach(
-          (element) => {
-            driverIDs.forEach((driverid) {
-              if (element['id'] == driverid) {
-                driverNames.add(element['name']);
-                driverPhones.add(element['phone']);
-              }
-            }),
-            HelperIDs.forEach((helperID) {
-              if (element['id'] == helperID) {
-                HelperNames.add(element['name']);
-                HelperPhones.add(element['phone']);
-              }
-            })
+    try {
+      var r = await Requests.post(globel.serverIp + 'getRouteTimeData',
+          body: {
+            'route': route,
           },
-        );
-        print(HelperNames);
-        print(HelperPhones);
-      } else {
-        driverNames = List.filled(routeTimeData.length, "(Not found)");
-        driverPhones = List.filled(routeTimeData.length, "(Not found)");
-        HelperNames = List.filled(routeTimeData.length, "(Not found)");
-        HelperPhones = List.filled(routeTimeData.length, "(Not found)");
-      }
-      setDateInit();
-    });
+          bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
+      r.raiseForStatus();
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
+      }
+      setState(() {
+        routeTimeData = r.json();
+        driverIDs.clear();
+        HelperIDs.clear();
+        routeTimeData.forEach((element) {
+          driverIDs.add(element['driver']);
+          HelperIDs.add(element['helper']);
+        });
+        //print(driverIDs);
+        //print(routeTimeData);
+        loadedRouteTimeData = true;
+
+        routeTimeData.forEach((j) {
+          j["array_to_json"].forEach((stop) {
+            // routeCoords.add(station_coords[int.parse(stop['station']) - 1]);
+            stop['coord'] =
+                station_coords[station_ids.indexOf(stop['station'])];
+          });
+        });
+
+        // in global , we have List<dynamic> driverHelpers , now using the driver and helper id , we will search driverhelpers and fetch them to lists here
+        if (globel.userType == "buet_staff") {
+          driverNames.clear();
+          HelperNames.clear();
+          globel.driverHelpers.forEach(
+            (element) => {
+              driverIDs.forEach((driverid) {
+                if (element['id'] == driverid) {
+                  driverNames.add(element['name']);
+                  driverPhones.add(element['phone']);
+                }
+              }),
+              HelperIDs.forEach((helperID) {
+                if (element['id'] == helperID) {
+                  HelperNames.add(element['name']);
+                  HelperPhones.add(element['phone']);
+                }
+              })
+            },
+          );
+          print(HelperNames);
+          print(HelperPhones);
+        } else {
+          driverNames = List.filled(routeTimeData.length, "(Not found)");
+          driverPhones = List.filled(routeTimeData.length, "(Not found)");
+          HelperNames = List.filled(routeTimeData.length, "(Not found)");
+          HelperPhones = List.filled(routeTimeData.length, "(Not found)");
+        }
+        setDateInit();
+      });
+    } catch (err) {
+      globel.printError(err.toString());
+      setState(() {
+        context.loaderOverlay.hide();
+      });
+
+      Fluttertoast.showToast(
+          msg: 'Failed to reach server. Try again.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
     context.loaderOverlay.hide();
   }
 

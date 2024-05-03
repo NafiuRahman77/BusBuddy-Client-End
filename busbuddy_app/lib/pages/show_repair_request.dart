@@ -1,5 +1,6 @@
 import 'package:busbuddy_app/components/RepairCollapsibleCard.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../components/CollapsibleCard.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:requests/requests.dart';
@@ -31,6 +32,21 @@ class _ShowRepairState extends State<ShowRepair> {
 
     var r = await Requests.post(globel.serverIp + 'getRepairRequests');
     r.raiseForStatus();
+    if (r.statusCode == 401) {
+      await Requests.clearStoredCookies(globel.serverAddr);
+      globel.clearAll();
+      Fluttertoast.showToast(
+          msg: 'Not authenticated / authorised.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(71, 211, 59, 45),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      context.loaderOverlay.hide();
+      GoRouter.of(context).go("/login");
+      return;
+    }
     print("receiving ? ");
     print(r.content());
     print("done ?");

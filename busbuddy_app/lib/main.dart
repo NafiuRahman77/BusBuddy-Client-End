@@ -918,24 +918,38 @@ class HomeViewState extends State<HomeView> {
                           selected: false,
                           onTap: () async {
                             context.loaderOverlay.show();
-                            var r1 =
-                                await Requests.post(globel.serverIp + 'logout');
-                            r1.raiseForStatus();
-                            dynamic json1 = r1.json();
-                            if (json1['success']) {
-                              await Requests.clearStoredCookies(
-                                  globel.serverAddr);
-                              globel.clearAll();
-                              Fluttertoast.showToast(
-                                  msg: 'Logged out.',
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.BOTTOM,
-                                  timeInSecForIosWeb: 1,
-                                  backgroundColor:
-                                      Color.fromARGB(73, 77, 65, 64),
-                                  textColor: Colors.white,
-                                  fontSize: 16.0);
-                            } else {
+                            try {
+                              var r1 = await Requests.post(
+                                  globel.serverIp + 'logout');
+                              r1.raiseForStatus();
+                              dynamic json1 = r1.json();
+                              if (r1.statusCode == 401) {
+                                await Requests.clearStoredCookies(
+                                    globel.serverAddr);
+                                globel.clearAll();
+                                Fluttertoast.showToast(
+                                    msg: 'Logged out.',
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 1,
+                                    backgroundColor:
+                                        Color.fromARGB(73, 77, 65, 64),
+                                    textColor: Colors.white,
+                                    fontSize: 16.0);
+                              } else {
+                                Fluttertoast.showToast(
+                                    msg:
+                                        'Something went wrong. Please restart the app.',
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 1,
+                                    backgroundColor:
+                                        Color.fromARGB(72, 243, 85, 71),
+                                    textColor: Colors.white,
+                                    fontSize: 16.0);
+                              }
+                            } catch (err) {
+                              globel.printError("Error: " + err.toString());
                               Fluttertoast.showToast(
                                   msg:
                                       'Something went wrong. Please restart the app.',
@@ -946,6 +960,8 @@ class HomeViewState extends State<HomeView> {
                                       Color.fromARGB(73, 77, 65, 64),
                                   textColor: Colors.white,
                                   fontSize: 16.0);
+                              context.loaderOverlay.hide();
+                              GoRouter.of(context).go("/login");
                             }
                             context.loaderOverlay.hide();
                             GoRouter.of(context).go("/login");

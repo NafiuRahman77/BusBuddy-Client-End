@@ -216,39 +216,70 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
 
   Future<void> scanTicket() async {
     context.loaderOverlay.show();
-    var r = await Requests.post(globel.serverIp + 'staffScanTicket',
-        body: {
-          'ticket_id': ticket_id,
-        },
-        bodyEncoding: RequestBodyEncoding.JSON);
+    try {
+      var r = await Requests.post(globel.serverIp + 'staffScanTicket',
+          body: {
+            'ticket_id': ticket_id,
+          },
+          bodyEncoding: RequestBodyEncoding.JSON);
 
-    r.raiseForStatus();
-    dynamic json = r.json();
+      r.raiseForStatus();
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
+      }
+      dynamic json = r.json();
 
-    if (json['success'] == true) {
-      Fluttertoast.showToast(
-          msg:
-              'Ticket from Student#${json['student_id']} Scanned Successfully.',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(118, 76, 175, 80),
-          textColor: Colors.white,
-          fontSize: 16.0);
+      if (json['success'] == true) {
+        Fluttertoast.showToast(
+            msg:
+                'Ticket from Student#${json['student_id']} Scanned Successfully.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(118, 76, 175, 80),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        setState(() {
+          passenger_count = json['passenger_count'].toString();
+        });
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Failed to load data.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(118, 244, 67, 54),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+      print(ticket_id);
+    } catch (err) {
+      globel.printError(err.toString());
       setState(() {
-        passenger_count = json['passenger_count'].toString();
+        context.loaderOverlay.hide();
       });
-    } else {
+
       Fluttertoast.showToast(
-          msg: 'Failed to load data.',
+          msg: 'Failed to reach server. Try again.',
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(118, 244, 67, 54),
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
           textColor: Colors.white,
           fontSize: 16.0);
     }
-    print(ticket_id);
     context.loaderOverlay.hide();
   }
 
@@ -275,29 +306,61 @@ class _ScanTicketQRState extends State<ScanTicketQR> {
 
   Future<void> onQrScannerMount() async {
     context.loaderOverlay.show();
-    var r4 = await Requests.post(globel.serverIp + 'checkStaffRunningTrip');
-    print("hello bus stff");
-    r4.raiseForStatus();
-    dynamic rt = r4.json();
-    if (rt['success']) {
-      globel.runningTripId = rt['id'];
+    try {
+      var r4 = await Requests.post(globel.serverIp + 'checkStaffRunningTrip');
+      print("hello bus stff");
+      r4.raiseForStatus();
+      if (r4.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
+      }
+      dynamic rt = r4.json();
+      if (rt['success']) {
+        globel.runningTripId = rt['id'];
+        setState(() {
+          passenger_count = rt['passenger_count'].toString();
+        });
+        context.loaderOverlay.hide();
+        return;
+      } else {
+        GoRouter.of(context).go('/show_profile');
+        Fluttertoast.showToast(
+            msg: 'Please start a trip first.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(118, 185, 26, 5),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        return;
+      }
+    } catch (err) {
+      globel.printError(err.toString());
       setState(() {
-        passenger_count = rt['passenger_count'].toString();
+        context.loaderOverlay.hide();
       });
-      context.loaderOverlay.hide();
-      return;
-    } else {
-      GoRouter.of(context).go('/show_profile');
+
       Fluttertoast.showToast(
-          msg: 'Please start a trip first.',
+          msg: 'Failed to reach server. Try again.',
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(118, 185, 26, 5),
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
           textColor: Colors.white,
           fontSize: 16.0);
-      context.loaderOverlay.hide();
-      return;
+      GoRouter.of(context).pop();
     }
   }
 }

@@ -167,7 +167,21 @@ class _TripCardState extends State<TripCard>
 
     dynamic json2 = r2.json();
     //print(json2);
-
+    if (r2.statusCode == 401) {
+      await Requests.clearStoredCookies(globel.serverAddr);
+      globel.clearAll();
+      Fluttertoast.showToast(
+          msg: 'Not authenticated / authorised.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(71, 211, 59, 45),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      context.loaderOverlay.hide();
+      GoRouter.of(context).go("/login");
+      return false;
+    }
     if (json2['success'] == true) {
       // Start the timer for location updates
 
@@ -197,7 +211,21 @@ class _TripCardState extends State<TripCard>
 
     dynamic json2 = r2.json();
     print(json2);
-
+    if (r2.statusCode == 401) {
+      await Requests.clearStoredCookies(globel.serverAddr);
+      globel.clearAll();
+      Fluttertoast.showToast(
+          msg: 'Not authenticated / authorised.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(71, 211, 59, 45),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      context.loaderOverlay.hide();
+      GoRouter.of(context).go("/login");
+      return false;
+    }
     if (json2['success'] == true) {
       await globel.positionStream?.cancel();
       // context.loaderOverlay.hide();
@@ -431,6 +459,25 @@ class _TripCardState extends State<TripCard>
                                                 .FormURLEncoded);
 
                                         r2.raiseForStatus();
+                                        dynamic json = r2.json();
+                                        if (r2.statusCode == 401) {
+                                          await Requests.clearStoredCookies(
+                                              globel.serverAddr);
+                                          globel.clearAll();
+                                          Fluttertoast.showToast(
+                                              msg:
+                                                  'Not authenticated / authorised.',
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.CENTER,
+                                              timeInSecForIosWeb: 1,
+                                              backgroundColor: Color.fromARGB(
+                                                  71, 211, 59, 45),
+                                              textColor: Colors.white,
+                                              fontSize: 16.0);
+                                          context.loaderOverlay.hide();
+                                          GoRouter.of(context).go("/login");
+                                          return;
+                                        }
                                       }
                                     });
                                     widget.parentTabController();

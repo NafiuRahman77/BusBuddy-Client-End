@@ -46,72 +46,130 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<void> onRouteSelect(String route) async {
     context.loaderOverlay.show();
-    var r2 = await Requests.post(globel.serverIp + 'getRouteStations',
-        body: {
-          'route': route,
-        },
-        bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+    try {
+      var r2 = await Requests.post(globel.serverIp + 'getRouteStations',
+          body: {
+            'route': route,
+          },
+          bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
-    r2.raiseForStatus();
-
-    List<dynamic> json2 = r2.json();
-    //print(json2);
-    setState(() {
-      for (int i = 0; i < json2.length; i++) {
-        station_ids.add(json2[i]['id']);
-        station_names.add(json2[i]['name']);
-        if (json2[i]['id'] == defaultStation) {
-          selectedStationId = station_ids[i];
-          selectedStationOption = station_names[i];
-        }
+      r2.raiseForStatus();
+      if (r2.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
       }
-    });
+
+      List<dynamic> json2 = r2.json();
+      //print(json2);
+      setState(() {
+        for (int i = 0; i < json2.length; i++) {
+          station_ids.add(json2[i]['id']);
+          station_names.add(json2[i]['name']);
+          if (json2[i]['id'] == defaultStation) {
+            selectedStationId = station_ids[i];
+            selectedStationOption = station_names[i];
+          }
+        }
+      });
+    } catch (err) {
+      globel.printError(err.toString());
+      context.loaderOverlay.hide();
+      Fluttertoast.showToast(
+          msg: 'Failed to reach server. Try again.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      // GoRouter.of(context).pop();
+    }
     context.loaderOverlay.hide();
   }
 
   Future<void> onProfileMount() async {
     context.loaderOverlay.show();
-    var r = await Requests.post(globel.serverIp + 'getProfile');
+    try {
+      var r = await Requests.post(globel.serverIp + 'getProfile');
 
-    r.raiseForStatus();
-    dynamic json = r.json();
-    //print(r.content());
+      r.raiseForStatus();
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
+      }
+      dynamic json = r.json();
+      //print(r.content());
 
-    if (json['success'] == true) {
-      setState(() {
-        if (globel.userType == "student") {
-          email = json['email'];
-          phoneNo = json['phone'];
-          defaultRoute = json['default_route'];
-          defaultRouteName = json['default_route_name'];
-          defaultStation = json['default_station'];
-          id = json['id'].toString().trim();
-        } else if (globel.userType == "bus_staff") {
-          phoneNo = json['phone'];
-          id = json['id'].toString().trim();
-        } else if (globel.userType == "buet_staff") {
-          phoneNo = json['phone'];
-          id = json['id'].toString().trim();
-          residence = json['residence'];
+      if (json['success'] == true) {
+        setState(() {
+          if (globel.userType == "student") {
+            email = json['email'];
+            phoneNo = json['phone'];
+            defaultRoute = json['default_route'];
+            defaultRouteName = json['default_route_name'];
+            defaultStation = json['default_station'];
+            id = json['id'].toString().trim();
+          } else if (globel.userType == "bus_staff") {
+            phoneNo = json['phone'];
+            id = json['id'].toString().trim();
+          } else if (globel.userType == "buet_staff") {
+            phoneNo = json['phone'];
+            id = json['id'].toString().trim();
+            residence = json['residence'];
+          }
+        });
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Failed to load data.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(136, 244, 67, 54),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+      //print(r.content());
+
+      for (int i = 0; i < globel.routeIDs.length; i++) {
+        if (globel.routeIDs[i] == globel.userDefaultRouteId) {
+          selectedId = globel.routeIDs[i];
+          selectedOption = globel.routeNames[i];
         }
-      });
-    } else {
+      }
+    } catch (err) {
+      globel.printError(err.toString());
+      context.loaderOverlay.hide();
       Fluttertoast.showToast(
-          msg: 'Failed to load data.',
+          msg: 'Failed to reach server. Try again.',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(136, 244, 67, 54),
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
           textColor: Colors.white,
           fontSize: 16.0);
-    }
-    //print(r.content());
-
-    for (int i = 0; i < globel.routeIDs.length; i++) {
-      if (globel.routeIDs[i] == globel.userDefaultRouteId) {
-        selectedId = globel.routeIDs[i];
-        selectedOption = globel.routeNames[i];
-      }
+      GoRouter.of(context).pop();
     }
     context.loaderOverlay.hide();
     onRouteSelect(defaultRoute);
@@ -120,136 +178,194 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> editProfile(String def_route, String mail, String phn_no,
       String stn, String resdnc) async {
     context.loaderOverlay.show();
-    print("hello");
-    if (def_route.isEmpty) def_route = defaultRoute;
-    if (stn.isEmpty) stn = defaultStation;
-    if (mail.isEmpty) mail = email;
-    if (phn_no.isEmpty) phn_no = phoneNo;
-    if (resdnc.isEmpty) resdnc = residence;
+    try {
+      print("hello");
+      if (def_route.isEmpty) def_route = defaultRoute;
+      if (stn.isEmpty) stn = defaultStation;
+      if (mail.isEmpty) mail = email;
+      if (phn_no.isEmpty) phn_no = phoneNo;
+      if (resdnc.isEmpty) resdnc = residence;
 
-    if (globel.userType == "student") {
-      dynamic json;
-      print("as stdnt");
-      print(phn_no + " " + mail + " " + def_route + " " + stn + " " + id);
-      var r = await Requests.post(globel.serverIp + 'updateProfile',
-          body: {
-            'phone': phn_no,
-            'email': mail,
-            'default_route': def_route,
-            'default_station': stn,
-            'id': id,
-          },
-          bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+      if (globel.userType == "student") {
+        dynamic json;
+        print("as stdnt");
+        print(phn_no + " " + mail + " " + def_route + " " + stn + " " + id);
+        var r = await Requests.post(globel.serverIp + 'updateProfile',
+            body: {
+              'phone': phn_no,
+              'email': mail,
+              'default_route': def_route,
+              'default_station': stn,
+              'id': id,
+            },
+            bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
-      r.raiseForStatus();
-      json = r.json();
+        r.raiseForStatus();
+        if (r.statusCode == 401) {
+          await Requests.clearStoredCookies(globel.serverAddr);
+          globel.clearAll();
+          Fluttertoast.showToast(
+              msg: 'Not authenticated / authorised.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(71, 211, 59, 45),
+              textColor: Colors.white,
+              fontSize: 16.0);
+          context.loaderOverlay.hide();
+          GoRouter.of(context).go("/login");
+          return;
+        }
+        json = r.json();
 
-      print(r.content());
+        print(r.content());
 
-      if (json['success'] == true) {
-        Fluttertoast.showToast(
-            msg: 'Saved changes successfully.',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Color.fromARGB(131, 71, 62, 62),
-            textColor: Colors.white,
-            fontSize: 16.0);
-      } else {
-        Fluttertoast.showToast(
-            msg: 'Failed to load data.',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Color.fromARGB(97, 212, 33, 21),
-            textColor: Colors.white,
-            fontSize: 16.0);
+        if (json['success'] == true) {
+          Fluttertoast.showToast(
+              msg: 'Saved changes successfully.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(131, 71, 62, 62),
+              textColor: Colors.white,
+              fontSize: 16.0);
+        } else {
+          Fluttertoast.showToast(
+              msg: 'Failed to load data.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(97, 212, 33, 21),
+              textColor: Colors.white,
+              fontSize: 16.0);
+        }
       }
-    }
-    if (globel.userType == "bus_staff") {
-      print("as staff");
-      print(phn_no + " " + id);
-      dynamic json;
-      var r = await Requests.post(globel.serverIp + 'updateProfile',
-          body: {
-            'phone': phn_no,
-            'id': id,
-          },
-          bodyEncoding: RequestBodyEncoding.FormURLEncoded);
-      r.raiseForStatus();
-      json = r.json();
-      if (json['success'] == true) {
-        Fluttertoast.showToast(
-            msg: 'Saved changes successfully.',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Color.fromARGB(131, 71, 62, 62),
-            textColor: Colors.white,
-            fontSize: 16.0);
-      } else {
-        Fluttertoast.showToast(
-            msg: 'Failed to load data.',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Color.fromARGB(97, 212, 33, 21),
-            textColor: Colors.white,
-            fontSize: 16.0);
+      if (globel.userType == "bus_staff") {
+        print("as staff");
+        print(phn_no + " " + id);
+        dynamic json;
+        var r = await Requests.post(globel.serverIp + 'updateProfile',
+            body: {
+              'phone': phn_no,
+              'id': id,
+            },
+            bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+        r.raiseForStatus();
+        if (r.statusCode == 401) {
+          await Requests.clearStoredCookies(globel.serverAddr);
+          globel.clearAll();
+          Fluttertoast.showToast(
+              msg: 'Not authenticated / authorised.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(71, 211, 59, 45),
+              textColor: Colors.white,
+              fontSize: 16.0);
+          context.loaderOverlay.hide();
+          GoRouter.of(context).go("/login");
+          return;
+        }
+        json = r.json();
+        if (json['success'] == true) {
+          Fluttertoast.showToast(
+              msg: 'Saved changes successfully.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(131, 71, 62, 62),
+              textColor: Colors.white,
+              fontSize: 16.0);
+        } else {
+          Fluttertoast.showToast(
+              msg: 'Failed to load data.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(97, 212, 33, 21),
+              textColor: Colors.white,
+              fontSize: 16.0);
+        }
       }
-    }
-    if (globel.userType == "buet_staff") {
-      print("as fclty");
-      dynamic json;
-      var r = await Requests.post(globel.serverIp + 'updateProfile',
-          body: {
-            'phone': phn_no,
-            'residence': resdnc,
-            'id': id,
-          },
-          bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+      if (globel.userType == "buet_staff") {
+        print("as fclty");
+        dynamic json;
+        var r = await Requests.post(globel.serverIp + 'updateProfile',
+            body: {
+              'phone': phn_no,
+              'residence': resdnc,
+              'id': id,
+            },
+            bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
-      r.raiseForStatus();
-      json = r.json();
-      if (json['success'] == true) {
-        Fluttertoast.showToast(
-            msg: 'Saved changes successfully.',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Color.fromARGB(131, 71, 62, 62),
-            textColor: Colors.white,
-            fontSize: 16.0);
-      } else {
-        Fluttertoast.showToast(
-            msg: 'Failed to load data.',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Color.fromARGB(97, 212, 33, 21),
-            textColor: Colors.white,
-            fontSize: 16.0);
+        r.raiseForStatus();
+        if (r.statusCode == 401) {
+          await Requests.clearStoredCookies(globel.serverAddr);
+          globel.clearAll();
+          Fluttertoast.showToast(
+              msg: 'Not authenticated / authorised.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(71, 211, 59, 45),
+              textColor: Colors.white,
+              fontSize: 16.0);
+          context.loaderOverlay.hide();
+          GoRouter.of(context).go("/login");
+          return;
+        }
+        json = r.json();
+        if (json['success'] == true) {
+          Fluttertoast.showToast(
+              msg: 'Saved changes successfully.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(131, 71, 62, 62),
+              textColor: Colors.white,
+              fontSize: 16.0);
+        } else {
+          Fluttertoast.showToast(
+              msg: 'Failed to load data.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(97, 212, 33, 21),
+              textColor: Colors.white,
+              fontSize: 16.0);
+        }
       }
-    }
 
-    print("in the end of edit profile");
-    if (globel.userType == "student") {
-      globel.userEmail = mail;
-      globel.userPhone = phn_no;
-      globel.userDefaultRouteId = def_route;
-      globel.userDefaultStationId = stn;
-      globel.userDefaultRouteName =
-          globel.routeNames[globel.routeIDs.indexOf(def_route)];
-      globel.userDefaultStationName = station_names[station_ids.indexOf(stn)];
+      print("in the end of edit profile");
+      if (globel.userType == "student") {
+        globel.userEmail = mail;
+        globel.userPhone = phn_no;
+        globel.userDefaultRouteId = def_route;
+        globel.userDefaultStationId = stn;
+        globel.userDefaultRouteName =
+            globel.routeNames[globel.routeIDs.indexOf(def_route)];
+        globel.userDefaultStationName = station_names[station_ids.indexOf(stn)];
+      }
+      if (globel.userType == "bus_staff") {
+        globel.userPhone = phn_no;
+      }
+      if (globel.userType == "buet_staff") {
+        globel.userPhone = phn_no;
+        globel.teacherResidence = resdnc;
+      }
+    } catch (err) {
+      globel.printError(err.toString());
+      context.loaderOverlay.hide();
+      Fluttertoast.showToast(
+          msg: 'Failed to reach server. Try again.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      // GoRouter.of(context).pop();
     }
-    if (globel.userType == "bus_staff") {
-      globel.userPhone = phn_no;
-    }
-    if (globel.userType == "buet_staff") {
-      globel.userPhone = phn_no;
-      globel.teacherResidence = resdnc;
-    }
-
     context.loaderOverlay.hide();
   }
 

@@ -32,6 +32,21 @@ class _ReqRepairState extends State<ReqRepair> {
 
     var r1 = await Requests.post(globel.serverIp + 'getBusList');
     r1.raiseForStatus();
+    if (r1.statusCode == 401) {
+      await Requests.clearStoredCookies(globel.serverAddr);
+      globel.clearAll();
+      Fluttertoast.showToast(
+          msg: 'Not authenticated / authorised.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(71, 211, 59, 45),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      context.loaderOverlay.hide();
+      GoRouter.of(context).go("/login");
+      return;
+    }
     List<dynamic> d = r1.json();
     print(d);
     BusList.clear();

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../components/Req_CollapsibleCard.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:requests/requests.dart';
@@ -33,47 +34,78 @@ class _ShowRequisitionState extends State<ShowRequisition> {
 
   Future<void> getFeedbackInfo() async {
     context.loaderOverlay.show();
-
-    var r = await Requests.post(globel.serverIp + 'getUserRequisition');
-    r.raiseForStatus();
-    print("receiving ? ");
-    print(r.content());
-    print("done ?");
-
-    List<dynamic> json = r.json();
-
-    setState(() {
-      for (int i = 0; i < json.length; i++) {
-        timeList.add(json[i]['timestamp']);
-        routeList.add(json[i]['destination']);
-        descriptionList.add(json[i]['text']);
-        reasonList.add(json[i]['subject']);
-        bustypeList.add(json[i]['bus_type']);
-        if (json[i]['approved_by'] != null)
-          approvedList.add(json[i]['approved_by']);
-        else
-          approvedList.add('');
-        sourceList.add(json[i]['source']);
-        if (json[i]['remarks'] == null)
-          responseList.add('');
-        else
-          responseList.add(json[i]['remarks']);
-        if (json[i]['is_approved'] == null)
-          isApproved.add('');
-        else
-          isApproved
-              .add(json[i]['is_approved'] == true ? 'Approved' : 'Rejected');
-        if (json[i]['driver'] == null) {
-          approvedDrivers.add('');
-          approvedHelpers.add('');
-          approvedBus.add('');
-        } else {
-          approvedDrivers.add(json[i]['driver']);
-          approvedHelpers.add(json[i]['helper']);
-          approvedBus.add(json[i]['bus']);
-        }
+    try {
+      var r = await Requests.post(globel.serverIp + 'getUserRequisition');
+      r.raiseForStatus();
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
       }
-    });
+      print("receiving ? ");
+      print(r.content());
+      print("done ?");
+
+      List<dynamic> json = r.json();
+
+      setState(() {
+        for (int i = 0; i < json.length; i++) {
+          timeList.add(json[i]['timestamp']);
+          routeList.add(json[i]['destination']);
+          descriptionList.add(json[i]['text']);
+          reasonList.add(json[i]['subject']);
+          bustypeList.add(json[i]['bus_type']);
+          if (json[i]['approved_by'] != null)
+            approvedList.add(json[i]['approved_by']);
+          else
+            approvedList.add('');
+          sourceList.add(json[i]['source']);
+          if (json[i]['remarks'] == null)
+            responseList.add('');
+          else
+            responseList.add(json[i]['remarks']);
+          if (json[i]['is_approved'] == null)
+            isApproved.add('');
+          else
+            isApproved
+                .add(json[i]['is_approved'] == true ? 'Approved' : 'Rejected');
+          if (json[i]['driver'] == null) {
+            approvedDrivers.add('');
+            approvedHelpers.add('');
+            approvedBus.add('');
+          } else {
+            approvedDrivers.add(json[i]['driver']);
+            approvedHelpers.add(json[i]['helper']);
+            approvedBus.add(json[i]['bus']);
+          }
+        }
+      });
+    } catch (err) {
+      globel.printError(err.toString());
+      setState(() {
+        context.loaderOverlay.hide();
+      });
+
+      Fluttertoast.showToast(
+          msg: 'Failed to reach server. Try again.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      GoRouter.of(context).pop();
+    }
     context.loaderOverlay.hide();
   }
 

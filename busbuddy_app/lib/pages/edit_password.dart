@@ -151,44 +151,71 @@ class _EditPasswordPageState extends State<EditPasswordPage> {
       return;
     }
 
-    var r = await Requests.post(globel.serverIp + 'updatePassword',
-        body: {
-          'old': oldPassword,
-          'new': newPassword,
-        },
-        bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+    try {
+      var r = await Requests.post(globel.serverIp + 'updatePassword',
+          body: {
+            'old': oldPassword,
+            'new': newPassword,
+          },
+          bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
-    r.raiseForStatus();
-    dynamic json = r.json();
+      r.raiseForStatus();
+      dynamic json = r.json();
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
+      }
+      if (json['success'] == true) {
+        // Show fluttertoast
+        Fluttertoast.showToast(
+            msg: "Password updated successfully",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0);
+        GoRouter.of(context).replace("/show_profile");
+        context.loaderOverlay.hide();
+      } else {
+        // Show fluttertoast
+        Fluttertoast.showToast(
+            msg: "Password update failed",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        return;
+      }
 
-    if (json['success'] == true) {
-      // Show fluttertoast
+      // print('Old Password: $oldPassword');
+      // print('New Password: $newPassword');
+      // print('Confirm Password: $confirmPassword');
+    } catch (err) {
+      globel.printError(err.toString());
+      context.loaderOverlay.hide();
       Fluttertoast.showToast(
-          msg: "Password updated successfully",
+          msg: 'Failed to reach server. Try again.',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
-          backgroundColor: Colors.green,
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
           textColor: Colors.white,
           fontSize: 16.0);
-      GoRouter.of(context).replace("/show_profile");
-      context.loaderOverlay.hide();
-    } else {
-      // Show fluttertoast
-      Fluttertoast.showToast(
-          msg: "Password update failed",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
-      context.loaderOverlay.hide();
-      return;
     }
-
-    print('Old Password: $oldPassword');
-    print('New Password: $newPassword');
-    print('Confirm Password: $confirmPassword');
   }
 }

@@ -46,41 +46,68 @@ class _FeedbackFormState extends State<FeedbackForm> {
 
   Future<void> onCalendarMount() async {
     context.loaderOverlay.show();
-    globel.printWarning("hello");
-    print(globel.routeNames);
-    var r = await Requests.post(globel.serverIp + 'getDefaultRoute');
+    try {
+      globel.printWarning("hello");
+      print(globel.routeNames);
+      var r = await Requests.post(globel.serverIp + 'getDefaultRoute');
 
-    r.raiseForStatus();
-    dynamic json = r.json();
-
-    if (json['success'] == true) {
-      setState(() {
-        defaultRoute = json['default_route'];
-        defaultRouteName = json['default_route_name'];
-      });
-    } else {
-      if (globel.userType != "student") {
-        defaultRoute = "4";
-      } else {
+      r.raiseForStatus();
+      dynamic json = r.json();
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
         Fluttertoast.showToast(
-            msg: 'Failed to load default route.',
+            msg: 'Not authenticated / authorised.',
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.CENTER,
             timeInSecForIosWeb: 1,
-            backgroundColor: Color.fromARGB(73, 77, 65, 64),
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
             textColor: Colors.white,
             fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return;
       }
-    }
-    print(r.content());
-
-    for (int i = 0; i < globel.routeIDs.length; i++) {
-      if (globel.routeIDs[i] == globel.userDefaultRouteId) {
-        selectedRouteId = globel.routeIDs[i];
-        selectedRouteName = globel.routeNames[i];
+      if (json['success'] == true) {
+        setState(() {
+          defaultRoute = json['default_route'];
+          defaultRouteName = json['default_route_name'];
+        });
+      } else {
+        if (globel.userType != "student") {
+          defaultRoute = "4";
+        } else {
+          Fluttertoast.showToast(
+              msg: 'Failed to load default route.',
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color.fromARGB(73, 77, 65, 64),
+              textColor: Colors.white,
+              fontSize: 16.0);
+        }
       }
-    }
+      print(r.content());
 
+      for (int i = 0; i < globel.routeIDs.length; i++) {
+        if (globel.routeIDs[i] == globel.userDefaultRouteId) {
+          selectedRouteId = globel.routeIDs[i];
+          selectedRouteName = globel.routeNames[i];
+        }
+      }
+    } catch (err) {
+      globel.printError(err.toString());
+      context.loaderOverlay.hide();
+      Fluttertoast.showToast(
+          msg: 'Failed to reach server. Try again.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
+          textColor: Colors.white,
+          fontSize: 16.0);
+      GoRouter.of(context).pop();
+    }
     // If the server did return a 201 CREATED response,
     // then parse the JSON.
     //print('bb: ${jsonDecode(response.body)['email']}');
@@ -158,53 +185,80 @@ class _FeedbackFormState extends State<FeedbackForm> {
       context.loaderOverlay.hide();
       return false;
     }
+    try {
+      var r = await Requests.post(globel.serverIp + 'addFeedback',
+          body: {
+            'route': selectedRouteId,
+            'submission_timestamp': DateTime.now().toIso8601String(),
+            'timestamp': timestampStr,
+            //  'shift': selectedShift, // JALAL ETA BACKEND E ADD KORO
+            'text': feedbackController.text,
+            'subject': jsonEncode(selectedSubject),
+          },
+          bodyEncoding: RequestBodyEncoding.FormURLEncoded);
 
-    var r = await Requests.post(globel.serverIp + 'addFeedback',
-        body: {
-          'route': selectedRouteId,
-          'submission_timestamp': DateTime.now().toIso8601String(),
-          'timestamp': timestampStr,
-          //  'shift': selectedShift, // JALAL ETA BACKEND E ADD KORO
-          'text': feedbackController.text,
-          'subject': jsonEncode(selectedSubject),
-        },
-        bodyEncoding: RequestBodyEncoding.FormURLEncoded);
+      r.raiseForStatus();
+      dynamic json = r.json();
+      if (r.statusCode == 401) {
+        await Requests.clearStoredCookies(globel.serverAddr);
+        globel.clearAll();
+        Fluttertoast.showToast(
+            msg: 'Not authenticated / authorised.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(71, 211, 59, 45),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        context.loaderOverlay.hide();
+        GoRouter.of(context).go("/login");
+        return false;
+      }
+      print(r.content());
 
-    r.raiseForStatus();
-    dynamic json = r.json();
+      // If the server did return a 201 CREATED response,
+      // then parse the JSON.
+      //print('bb: ${jsonDecode(response.body)['email']}');
+      if (json['success'] == true) {
+        Fluttertoast.showToast(
+            msg: 'Feedback submitted.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(131, 71, 62, 62),
+            textColor: Colors.white,
+            fontSize: 16.0);
+        setState(() {
+          // email = json['email'];
+          // phoneNo = json['phone'];
+          // defaultRoute = json['default_route'];
 
-    print(r.content());
-
-    // If the server did return a 201 CREATED response,
-    // then parse the JSON.
-    //print('bb: ${jsonDecode(response.body)['email']}');
-    if (json['success'] == true) {
-      Fluttertoast.showToast(
-          msg: 'Feedback submitted.',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(131, 71, 62, 62),
-          textColor: Colors.white,
-          fontSize: 16.0);
-      setState(() {
-        // email = json['email'];
-        // phoneNo = json['phone'];
-        // defaultRoute = json['default_route'];
-
-        // id = json['id'];
-      });
+          // id = json['id'];
+        });
+        context.loaderOverlay.hide();
+        return true;
+      } else {
+        Fluttertoast.showToast(
+            msg: 'Error: Feedback not received by server.',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color.fromARGB(97, 212, 33, 21),
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    } catch (err) {
+      globel.printError(err.toString());
       context.loaderOverlay.hide();
-      return true;
-    } else {
       Fluttertoast.showToast(
-          msg: 'Error: Feedback not received by server.',
+          msg: 'Failed to reach server. Try again.',
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
+          gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
-          backgroundColor: Color.fromARGB(97, 212, 33, 21),
+          backgroundColor: Color.fromARGB(209, 194, 16, 0),
           textColor: Colors.white,
           fontSize: 16.0);
+      // GoRouter.of(context).pop();
     }
     context.loaderOverlay.hide();
     return false;
