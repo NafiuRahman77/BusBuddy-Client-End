@@ -32,7 +32,7 @@ const FCM = new fcm (certPath);
 const log4js = require("log4js");
 log4js.configure({
     appenders: { 
-        busbuddy: { type: "file", filename: "busbuddy.log", maxLogSize: 100000000 },
+        busbuddy: { type: "file", filename: "log/busbuddy.log", maxLogSize: 100000000 },
         console: { type: "stdout" },
     },
     categories: { 
@@ -1629,87 +1629,56 @@ const server = app.listen(port, () => {
 
 const httpTerminator = createHttpTerminator({ server });
 
-readline.emitKeypressEvents(process.stdin);
+process.on('SIGINT', async () => {
+    consoleLogger.info("\n\nInitiating Server Shutdown\n");
+    await httpTerminator.terminate();
+    consoleLogger.info("Connections closed, creating backups");
 
-if (process.stdin.isTTY) process.stdin.setRawMode(true);
-
-process.stdin.on('keypress', async (chunk, key) => {
-    if (key && key.name == 'b') {
-        consoleLogger.info("\n\nInitiating Server Shutdown\n");
-        await httpTerminator.terminate();
-        consoleLogger.info("Connections closed, creating backups");
-
-        let backupCount = tracking.runningTrips.size, backupDone = 0;
-        if (backupCount == 0) {
-            consoleLogger.info("\nnothing to back up");
-            process.exit();
-        } else tracking.runningTrips.forEach ((trip) => {
-            consoleLogger.info("backing up " + trip.id);
-            let timeWindowStr = "{";
-            for (let i=0; i<trip.time_window.length; i++) {
-                timeWindowStr += `"${trip.time_window[i].toISOString()}"`;
-                if (i<trip.time_window.length-1) timeWindowStr += ", ";
-            };
-            timeWindowStr += "}";
-            historyLogger.debug(timeWindowStr);
-            let pathStr = "{";
-            for (let i=0; i<trip.path.length; i++) {
-                pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
-                if (i<trip.path.length-1) pathStr += ", ";
-            };
-            pathStr += "}";
-            historyLogger.debug(pathStr);
-            let timeListStr = "{";
-            for (let i=0; i<trip.time_list.length; i++) {
-                if (trip.time_list[i].time) 
-                    timeListStr += `"(${trip.time_list[i].station}, \\\"${trip.time_list[i].time.toISOString()}\\\")"`;
-                else timeListStr += `"(${trip.time_list[i].station}, \\\"${(new Date(0)).toISOString()}\\\")"`;
-                if (i<trip.time_list.length-1) timeListStr += ",";
-            };
-            timeListStr += "}";
-            dbclient.query(
-                `update trip set passenger_count=$1, path=$2, time_list=$3, time_window=$5 where id=$4`, 
-                [trip.passenger_count, pathStr, timeListStr, trip.id, timeWindowStr]
-            ).then(qres => {
-                historyLogger.debug(qres);
-                consoleLogger.info("backed up " + trip.id);
-                tracking.runningTrips.delete(trip.id);
-                backupDone++;
-                if (backupCount == backupDone) {
-                    consoleLogger.info ("\nbackups completed");
-                    consoleLogger.info("\nbye");
-                    process.exit();
-                };
-            }).catch(e => errLogger.error(e.stack));
-        });
-
-        // while (backupDone < backupCount);
-    };
-    if (key && key.name == 'n') {
-
-        var token = 'dVj_grVZT82cpXtN9RZUEr:APA91bHjgnFIoOTDcMO4h6Ma7dXNbBQMVbEkMnjy_8rBhPyfTJQwmxASrat1UPDyc5zLoaRIOR57gMVZH9G5LyeuIjcGBmMgkNE-rCsDni_vkPh1i-0xlwzaiYeoVz3L9KxuCrluaiuV';
-        var message = {
-            // data: {    //This is only optional, you can send any data
-            //     title : 'Title of notification',
-            //     body : 'Body of notification'
-            // },
-            notification:{
-                title : 'Title of notification',
-                body : 'Body of notification'
-            },
-            android: {
-                notification: {
-                  channel_id: "busbuddy_broadcast",
-                  default_sound: true,
-                }
-            },
-            token : token
+    let backupCount = tracking.runningTrips.size, backupDone = 0;
+    if (backupCount == 0) {
+        consoleLogger.info("\nnothing to back up");
+        process.exit();
+    } else tracking.runningTrips.forEach ((trip) => {
+        consoleLogger.info("backing up " + trip.id);
+        let timeWindowStr = "{";
+        for (let i=0; i<trip.time_window.length; i++) {
+            timeWindowStr += `"${trip.time_window[i].toISOString()}"`;
+            if (i<trip.time_window.length-1) timeWindowStr += ", ";
         };
-
-        FCM.send(message, function(err, response) {
-            if (err) errLogger.error (err);
-            else historyLogger.debug (response);
+        timeWindowStr += "}";
+        historyLogger.debug(timeWindowStr);
+        let pathStr = "{";
+        for (let i=0; i<trip.path.length; i++) {
+            pathStr += `"(${trip.path[i].latitude}, ${trip.path[i].longitude})"`;
+            if (i<trip.path.length-1) pathStr += ", ";
+        };
+        pathStr += "}";
+        historyLogger.debug(pathStr);
+        let timeListStr = "{";
+        for (let i=0; i<trip.time_list.length; i++) {
+            if (trip.time_list[i].time) 
+                timeListStr += `"(${trip.time_list[i].station}, \\\"${trip.time_list[i].time.toISOString()}\\\")"`;
+            else timeListStr += `"(${trip.time_list[i].station}, \\\"${(new Date(0)).toISOString()}\\\")"`;
+            if (i<trip.time_list.length-1) timeListStr += ",";
+        };
+        timeListStr += "}";
+        dbclient.query(
+            `update trip set passenger_count=$1, path=$2, time_list=$3, time_window=$5 where id=$4`, 
+            [trip.passenger_count, pathStr, timeListStr, trip.id, timeWindowStr]
+        ).then(qres => {
+            historyLogger.debug(qres);
+            consoleLogger.info("backed up " + trip.id);
+            tracking.runningTrips.delete(trip.id);
+            backupDone++;
+            if (backupCount == backupDone) {
+                consoleLogger.info ("\nbackups completed");
+                consoleLogger.info("\nbye!");
+                process.exit(0);
+            };
+        }).catch(e => {
+            errLogger.error(e.stack);
+            process.exit(1);
         });
-    };
-    if (key && key.name == 'x') process.exit();
+    });
+
 });
