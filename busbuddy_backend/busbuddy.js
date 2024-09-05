@@ -128,7 +128,7 @@ dbclient.query(
                 historyLogger.debug (td.list_time[i]);
                 newTrip.time_list.push({
                     station: td.list_time[i].station,
-                    time: (td.list_time[i].time == "1970-01-01T06:00:00+06:00")? null : new Date(td.list_time[i].time),
+                    time: (td.list_time[i].time == "1970-01-01T00:00:00+00:00")? null : new Date(td.list_time[i].time),
                 });
             };
         } else if (td.travel_direction == "from_buet") {
@@ -136,7 +136,7 @@ dbclient.query(
                 historyLogger.debug (td.list_time[i]);
                 newTrip.time_list.push({
                     station: td.list_time[i].station,
-                    time: (td.list_time[i].time == "1970-01-01T06:00:00+06:00")? null : new Date(td.list_time[i].time),
+                    time: (td.list_time[i].time == "1970-01-01T00:00:00+00:00")? null : new Date(td.list_time[i].time),
                 });
             };
         };
@@ -388,6 +388,8 @@ app.post('/api/getProfile', (req, res) => {
                 };
             }).catch(e => errLogger.error(e.stack));
         };
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -420,6 +422,8 @@ app.post('/api/getProfileStatic', (req, res) => {
                 };
             }).catch(e => errLogger.error(e.stack));
         } else consoleLogger.info("Session not recognised.")
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -464,6 +468,8 @@ app.post('/api/updatePassword', (req, res) => {
                 };
             }).catch(e => errLogger.error(e.stack));
         } else consoleLogger.info("Session not recognised.")
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -486,6 +492,8 @@ app.post('/api/getDefaultRoute', (req, res) => {
                 });
             };
         }).catch(e => errLogger.error(e.stack));
+    } else {
+        res.sendStatus(401);
     };
 });     
 
@@ -538,42 +546,60 @@ app.post('/api/updateProfile', (req,res) => {
                 };
             }).catch(e => errLogger.error(e.stack));
         } 
+    } else {
+        res.sendStatus(401);
     };
 });
 
 app.post('/api/getRoutes', (req,res) => {
-    dbclient.query("SELECT id, terminal_point FROM route").then(qres => {
-        res.send(qres.rows);
-    }).catch(e => errLogger.error(e.stack));
-});
-
-app.post('/api/getStations', (req,res) => {
-    dbclient.query("SELECT id, name, coords FROM station").then(qres => {
-        res.send(qres.rows);
-    }).catch(e => errLogger.error(e.stack));
-});
-
-app.post('/api/getRouteStations', (req,res) => {
-    dbclient.query("SELECT id, name FROM station where id in (select unnest(points) from route where id = $1)",
-		   [ req.body.route]).then(qres => {
-        res.send(qres.rows);
-    }).catch(e => errLogger.error(e.stack));
-});
-
-app.post('/api/getBusStaffData', (req,res) => {
-    if (req.session && req.session.user_type == "buet_staff") {
-        dbclient.query("SELECT id, name, phone from bus_staff").then(qres => {
+    if (req.session.userid) {
+        dbclient.query("SELECT id, terminal_point FROM route").then(qres => {
             res.send(qres.rows);
         }).catch(e => errLogger.error(e.stack));
+    } else {
+        res.sendStatus(401);
     };
 });
 
-app.post('/api/getBusList', (req,res) => {
-    if (req.session && req.session.user_type == "bus_staff") {
+app.post('/api/getStations', (req,res) => {
+    if (req.session.userid) {
+        dbclient.query("SELECT id, name, coords FROM station").then(qres => {
+            res.send(qres.rows);
+        }).catch(e => errLogger.error(e.stack));
+    } else {
+        res.sendStatus(401);
+    };
+});
+
+app.post('/api/getRouteStations', (req,res) => {
+    if (req.session.userid) {
+        dbclient.query("SELECT id, name FROM station where id in (select unnest(points) from route where id = $1)",
+            [ req.body.route]).then(qres => {
+            res.send(qres.rows);
+        }).catch(e => errLogger.error(e.stack));
+    } else {
+        res.sendStatus(401);
+    };
+});
+
+app.post('/api/getBusStaffData', (req,res) => {
+    if (req.session.userid && req.session.user_type == "buet_staff") {
+        dbclient.query("SELECT id, name, phone from bus_staff").then(qres => {
+            res.send(qres.rows);
+        }).catch(e => errLogger.error(e.stack));
+    } else {
+        res.sendStatus(401);
+    };
+});
+
+app.post('/api/getBusList', (req,res) => {   
+    if (req.session.userid && req.session.user_type == "bus_staff") {
         dbclient.query("select distinct bus from allocation where driver=$1 or helper=$1",
         [req.session.userid]).then(qres => {
             res.send(qres.rows);
         }).catch(e => errLogger.error(e.stack));
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -616,6 +642,8 @@ app.post('/api/addFeedback', (req,res) => {
                 };
             }).catch(e => errLogger.error(e.stack));
         };
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -638,6 +666,8 @@ app.post('/api/addRequisition', (req,res) => {
                 });
             };
         }).catch(e => errLogger.error(e.stack));
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -659,6 +689,8 @@ app.post('/api/addRepairRequest', (req,res) => {
                 });
             };
         }).catch(e => errLogger.error(e.stack));
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -684,6 +716,8 @@ app.post('/api/purchaseTickets', (req,res) => {
                 };
             }).catch(e => errLogger.error(e.stack));
         }).catch(e => errLogger.error(e.stack));
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -705,6 +739,8 @@ app.post('/api/getTicketCount', (req,res) => {
                 });
             };
         }).catch(e => errLogger.error(e.stack));
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -726,6 +762,8 @@ app.post('/api/getTicketQRData', (req,res) => {
                 });
             };
         }).catch(e => errLogger.error(e.stack));
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -752,6 +790,8 @@ app.post('/api/getTicketList', (req,res) => {
                 });
             };
         }).catch(e => errLogger.error(e.stack));
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -787,6 +827,8 @@ app.post('/api/getUserFeedback', (req, res) => {
                 });
             });
         } 
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -794,8 +836,7 @@ app.post('/api/getUserRequisition', (req, res) => {
     historyLogger.debug(req.session);
     if (req.session.userid) {
         dbclient.query(
-           `
-           select r.*, a.driver, a.helper, a.bus from requisition r, allocation a 
+           `select r.*, a.driver, a.helper, a.bus from requisition r, allocation a 
            where r.requestor_id = $1 and (a.id = r.allocation_id )
            union
            select *, null as driver, null as helper, null as bus from requisition 
@@ -809,6 +850,8 @@ app.post('/api/getUserRequisition', (req, res) => {
                 success: false,
             });
         });
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -826,6 +869,8 @@ app.post('/api/getRepairRequests', (req, res) => {
                 success: false,
             });
         });
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -843,6 +888,8 @@ app.post('/api/getUserPurchaseHistory', (req, res) => {
                 success: false,
             });
         });
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -862,6 +909,8 @@ app.post('/api/getTicketUsageHistory', (req, res) => {
                 success: false,
             });
         });
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -885,6 +934,8 @@ app.post('/api/getRouteTimeData', (req, res) => {
                 success: false,
             });
         });
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -898,147 +949,72 @@ app.post('/api/getTrackingData', async (req, res) => {
         });
         historyLogger.debug(list);
         res.send(list);
+    } else {
+        res.sendStatus(401);
     };
 });
 
-// app.post('/api/sendRepairRequest', (req,res) => {
-//     
-//     consoleLogger.info(req.body);
-//     res.send({
-//         success: true,
-//     });
-// });
 
-// app.post('/api/getRepairRequest', (req,res) => {
-//     
-//     consoleLogger.info(req.body);
-//     res.send({
-//         success: true,
-//         data: [
-//             {
-//                 id: 1,
-//                 staff_id: "altaf",
-//                 item : "Engine",
-//                 item_count: "1",
-//                 problem: "Engine problem",
-//                 status: "pending",
-//                 timestamp: "2021-05-01 12:00:00"
-//             },
-//             {
-//                 id: 2,
-//                 staff_id: "altaf",
-//                 item : "Engine",
-//                 item_count: "1",
-//                 problem: "Engine problem",
-//                 status: "pending",
-//                 timestamp: "2021-05-01 12:00:00"
-//             },
-//             {
-//                 id: 3,
-//                 staff_id: "altaf",
-//                 item : "Engine",
-//                 item_count: "1",
-//                 problem: "Engine problem",
-//                 status: "pending",
-//                 timestamp: "2021-05-01 12:00:00"
-//             },
-//             {
-//                 id: 4,
-//                 staff_id: "altaf",
-//                 item : "Engine",
-//                 item_count: "1",
-//                 problem: "Engine problem",
-//                 status: "pending",
-//                 timestamp: "2021-05-01 12:00:00"
-//             },
-           
-//         ]
-//     });
-// }
-// );
 app.post('/api/getNotifications', (req,res) => {
-    let notifs = [];
-    dbclient.query(
-        `select * from broadcast_notification order by timestamp desc limit 10`
-    ).then(qres => {
-        let broadcast = [...qres.rows];
-        for (let i=0; i<broadcast.length; i++) broadcast[i].type = 'broadcast';
-        notifs = [...broadcast];
+    if (req.session.userid) {
+        let notifs = [];
         dbclient.query(
-            `select * from personal_notification where user_id=$1 order by timestamp desc limit 10`, 
-            [req.session.userid]
-        ).then(qres2 => {
-            let personal = [...qres2.rows];
-            for (let i=0; i<personal.length; i++) personal[i].type = 'personal';
-            notifs = [...notifs, ...personal];
-            res.send(notifs);
+            `select * from broadcast_notification order by timestamp desc limit 10`
+        ).then(qres => {
+            let broadcast = [...qres.rows];
+            for (let i=0; i<broadcast.length; i++) broadcast[i].type = 'broadcast';
+            notifs = [...broadcast];
+            dbclient.query(
+                `select * from personal_notification where user_id=$1 order by timestamp desc limit 10`, 
+                [req.session.userid]
+            ).then(qres2 => {
+                let personal = [...qres2.rows];
+                for (let i=0; i<personal.length; i++) personal[i].type = 'personal';
+                notifs = [...notifs, ...personal];
+                res.send(notifs);
+            }).catch(e => {
+                errLogger.error(e.stack);
+                res.send({ 
+                    success: false,
+                });
+            });
         }).catch(e => {
             errLogger.error(e.stack);
             res.send({ 
                 success: false,
             });
         });
-    }).catch(e => {
-        errLogger.error(e.stack);
-        res.send({ 
-            success: false,
-        });
-    });
+    } else {
+        res.sendStatus(401);
+    };
 });
 
-// // Teacher bill payment api
-// app.post('/api/payBill', (req,res) => {
-//     
-//     consoleLogger.info(req.body);
-//     res.send({
-//         success: true,
-//         payment_id: 1984983210
-//     });
-// });
 
-// // Teacher bill history api
-// app.post('/api/getBillHistory', (req,res) => {
-//     
-//     consoleLogger.info(req.body);
-//     res.send({
-//         success: true,
-//         data: [
-//             {
-//                 id: 1,
-//                 teacher_id: "mtzcse",
-//                 name: "Md. Toufikuzzaman",
-//                 bill_type: "Monthly",
-//                 bill_amount: "200",
-//                 bill_month: "January",
-//                 bill_year: "2024",
-//                 timestamp: "2021-05-01 12:00:00"
-//             },       
-           
-//         ]
-//     });
-// });
 
 //get route details
 //get nearest station
 app.post('/api/getNearestStation', (req,res) => {
-    
-    consoleLogger.info(req.body);
-    let minDist = 1000000, nearestId, nearestCoord;
-    tracking.stationCoords.forEach( async (st, st_id) => {
-        let dist = geolib.getDistance(st, {
-            latitude: req.body.latitude,
-            longitude: req.body.longitude,
+    if (req.session.userid) {
+        consoleLogger.info(req.body);
+        let minDist = 1000000, nearestId, nearestCoord;
+        tracking.stationCoords.forEach( async (st, st_id) => {
+            let dist = geolib.getDistance(st, {
+                latitude: req.body.latitude,
+                longitude: req.body.longitude,
+            });
+            if (dist < minDist) {
+                minDist = dist;
+                nearestId = st_id;
+                nearestCoord = {...st};
+            };
         });
-        if (dist < minDist) {
-            minDist = dist;
-            nearestId = st_id;
-            nearestCoord = {...st};
-        };
-    });
-    res.send({
-        station_id: nearestId,
-        station_coordinates: nearestCoord,
-    });
+        res.send({
+            station_id: nearestId,
+            station_coordinates: nearestCoord,
+        });
+    } else {
+        res.sendStatus(401);
+    };
 });
 
 // app.post('/api/getRouteFromStation', (req,res) => {
@@ -1070,6 +1046,8 @@ app.post('/api/checkStaffRunningTrip', async (req,res) => {
         else res.send({
             success: false,
         });
+    } else {
+        res.sendStatus(401);
     };
 });
     
@@ -1101,6 +1079,8 @@ app.post('/api/getStaffTrips', (req,res) => {
                 };
             }).catch(e => errLogger.error(e.stack));
         }).catch(e => errLogger.error(e.stack));
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -1248,6 +1228,8 @@ app.post('/api/startTrip', (req,res) => {
                 success: false,
             });
         };
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -1347,6 +1329,8 @@ app.post('/api/endTrip', async (req,res) => {
                 };
             }).catch(e => errLogger.error(e.stack));
         };
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -1435,6 +1419,8 @@ app.post('/api/updateStaffLocation', (req,res) => {
                 success: false,
             });
         };
+    } else {
+        res.sendStatus(401);
     };
 });
 
@@ -1528,6 +1514,8 @@ app.post('/api/staffScanTicket', (req,res) => {
                 });
             });
         };
+    } else {
+        res.sendStatus(401);
     };
 });
 
