@@ -111,4 +111,3 @@ Stay tuned for updates as we work towards a smooth and efficient launch!
 
 ---
 
-**Repository Link:** [BusBuddy Source Code](https://github.com/NafiuRahman77/BusBuddy-Client-End) *(currently private, awaiting deployment approval)*
