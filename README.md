@@ -72,8 +72,6 @@
    flutter run
    ```
 
-*Note: The source code is not public yet as it is being considered for deployment.*
-
 ## Application Demonstration
 
 ### Profile-based System
@@ -110,4 +108,5 @@
 Stay tuned for updates as we work towards a smooth and efficient launch!
 
 ---
-
+### API Documentation
+The API documentation is avaiable [here](https://documenter.getpostman.com/view/32134657/2s9YsJBCmJ)
