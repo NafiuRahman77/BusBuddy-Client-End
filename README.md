@@ -109,4 +109,4 @@ Stay tuned for updates as we work towards a smooth and efficient launch!
 
 ---
 ### API Documentation
-The API documentation is avaiable [here](https://documenter.getpostman.com/view/32134657/2s9YsJBCmJ)
+The API documentation is available [here](https://documenter.getpostman.com/view/32134657/2s9YsJBCmJ)
