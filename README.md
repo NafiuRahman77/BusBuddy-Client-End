@@ -101,12 +101,6 @@
 ### Requisition System
 <img src="src/requisition.jpg" alt="Requisition Screenshot" width="300">
 
-## Deployment Status
-
-**BusBuddy** is currently being deployed at **Bangladesh University of Engineering and Technology (BUET)**. The app is in the final stages of integration with the campus transportation system to provide a better bus travel experience for students, teachers, and staff.
-
-Stay tuned for updates as we work towards a smooth and efficient launch!
-
 ---
 ### API Documentation
 The API documentation is available [here](https://documenter.getpostman.com/view/32134657/2s9YsJBCmJ)
